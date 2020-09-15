@@ -1,0 +1,8 @@
+name: stig_validation
+label: STIG Validation
+description: Validates a NGFW configuration for STIG Compliance
+type: pan_validation
+labels:
+    collection: Unknown
+variables: []
+snippets: []
