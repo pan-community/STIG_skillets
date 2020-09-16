@@ -18,3 +18,120 @@ snippets:
     tags:
     - stig_alg
     output_type: validation
+-   name: V-62613
+    cmd: validate
+    test: 'true'
+    label: Log Generation on unauthorized network services
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62613
+    severity: medium
+    when: 'true'
+    tags:
+    - stig_alg
+    output_type: validation
+    fail_message: Snippet Validation Failed
+    pass_message: Snippet Validation Passed
+-   name: V-62591
+    cmd: validate
+    test: 'true'
+    label: The Palo Alto Networks security, if used as a TLS gateway/decryption point
+        or VPN concentrator, must provide the capability to immediately disconnect
+        or disable remote access to the information system.
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62591
+    severity: medium
+    tags:
+    - stig_alg
+    output_type: validation
+    fail_message: Snippet Validation Failed
+    pass_message: Snippet Validation Passed
+-   name: V-62611
+    cmd: validate
+    test: 'true'
+    label: The Palo Alto Networks security platform must detect use of network services
+        that have not been authorized or approved by the ISSM and ISSO, at a minimum
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62611
+    severity: medium
+    tags:
+    - stig_alg
+    output_type: validation
+    fail_message: Snippet Validation Failed
+    pass_message: Snippet Validation Passed
+-   name: V-62593
+    cmd: validate
+    test: 'true'
+    label: To protect against data mining, the Palo Alto Networks security platform
+        must detect and prevent SQL and other code injection attacks launched against
+        data storage objects, including, at a minimum, databases, database records,
+        queries, and fields
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62593
+    severity: medium
+    pass_message: good
+    fail_message: bad
+    tags:
+    - stig_alg
+    output_type: validation
+-   name: V-62617
+    cmd: validate
+    test: 'true'
+    label: The Palo Alto Networks security platform must continuously monitor inbound
+        communications traffic crossing internal security boundaries
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62617
+    severity: medium
+    pass_message: good
+    fail_message: bad
+    when: 'true'
+    tags:
+    - stig_alg
+    output_type: validation
+-   name: V-62595
+    cmd: validate
+    test: 'true'
+    label: To protect against data mining, the Palo Alto Networks security platform
+        must detect and prevent code injection attacks launched against application
+        objects including, at a minimum, application URLs and application code
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62595
+    severity: medium
+    pass_message: good
+    fail_message: bad
+    when: 'true'
+    tags:
+    - stig_alg
+    output_type: validation
+-   name: V-62615
+    cmd: validate
+    test: 'true'
+    label: The Palo Alto Networks security platform must generate an alert to, at
+        a minimum, the ISSO and ISSM when unauthorized network services are detected
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62615
+    severity: medium
+    pass_message: good
+    fail_message: bad
+    when: 'true'
+    tags:
+    - stig_alg
+    output_type: validation
+-   name: V-62597
+    cmd: validate
+    test: 'true'
+    label: The Palo Alto Networks security platform must off-load audit records onto
+        a different system or media than the system being audited
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62597
+    severity: medium
+    pass_message: good
+    fail_message: bad
+    when: 'true'
+    tags:
+    - stig_alg
+    output_type: validation
+-   name: V-62635
+    cmd: validate
+    test: 'true'
+    label: The Palo Alto Networks security platform, if used for TLS/SSL decryption,
+        must use NIST FIPS-validated cryptography to implement encryption
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62635
+    severity: medium
+    pass_message: good
+    fail_message: bad
+    when: 'true'
+    tags:
+    - stig_alg
+    output_type: validation
