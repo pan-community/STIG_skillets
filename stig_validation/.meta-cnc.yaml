@@ -5,4 +5,16 @@ type: pan_validation
 labels:
     collection: Unknown
 variables: []
-snippets: []
+snippets:
+-   name: V-62601
+    cmd: validate
+    test: 'true'
+    label: DoS Protection
+    documentation_link: stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62601
+    severity: low
+    pass_message: pass
+    fail_message: fail
+    when: 'true'
+    tags:
+    - stig_alg
+    output_type: validation
