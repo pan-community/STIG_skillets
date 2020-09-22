@@ -1,0 +1,108 @@
+name: dos_protection
+label: dos_protection
+description: Skillet Generated from 10.70.221.139 using running-config.xml and Candidate
+    Config
+type: panos
+labels:
+    collection: Unknown
+variables: []
+snippets:
+-   name: dos-protection-820694
+    xpath: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles
+    element: |-
+        <dos-protection>
+                      <entry name="dos_protection_profile">
+                        <flood>
+                          <tcp-syn>
+                            <red>
+                              <alarm-rate>10000</alarm-rate>
+                              <activate-rate>10000</activate-rate>
+                              <maximal-rate>40000</maximal-rate>
+                            </red>
+                            <enable>yes</enable>
+                          </tcp-syn>
+                          <udp>
+                            <red>
+                              <maximal-rate>40000</maximal-rate>
+                              <alarm-rate>10000</alarm-rate>
+                              <activate-rate>10000</activate-rate>
+                            </red>
+                            <enable>yes</enable>
+                          </udp>
+                          <icmp>
+                            <red>
+                              <maximal-rate>40000</maximal-rate>
+                              <alarm-rate>10000</alarm-rate>
+                              <activate-rate>10000</activate-rate>
+                            </red>
+                            <enable>yes</enable>
+                          </icmp>
+                          <icmpv6>
+                            <red>
+                              <maximal-rate>40000</maximal-rate>
+                              <alarm-rate>10000</alarm-rate>
+                              <activate-rate>10000</activate-rate>
+                            </red>
+                            <enable>no</enable>
+                          </icmpv6>
+                          <other-ip>
+                            <red>
+                              <maximal-rate>40000</maximal-rate>
+                              <alarm-rate>10000</alarm-rate>
+                              <activate-rate>10000</activate-rate>
+                            </red>
+                            <enable>no</enable>
+                          </other-ip>
+                        </flood>
+                        <resource>
+                          <sessions>
+                            <enabled>yes</enabled>
+                          </sessions>
+                        </resource>
+                        <type>classified</type>
+                        <description>this is my dos proteection profile</description>
+                      </entry>
+                    </dos-protection>
+-   name: dos-997686
+    xpath: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase
+    element: |-
+        <dos>
+                      <rules>
+                        <entry name="dos_protection_policy">
+                          <from>
+                            <zone>
+                              <member>internet</member>
+                            </zone>
+                          </from>
+                          <to>
+                            <zone>
+                              <member>internal</member>
+                            </zone>
+                          </to>
+                          <protection>
+                            <classified>
+                              <classification-criteria>
+                                <address>destination-ip-only</address>
+                              </classification-criteria>
+                              <profile>dos_protection_profile</profile>
+                            </classified>
+                          </protection>
+                          <source>
+                            <member>any</member>
+                          </source>
+                          <destination>
+                            <member>any</member>
+                          </destination>
+                          <source-user>
+                            <member>any</member>
+                          </source-user>
+                          <service>
+                            <member>any</member>
+                          </service>
+                          <log-setting>default</log-setting>
+                          <action>
+                            <deny/>
+                          </action>
+                        </entry>
+                      </rules>
+                    </dos>
