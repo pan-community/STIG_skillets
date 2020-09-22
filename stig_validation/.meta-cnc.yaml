@@ -25,6 +25,11 @@ variables:
     description: DMZ Zone
     default: internal
     help_text: ''
+-   name: dos_zone_protection_profile
+    type_hint: text
+    description: Zone Protection Profile used to protect against DoS
+    default: Recommended_Zone_Protection
+    help_text: ''
 snippets:
 -   name: parse-01
     cmd: parse
@@ -36,6 +41,9 @@ snippets:
         capture_value: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile/../../@name
     -   name: zone_protection_profiles
         capture_list: /config/devices/entry[@name="localhost.localdomain"]/network/profiles/zone-protection-profile/entry/@name
+    -   name: zones_with_intended_dos_zone_protection_profile
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile[text()
+            = "{{ dos_zone_protection_profile }}"]/../../@name
     fail_message: Snippet Validation Failed
     pass_message: Snippet Validation Passed
 -   cmd: validate
@@ -55,6 +63,8 @@ snippets:
         zone_protection_profiles | length
         and internal_zone in zones_with_protection_profiles
         and dmz_zone in zones_with_protection_profiles
+        and internal_zone in zones_with_intended_dos_zone_protection_profile
+        and dmz_zone in zones_with_intended_dos_zone_protection_profile
         )
     when: 'true'
 -   cmd: validate
