@@ -12,12 +12,29 @@ snippets:
     severity: low
     variable: config
     outputs:
-    -   name: zone_protection_profiles
-        capture_list: /config/devices/entry[@name="localhost.localdomain"]/network/profiles/zone-protection-profile/@name
     -   name: zones_with_protection_profiles
         capture_value: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile/../../@name
+    -   name: zone_protection_profiles
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/network/profiles/zone-protection-profile/entry/@name
     fail_message: Snippet Validation Failed
     pass_message: Snippet Validation Passed
+-   cmd: validate
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62601
+    fail_message: fail
+    label: The Palo Alto Networks security platform must protect against Denial of
+        Service (DoS) attacks by employing rate-based attack prevention behavior analysis
+        (traffic thresholds).
+    name: V-62601
+    output_type: validation
+    pass_message: pass
+    severity: high
+    tags:
+    - stig_alg
+    test: |-
+        (
+        zone_protection_profiles | length
+        )
+    when: 'true'
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62547
     fail_message: fail
@@ -381,20 +398,6 @@ snippets:
     output_type: validation
     pass_message: pass
     severity: medium
-    tags:
-    - stig_alg
-    test: 'true'
-    when: 'true'
--   cmd: validate
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62601
-    fail_message: fail
-    label: The Palo Alto Networks security platform must protect against Denial of
-        Service (DoS) attacks by employing rate-based attack prevention behavior analysis
-        (traffic thresholds).
-    name: V-62601
-    output_type: validation
-    pass_message: pass
-    severity: high
     tags:
     - stig_alg
     test: 'true'
