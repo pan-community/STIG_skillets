@@ -33,7 +33,7 @@ variables:
 snippets:
 -   name: parse-01
     cmd: parse
-    variable: config2
+    variable: config
     outputs:
     -   name: zones_with_protection_profiles
         capture_value: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile/../../@name
