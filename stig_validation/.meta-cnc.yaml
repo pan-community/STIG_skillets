@@ -33,8 +33,6 @@ variables:
 snippets:
 -   name: parse-01
     cmd: parse
-    test: 'true'
-    severity: low
     variable: config
     outputs:
     -   name: zones_with_protection_profiles
@@ -44,6 +42,7 @@ snippets:
     -   name: zones_with_intended_dos_zone_protection_profile
         capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile[text()
             = "{{ dos_zone_protection_profile }}"]/../../@name
+    severity: low
     fail_message: Snippet Validation Failed
     pass_message: Snippet Validation Passed
 -   cmd: validate
@@ -66,7 +65,7 @@ snippets:
         and internal_zone in zones_with_intended_dos_zone_protection_profile
         and dmz_zone in zones_with_intended_dos_zone_protection_profile
         )
-    when: 'true'
+    when: dos_strategy == "zone"
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62547
     fail_message: fail
