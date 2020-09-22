@@ -42,6 +42,8 @@ snippets:
     -   name: zones_with_intended_dos_zone_protection_profile
         capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile[text()
             = "{{ dos_zone_protection_profile }}"]/../../@name
+    tags:
+    - stig_alg
     severity: low
     fail_message: Snippet Validation Failed
     pass_message: Snippet Validation Passed
