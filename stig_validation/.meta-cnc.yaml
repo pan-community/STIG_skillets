@@ -3,9 +3,21 @@ label: STIG Validation
 description: Validates a NGFW configuration for STIG Compliance
 type: pan_validation
 labels:
-    collection: Unknown
+    collection: STIG
 variables: []
 snippets:
+-   name: parse-01
+    cmd: parse
+    test: 'true'
+    severity: low
+    variable: config
+    outputs:
+    -   name: zone_protection_profiles
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/network/profiles/zone-protection-profile/@name
+    -   name: zones_with_protection_profiles
+        capture_value: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile/../../@name
+    fail_message: Snippet Validation Failed
+    pass_message: Snippet Validation Passed
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62547
     fail_message: fail
