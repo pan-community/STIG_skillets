@@ -4,7 +4,22 @@ description: Validates a NGFW configuration for STIG Compliance
 type: pan_validation
 labels:
     collection: STIG
-variables: []
+variables:
+-   name: dos_strategy
+    type_hint: dropdown
+    description: DoS Strategy
+    default: zone
+    help_text: ''
+    dd_list:
+    -   key: Zone Protection Profiles
+        value: zone
+    -   key: Dos Protection Profiles
+        value: dos
+-   name: internal_zone
+    type_hint: text
+    description: Internal Zone
+    default: internal
+    help_text: ''
 snippets:
 -   name: parse-01
     cmd: parse
@@ -33,6 +48,7 @@ snippets:
     test: |-
         (
         zone_protection_profiles | length
+        and internal_zone in zones_with_protection_profiles
         )
     when: 'true'
 -   cmd: validate
