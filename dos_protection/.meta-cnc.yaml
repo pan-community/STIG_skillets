@@ -71,7 +71,7 @@ snippets:
     label: The Palo Alto Networks security platform must protect against Denial of
         Service (DoS) attacks by employing rate-based attack prevention behavior analysis
         (traffic thresholds).
-    name: V-62601
+    name: V-62601-zone
     output_type: validation
     pass_message: pass
     severity: high
@@ -86,6 +86,25 @@ snippets:
         and dmz_zone in zones_with_intended_dos_zone_protection_profile
         )
     when: dos_strategy == "zone"
+-   cmd: validate
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62601
+    fail_message: fail
+    label: The Palo Alto Networks security platform must protect against Denial of
+        Service (DoS) attacks by employing rate-based attack prevention behavior analysis
+        (traffic thresholds).
+    name: V-62601-dos
+    output_type: validation
+    pass_message: pass
+    severity: high
+    tags:
+    - stig_alg
+    test: |-
+        (
+        dos_protection_policies | length
+        and internal_zone_with_intended_dos_protection_policy | length
+        and dmz_zone_with_intended_dos_protection_policy | length
+        )
+    when: dos_strategy == "dos"
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62547
     fail_message: fail
