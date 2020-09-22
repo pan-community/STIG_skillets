@@ -20,6 +20,11 @@ variables:
     description: Internal Zone
     default: internal
     help_text: ''
+-   name: dmz_zone
+    type_hint: text
+    description: DMZ Zone
+    default: internal
+    help_text: ''
 snippets:
 -   name: parse-01
     cmd: parse
@@ -49,6 +54,7 @@ snippets:
         (
         zone_protection_profiles | length
         and internal_zone in zones_with_protection_profiles
+        and dmz_zone in zones_with_protection_profiles
         )
     when: 'true'
 -   cmd: validate
