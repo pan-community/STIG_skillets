@@ -121,6 +121,13 @@ snippets:
     -   name: security_rules
         capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
         filter_items: item | element_value('entry.action') == 'deny'
+    -   name: deny_rules_with_logging_at_start_or_end
+        capture_expression: security_rules
+        filter_items: |-
+            (
+              item | element_value('log-end') | default('yes', true) == 'yes'
+              or item | element_value('log-start') | default('yes', true) == 'yes'
+            )
     severity: low
     fail_message: Snippet Validation Failed
     pass_message: Snippet Validation Passed
