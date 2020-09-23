@@ -133,7 +133,8 @@ snippets:
     pass_message: Snippet Validation Passed
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62613
-    fail_message: fail
+    fail_message: Found at least one unauthorized app that is not specifically blocked
+        and logged via a security policy
     label: The Palo Alto Networks security platform must generate a log record when
         unauthorized network services are detected.
     name: V-62613
@@ -142,8 +143,8 @@ snippets:
     severity: medium
     tags:
     - stig_alg
-    test: 'true'
-    when: 'true'
+    test: unauthorized_apps | items_present(deny_rules_with_logging_at_start_or_end,
+        'entry.application.member')
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62547
     fail_message: fail
