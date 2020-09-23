@@ -40,6 +40,11 @@ variables:
     description: DoS Protection Policy
     default: dos_protection_policy
     help_text: ''
+-   name: unauthorized_apps
+    type_hint: list
+    description: Unauthorized Applications
+    default: ''
+    help_text: ''
 snippets:
 -   name: parse-01
     cmd: parse
@@ -109,6 +114,16 @@ snippets:
         and dmz_zone_with_intended_dos_protection_policy | length
         )
     when: dos_strategy == "dos"
+-   name: parse-security-rules
+    cmd: parse
+    variable: config
+    outputs:
+    -   name: security_rules
+        capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
+        filter_items: item | element_value('entry.action') == 'deny'
+    severity: low
+    fail_message: Snippet Validation Failed
+    pass_message: Snippet Validation Passed
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62613
     fail_message: fail
