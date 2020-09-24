@@ -162,12 +162,24 @@ snippets:
         or disable remote access to the information system.
     name: V-62591
     output_type: validation
+    pass_message: No Decryption Profiles found, this STIG is not applicable
+    severity: medium
+    tags:
+    - stig_alg
+    test: descyption_profiles | length == 0
+-   cmd: validate
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62611
+    fail_message: Found unauthorized Applications that were not specifically mentioned
+        in a security policy
+    label: The Palo Alto Networks security platform must detect use of network services
+        that have not been authorized or approved by the ISSM and ISSO, at a minimum.
+    name: V-62611
+    output_type: validation
     pass_message: pass
     severity: medium
     tags:
     - stig_alg
-    test: 'false'
-    when: descyption_profiles | length > 0
+    test: unauthorized_apps | items_present(security_rules, 'entry.application.member')
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62547
     fail_message: fail
@@ -570,19 +582,6 @@ snippets:
     output_type: validation
     pass_message: pass
     severity: low
-    tags:
-    - stig_alg
-    test: 'true'
-    when: 'true'
--   cmd: validate
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62611
-    fail_message: fail
-    label: The Palo Alto Networks security platform must detect use of network services
-        that have not been authorized or approved by the ISSM and ISSO, at a minimum.
-    name: V-62611
-    output_type: validation
-    pass_message: pass
-    severity: medium
     tags:
     - stig_alg
     test: 'true'
