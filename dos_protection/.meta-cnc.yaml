@@ -145,6 +145,29 @@ snippets:
     - stig_alg
     test: unauthorized_apps | items_present(deny_rules_with_logging_at_start_or_end,
         'entry.application.member')
+-   name: parse-decryption-policies
+    cmd: parse
+    variable: config
+    outputs:
+    -   name: decryption_profiles
+        capture_list: /config/devices/entry[@name=\"localhost.localdomain\"]/vsys/entry[@name=\"vsys1\"]/rulebase/decryption/rules
+    severity: low
+    fail_message: Snippet Validation Failed
+    pass_message: Snippet Validation Passed
+-   cmd: validate
+    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62591
+    fail_message: Decryption Profiles Found, Manual Validation Required
+    label: The Palo Alto Networks security, if used as a TLS gateway/decryption point
+        or VPN concentrator, must provide the capability to immediately disconnect
+        or disable remote access to the information system.
+    name: V-62591
+    output_type: validation
+    pass_message: pass
+    severity: medium
+    tags:
+    - stig_alg
+    test: 'false'
+    when: descyption_profiles | length > 0
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62547
     fail_message: fail
@@ -434,20 +457,6 @@ snippets:
         point or VPN concentrator, must control remote access methods (inspect and
         filter traffic).
     name: V-62589
-    output_type: validation
-    pass_message: pass
-    severity: medium
-    tags:
-    - stig_alg
-    test: 'true'
-    when: 'true'
--   cmd: validate
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62591
-    fail_message: fail
-    label: The Palo Alto Networks security, if used as a TLS gateway/decryption point
-        or VPN concentrator, must provide the capability to immediately disconnect
-        or disable remote access to the information system.
-    name: V-62591
     output_type: validation
     pass_message: pass
     severity: medium
