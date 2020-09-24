@@ -185,6 +185,41 @@ snippets:
     tags:
     - stig_alg
     test: unauthorized_apps | items_present(security_rules, 'entry.application.member')
+-   name: parse-vulnerability-profiles
+    cmd: parse
+    variable: config
+    outputs:
+    -   name: vulnerability_profiles
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/vulnerability/entry
+    -   name: vulnerability_profile_db_protection
+        capture_object: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/vulnerability/entry[@name="{{
+            vulnerability_profile }}"]
+    -   name: vulnerability_profile_db_protection_rules
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/vulnerability/entry[@name="{{
+            vulnerability_profile }}"]/rules
+    -   name: vulnerability_profile_db_protection_rules_critical
+        capture_expression: vulnerability_profile_db_protection_rules
+        filter_items: '''critical'' in item | element_value(''entry.severity.member'')
+            | list'
+    -   name: vulnerability_profile_db_protection_rules_high
+        capture_expression: vulnerability_profile_db_protection_rules
+        filter_items: '''high'' in item | element_value(''entry.severity.member'')
+            | list'
+    -   name: vulnerability_profile_db_protection_rules_medium
+        capture_expression: vulnerability_profile_db_protection_rules
+        filter_items: '''medium'' in item | element_value(''entry.severity.member'')
+            | list'
+    -   name: vulnerability_profile_db_protection_rules_low
+        capture_expression: vulnerability_profile_db_protection_rules
+        filter_items: '''low'' in item | element_value(''entry.severity.member'')
+            | list'
+    -   name: vulnerability_profile_db_protection_rules_info
+        capture_expression: vulnerability_profile_db_protection_rules
+        filter_items: '''informational'' in item | element_value(''entry.severity.member'')
+            | list'
+    severity: low
+    fail_message: Snippet Validation Failed
+    pass_message: Snippet Validation Passed
 -   cmd: validate
     documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62593
     fail_message: fail
@@ -811,38 +846,3 @@ snippets:
     - stig_alg
     test: 'true'
     when: 'true'
--   name: parse-vulnerability-profiles
-    cmd: parse
-    variable: config
-    outputs:
-    -   name: vulnerability_profiles
-        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/vulnerability/entry
-    -   name: vulnerability_profile_db_protection
-        capture_object: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/vulnerability/entry[@name="{{
-            vulnerability_profile }}"]
-    -   name: vulnerability_profile_db_protection_rules
-        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/vulnerability/entry[@name="{{
-            vulnerability_profile }}"]/rules
-    -   name: vulnerability_profile_db_protection_rules_critical
-        capture_expression: vulnerability_profile_db_protection_rules
-        filter_items: '''critical'' in item | element_value(''entry.severity.member'')
-            | list'
-    -   name: vulnerability_profile_db_protection_rules_high
-        capture_expression: vulnerability_profile_db_protection_rules
-        filter_items: '''high'' in item | element_value(''entry.severity.member'')
-            | list'
-    -   name: vulnerability_profile_db_protection_rules_medium
-        capture_expression: vulnerability_profile_db_protection_rules
-        filter_items: '''medium'' in item | element_value(''entry.severity.member'')
-            | list'
-    -   name: vulnerability_profile_db_protection_rules_low
-        capture_expression: vulnerability_profile_db_protection_rules
-        filter_items: '''low'' in item | element_value(''entry.severity.member'')
-            | list'
-    -   name: vulnerability_profile_db_protection_rules_info
-        capture_expression: vulnerability_profile_db_protection_rules
-        filter_items: '''informational'' in item | element_value(''entry.severity.member'')
-            | list'
-    severity: low
-    fail_message: Snippet Validation Failed
-    pass_message: Snippet Validation Passed
