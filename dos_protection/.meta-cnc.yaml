@@ -235,7 +235,7 @@ snippets:
     - stig_alg
     test: |-
         (
-        vulnerability_profile != ''
+        vulnerability_profiles | default('', true) != ''
         )
     when: 'true'
 -   cmd: validate
