@@ -197,14 +197,6 @@ snippets:
     -   name: vulnerability_profile_db_protection_rules
         capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/vulnerability/entry[@name="{{
             vulnerability_profile }}"]/rules
-    -   name: vulnerability_profile_db_protection_rules_critical
-        capture_expression: vulnerability_profile_db_protection_rules
-        filter_items: '''critical'' in item | element_value(''entry.severity.member'')
-            | list'
-    -   name: vulnerability_profile_db_protection_rules_high
-        capture_expression: vulnerability_profile_db_protection_rules
-        filter_items: '''high'' in item | element_value(''entry.severity.member'')
-            | list'
     -   name: vulnerability_profile_db_protection_rules_medium
         capture_expression: vulnerability_profile_db_protection_rules
         filter_items: '''medium'' in item | element_value(''entry.severity.member'')
@@ -217,6 +209,28 @@ snippets:
         capture_expression: vulnerability_profile_db_protection_rules
         filter_items: '''informational'' in item | element_value(''entry.severity.member'')
             | list'
+    -   name: vulnerability_profile_db_protection_rules_critical
+        capture_expression: vulnerability_profile_db_protection_rules
+        filter_items: |-
+            (
+              'critical' in item | element_value('entry.severity.member') | list
+              and item | element_value('entry.threat-name') == 'any'
+              and item | element_value('entry.host') in ['any', 'server']
+              and ( item | tag_present('entry.action.reset-both') or item | tag_present('entry.action.drop') )
+              and 'any' in item | element_value('entry.cve.member') | list
+              and 'any' in item | element_value('entry.vendor-id.member') | list
+            )
+    -   name: vulnerability_profile_db_protection_rules_high
+        capture_expression: vulnerability_profile_db_protection_rules
+        filter_items: |-
+            (
+              'high' in item | element_value('entry.severity.member') | list
+              and item | element_value('entry.threat-name') == 'any'
+              and item | element_value('entry.host') in ['any', 'server']
+              and ( item | tag_present('entry.action.reset-both') or item | tag_present('entry.action.drop') )
+              and 'any' in item | element_value('entry.cve.member') | list
+              and 'any' in item | element_value('entry.vendor-id.member') | list
+            )
     severity: low
     fail_message: Snippet Validation Failed
     pass_message: Snippet Validation Passed
