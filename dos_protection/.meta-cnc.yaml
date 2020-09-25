@@ -47,9 +47,14 @@ variables:
     help_text: ''
 -   name: vulnerability_profile
     type_hint: text
-    description: 'Vulnerability Protection Profile '
+    description: Vulnerability Protection Profile For Database Assets
     default: Inbound-VP
     help_text: The name of the VPP that protects database Assets
+-   name: security_policy_for_db_assets
+    type_hint: text
+    description: Security Policy For Database Assets
+    default: test_rule
+    help_text: ''
 snippets:
 -   name: parse-01
     cmd: parse
@@ -250,6 +255,9 @@ snippets:
               and 'any' in item | element_value('entry.cve.member') | list
               and 'any' in item | element_value('entry.vendor-id.member') | list
             )
+    -   name: security_policy_for_db_protection_object
+        capture_object: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/security/rules/entry[@name="{{
+            security_policy_for_db_assets }}"]
     severity: low
     fail_message: Snippet Validation Failed
     pass_message: Snippet Validation Passed
@@ -271,7 +279,10 @@ snippets:
         vulnerability_profile | default('', true) != ''
         and vulnerability_profile_db_protection_rules_critical | length
         and vulnerability_profile_db_protection_rules_high | length
+        and vulnerability_profile_db_protection_rules_medium | length
         and vulnerability_profile_db_protection_rules_low | length
+        and vulnerability_profile_db_protection_rules_info | length
+        and vulnerability_profile in security_policy_for_db_protection_object | element_value('entry.profile-setting.profile.vulnerability.member') | list
         )
     when: 'true'
 -   cmd: validate
