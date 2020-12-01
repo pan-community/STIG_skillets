@@ -1,0 +1,3 @@
+[submodule "stig_validation/cis-benchmarks"]
+	path = stig_validation/cis-benchmarks
+	url = git@gitlab.com:panw-gse/as/cis-benchmarks.git
