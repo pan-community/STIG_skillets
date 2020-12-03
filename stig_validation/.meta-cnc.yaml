@@ -5,9 +5,9 @@ label: skillet generated from STIG documents at stigviewer.com
 
 description: |-
     This skillet accounts for the following stig versions
-   alg: 2020-09-28
-   idps: 2020-09-28
-   ndm: 2019-12-20
+    alg 2020-09-28
+    idps 2020-09-28
+    ndm 2019-12-20
 
 
 type: pan_validation
@@ -29,14 +29,22 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228832
+
+    - name: get_system_info
+      cmd: cli
+      cmd_str: show system info
+      output_type: xml
+      outputs:
+        - name: operational_mode
+          capture_value: /system/operational-mode/text()
     
     - name: PANW-AG-000016
       label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must use encryption services that implement NIST FIPS-validated cryptography to protect the confidentiality of remote access sessions.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: operational_mode == 'fips-cc'
+      fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228833
     
