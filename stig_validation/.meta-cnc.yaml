@@ -114,14 +114,23 @@ snippets:
       include_snippets:
         - name: captured_wmi_probing_disabled
         - name: wmi_probing_disabled
+
+    - name: capture_dns_proxy
+      cmd: parse
+      variable: config
+      outputs:
+        - name: capture_dns_proxy
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/dns-proxy/entry
+        - name: capture_dns_proxy_names
+          capture_expression: capture_dns_proxy | map(attribute="entry.@name") | list
     
     - name: PANW-AG-000037
       label: The Palo Alto Networks security platform must not enable the DNS proxy.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not capture_dns_proxy_names 
+      fail_message: DNS proxy must not be configured
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228839
     
