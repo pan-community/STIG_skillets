@@ -67,14 +67,25 @@ snippets:
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228835
+
+    - name: deny_no_log_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: deny_no_log_pols
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and log-end="no" and not(disabled="yes")]
+        - name: deny_no_log_policies_names
+          capture_expression: deny_no_log_pols | map(attribute="entry.@name") | list
     
     - name: PANW-AG-000024
       label: The Palo Alto Networks security platform must log violations of security policies.
       meta:
         stig: alg
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not deny_no_log_policies_names
+      fail_message: Active deny policies without logging are present
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228836
     
