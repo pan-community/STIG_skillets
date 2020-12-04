@@ -107,10 +107,13 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228838
+      include: CIS_NGFW_benchmark_v90
+      include_snippets:
+        - name: captured_wmi_probing_disabled
+        - name: wmi_probing_disabled
     
     - name: PANW-AG-000037
       label: The Palo Alto Networks security platform must not enable the DNS proxy.
