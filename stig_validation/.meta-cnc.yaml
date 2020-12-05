@@ -143,14 +143,24 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228840
+
+    - name: get_decryption_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: decryption_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/decryption/rules/entry
+        - name: ocsp_responders
+          capture_list:  /config/shared/ocsp-responder/entry
     
     - name: PANW-AG-000044
       label: The Palo Alto Networks security platform that provides intermediary services for TLS must validate certificates used for TLS functions by performing RFC 5280-compliant certification path validation.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not decryption_policies or ocsp_responders
+      fail_message: OCSP responders must be configured if decryption is used
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228841
     
