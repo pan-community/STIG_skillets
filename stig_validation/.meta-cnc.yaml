@@ -229,7 +229,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228845
 
-    - name: device_session_timeout_tcp
+    - name: capture_device_session_timeout_tcp
       cmd: parse
       variable: config
       outputs:
@@ -269,14 +269,57 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228847
-    
+
+    - name: capture_av_profile_in_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_av_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
+            [
+              (decoder/entry[@name='smtp']/action='drop' or decoder/entry[@name='smtp']/action='reset-both')
+              and (decoder/entry[@name='smtp']/wildfire-action='drop' or decoder/entry[@name='smtp']/wildfire-action='reset-both')
+              and (decoder/entry[@name='pop3']/action='drop' or decoder/entry[@name='pop3']/action='reset-both')
+              and (decoder/entry[@name='pop3']/wildfire-action='drop' or decoder/entry[@name='pop3']/wildfire-action='reset-both')
+              and (decoder/entry[@name='imap']/action='drop' or decoder/entry[@name='imap']/action='reset-both')
+              and (decoder/entry[@name='imap']/wildfire-action='drop' or decoder/entry[@name='imap']/wildfire-action='reset-both')
+            ]/@name
+        - name: invalid_av_profiles
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry/@name
+          filter_items: item not in valid_av_profiles
+        - name: valid_av_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
+            entry[count(virus) > 0 and not(virus/member='default')]/@name
+        - name: invalid_av_profile_groups
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry/@name
+          filter_items: item not in valid_av_profile_groups
+        # At this point we can assume all profiles and profile-groups have vaild antivirus settings
+        - name: invalid_security_policies_av
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
+            [
+              action='allow'
+              and (
+                count(profile-setting/group/member) = 0
+                and (
+                  count(profile-setting/profiles/virus/member) = 0
+                  or profile-setting/profiles/virus/member='default'
+                )
+              ) 
+            ]/@name
+
     - name: PANW-AG-000062
       label: The Palo Alto Networks security platform must drop malicious code upon detection.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
+      fail_message: |
+        {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_av_profile_groups %}Invalid profile groups - {% for prof in invalid_av_profile_groups %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228848
     
