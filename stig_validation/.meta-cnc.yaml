@@ -228,14 +228,35 @@ snippets:
       fail_message: Policies that permit by default - {% for pol in default_any_any_policies %}{{ pol }}{% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228845
+
+    - name: device_session_timeout_tcp
+      cmd: parse
+      variable: config
+      outputs:
+        - name: device_session_timeout_tcp
+          capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/session/timeout-tcp
+        - name: device_session_timeout_udp
+          capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/session/timeout-udp
+        - name: override_app_timeout
+          capture_list: /config/shared/override/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
+        - name: custom_app_timeout
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
     
     - name: PANW-AG-000052
       label: The Palo Alto Networks security platform must terminate communications sessions after 15 minutes of inactivity.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      # TCP default is higher than 900 so there must be a configuration element to be valid
+      test: (
+         device_session_timeout_tcp | int < 901
+         and ( not device_session_timeout_udp or device_session_timeout_udp | int < 901 )
+         and not override_app_timeout
+         and not custom_app_timeout
+         )
+      fail_message: |
+        {% if device_session_timeout_tcp | int > 900 or device_session_timeout_udp | int > 900 %}Default session timeout for TCP or UDP too high. {% endif %}
+        {% if override_app_timeout or custom_app_timeout %}Applications with timeout above 900: {% for app in custom_app_timeout %}{{ app }} {% endfor %} {% for app in override_app_timeout %}{{ app }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228846
     
