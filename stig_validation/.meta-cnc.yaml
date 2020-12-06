@@ -447,14 +447,28 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228857
+
+    - name: capture_logging_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_syslog_profiles
+          capture_list: /config/shared/log-settings/syslog/entry[count(server)>0]/@name
+        - name: valid_syslog_log_forwarding_profile
+          capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
+        - name: valid_system_syslog_settings
+          capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
     
     - name: PANW-AG-000094
       label: The Palo Alto Networks security platform must off-load audit records onto a different system or media than the system being audited.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
+      fail_message: |
+        {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
+        {% if not valid_syslog_log_forwarding_profile %}No valid syslog log forwarding profiles. {% endif %}
+        {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228858
     
