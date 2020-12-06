@@ -210,13 +210,22 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228844
     
+    - name: capture_default_permit_policy
+      cmd: parse
+      variable: config
+      outputs:
+        - name: default_any_any_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [application/member="any" and source/member="any" and destination/member="any" and action="allow" and not (disabled="yes")]/@name
+
     - name: PANW-AG-000051
       label: The Palo Alto Networks security platform must deny network communications traffic by default and allow network communications traffic by exception (i.e., deny all, permit by exception).
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not default_any_any_policies
+      fail_message: Policies that permit by default - {% for pol in default_any_any_policies %}{{ pol }}{% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228845
     
