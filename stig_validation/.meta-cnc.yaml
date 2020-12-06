@@ -184,13 +184,29 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228843
     
+    - name: capture_zone_protect_profile_crafted_pkts
+      cmd: parse
+      variable: config
+      outputs:
+        - name: zone_protect_profile_pkt_attack_enabled
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/network/profiles/zone-protection-profile/entry
+            [discard-ip-spoof='yes']/@name
+        - name: zones_with_pkt_attack_enabled_object
+          capture_object: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone/entry
+          filter_items: |-
+            item | element_value('network.zone-protection-profile') not in zone_protect_profile_pkt_attack_enabled
+        - name: zones_permitting_spoofing
+          capture_expression: zones_with_pkt_attack_enabled_object | map(attribute="entry.@name") | list
+
     - name: PANW-AG-000050
       label: The Palo Alto Networks security platform must deny outbound IP packets that contain an illegitimate address in the source address field.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not zones_permitting_spoofing
+      fail_message: Zones that permit IP Spoofing - {% for zone in zones_permitting_spoofing %}{{ zone }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228844
     
