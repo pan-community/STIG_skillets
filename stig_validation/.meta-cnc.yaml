@@ -706,8 +706,11 @@ snippets:
       meta:
         stig: alg
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
+      fail_message: |
+        {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
+        {% if not valid_syslog_log_forwarding_profile %}No valid syslog log forwarding profiles. {% endif %}
+        {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228878
     
