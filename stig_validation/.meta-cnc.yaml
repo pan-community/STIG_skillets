@@ -491,14 +491,44 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228860
+
+    - name: capture_vulnerability_profile_rules
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_vulnerability_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry/rules/entry
+            [count(action/reset-both)>0]/../../@name
+        - name: valid_vulnerability_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
+            entry[count(vulnerability)>0 and not(vulnerability/member='default')]/@name
+        - name: invalid_vulnerability_interzone_security_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [
+              action="allow" and not(disabled="yes")
+              and (
+                not(to/member/text()=from/member/text())
+                or to/member='any' or from/member='any'
+                or count(to/member) > 1
+                or count(from/member) > 1
+                )
+            ]
+          filter_items: |-
+            item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
+            and item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
+        - name: invalid_vulnerability_interzone_security_policies_names
+          capture_expression: invalid_vulnerability_interzone_security_policies | map(attribute="entry.@name") | list
     
     - name: PANW-AG-000105
       label: The Palo Alto Networks security platform must use a Vulnerability Protection Profile that blocks any critical, high, or medium threats.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_vulnerability_interzone_security_policies_names
+      fail_message: Policies with bad vulnerability profiles - {% for pol in invalid_vulnerability_interzone_security_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228861
     
