@@ -18,6 +18,46 @@ labels:
 
 variables:
 
+  - name: traffic_intermediary
+    description: NGFW is used for intermediary services
+    type_hint: dropdown
+    default: true
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
+
+  - name: TLS_gw
+    description: NGFW is used as TLS Gateway
+    type_hint: dropdown
+    default: true
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
+
+  - name: VPN_concentrator
+    description: NGFW is used as VPN Concentrator
+    type_hint: dropdown
+    default: true
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
+
+  - name: use_WMI
+    description: WMI Probing is in use
+    type_hint: dropdown
+    default: false
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
+
 snippets:
     
     - name: PANW-AG-000015
@@ -26,6 +66,7 @@ snippets:
         stig: alg
         severity: medium
       test: false
+      when: traffic_intermediary
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228832
@@ -44,6 +85,7 @@ snippets:
         stig: alg
         severity: medium
       test: operational_mode == 'fips-cc'
+      when: traffic_intermediary
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228833
@@ -63,6 +105,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+      when: TLS_gw or VPN_concentrator
       test: operational_mode == 'fips-cc'
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
