@@ -745,14 +745,35 @@ snippets:
       fail_message: SMTP policies without av - {% for pol in smtp_policies_no_av %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228879
+
+    - name: capture_ftp_policies_no_av
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_ftp_policies
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="allow" and not(disabled="yes") and application/member/text()='ftp']
+          filter_items: |
+            (
+              item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
+              or item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
+            ) and (
+              item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+              or item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
+            )
+        - name: invalid_ftp_policies_names
+          capture_expression: invalid_ftp_policies | map(attribute="entry.@name") | list
     
     - name: PANW-AG-000148
       label: The Palo Alto Networks security platform must inspect inbound and outbound FTP and FTPS communications traffic (if authorized) for protocol compliance and protocol anomalies.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not decryption_policies and not invalid_ftp_policies
+      fail_message: |
+        {% if not decryption_policies %}This validation requiers decryption to be configured. {% endif %}
+        {% if invalid_ftp_policies_names %}Policies without proper profiles - {% for pol in invalid_ftp_policies_names %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228880
     
