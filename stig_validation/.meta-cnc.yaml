@@ -729,8 +729,12 @@ snippets:
                 or application/member/text()='smtp-base'
                 or application/member/text()='smtp-starttls'
               )
-            ]/@name
-          filter_items: item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
+            ]
+          filter_items: |
+            item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
+            and item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+        - name: smtp_policies_no_av_names
+          capture_expression: smtp_policies_no_av | map(attribute="entry.@name") | list
     
     - name: PANW-AG-000147
       label: The Palo Alto Networks security platform must inspect inbound and outbound SMTP and Extended SMTP communications traffic (if authorized) for protocol compliance and protocol anomalies.
