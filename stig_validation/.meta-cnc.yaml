@@ -776,14 +776,33 @@ snippets:
         {% if invalid_ftp_policies_names %}Policies without proper profiles - {% for pol in invalid_ftp_policies_names %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228880
+
+    - name: capture_invalid_http_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_http_policies
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="allow" and not(disabled="yes") and application/member/text()='web-browsing']
+          filter_items: |
+            (
+              item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
+              or item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
+            ) and (
+              item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+              or item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
+            )
+        - name: invalid_http_policies_names
+          capture_expression: invalid_http_policies | map(attribute="entry.@name") | list
     
     - name: PANW-AG-000149
       label: The Palo Alto Networks security platform must inspect inbound and outbound HTTP traffic (if authorized) for protocol compliance and protocol anomalies.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_http_policies_names
+      fail_message: Policies without proper profiles - {% for pol in invalid_http_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228881
     
