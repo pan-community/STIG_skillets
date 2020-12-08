@@ -152,6 +152,7 @@ snippets:
         severity: medium
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
+      when: not use_WMI
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228838
       include: CIS_NGFW_benchmark_v90
       include_snippets:
@@ -202,6 +203,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+      when: TLS_gw
       test: not decryption_policies or ocsp_responders
       fail_message: OCSP responders must be configured if decryption is used
       pass_message: Validation successful
@@ -729,6 +731,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+      when: traffic_intermediary
       test: operational_mode == 'fips-cc'
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
@@ -739,6 +742,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+      when: TLS_gw
       test: operational_mode == 'fips-cc'
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
