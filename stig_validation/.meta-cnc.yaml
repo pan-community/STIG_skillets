@@ -59,337 +59,761 @@ variables:
         value: false
 
 snippets:
-  - name: PANW-AG-000015-capture
-    cmd: parse
-    variable: config
-    outputs:
-      - name: decryption_rules
-        capture_list: |-
-          /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/decryption/rules/entry
-          [not(action="no-decrypt") and not(disabled="yes")]
+    
+    - name: PANW-AG-000015-capture
+      cmd: parse
+      variable: config
+      outputs:
+        - name: decryption_rules
+          capture_list: |-
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/decryption/rules/entry
+            [not(action="no-decrypt") and not(disabled="yes")]
 
-      - name: security_policies
-        capture_list: |-
-          /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+        - name: security_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
 
-      - name: decryption
-        capture_expression: |
-          decryption_rules |
-          json_query('[*].entry[].{source_zone: [from.member][], source_ip: [source.member][],
-          source_user: ["source-user".member][], destination_zone: [to.member][],
-          destination_ip: [destination.member][], service: [service.member][]}'
-          )
+        - name: decryption
+          capture_expression: |
+            decryption_rules |
+            json_query('[*].entry[].{source_zone: [from.member][], source_ip: [source.member][],
+            source_user: ["source-user".member][], destination_zone: [to.member][],
+            destination_ip: [destination.member][], service: [service.member][]}'
+            )
 
-      - name: decryption_names
-        capture_expression: |-
-          decryption_rules |
-          json_query('[*].entry[].{name: "@name", source_zone: [from.member][], source_ip: [source.member][],
-          source_user: ["source-user".member][], destination_zone: [to.member][],
-          destination_ip: [destination.member][], service: [service.member][]}'
-          )
+        - name: decryption_names
+          capture_expression: |-
+            decryption_rules |
+            json_query('[*].entry[].{name: "@name", source_zone: [from.member][], source_ip: [source.member][],
+            source_user: ["source-user".member][], destination_zone: [to.member][],
+            destination_ip: [destination.member][], service: [service.member][]}'
+            )
 
-      - name: security
-        capture_expression: |-
-          security_policies |
-          json_query('[*].entry[].{name: "@name", source_zone: [from.member][], source_ip: [source.member][],
-          source_user: ["source-user".member][], destination_zone: [to.member][],
-          destination_ip: [destination.member][], service: [service.member][]}'
-          )
+        - name: security
+          capture_expression: |-
+            security_policies |
+            json_query('[*].entry[].{name: "@name", source_zone: [from.member][], source_ip: [source.member][],
+            source_user: ["source-user".member][], destination_zone: [to.member][],
+            destination_ip: [destination.member][], service: [service.member][]}'
+            )
 
 
-  - name: PANW-AG-000015
-    label: |-
-      The Palo Alto Networks security platform, if used to provide intermediary services for remote access
-      communications traffic (TLS or SSL decryption), must ensure inbound and outbound traffic is monitored for
-      compliance with remote access security policies.
-    meta:
-      stig: alg
-      severity: medium
-    test: |
-      decryption | length > 0
+    - name: PANW-AG-000015
+      label: |-
+        The Palo Alto Networks security platform, if used to provide intermediary services for remote access
+        communications traffic (TLS or SSL decryption), must ensure inbound and outbound traffic is monitored for
+        compliance with remote access security policies.
+      meta:
+        stig: alg
+        severity: medium
+      test: |
+        decryption | length > 0
 
-    when: traffic_intermediary
-    fail_message: Click link for remediation instruction.
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228832
+      when: traffic_intermediary
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228832
 
-  - name: get_system_info
-    cmd: cli
-    cmd_str: show system info
-    output_type: xml
-    outputs:
-      - name: operational_mode
-        capture_value: /system/operational-mode/text()
+    - name: get_system_info
+      cmd: cli
+      cmd_str: show system info
+      output_type: xml
+      outputs:
+        - name: operational_mode
+          capture_value: /system/operational-mode/text()
+    
+    - name: PANW-AG-000016
+      label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must use encryption services that implement NIST FIPS-validated cryptography to protect the confidentiality of remote access sessions.
+      meta:
+        stig: alg
+        severity: medium
+      test: operational_mode == 'fips-cc'
+      when: traffic_intermediary
+      fail_message: The NGFW must be running in FIPS mode
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228833
+    
+    - name: PANW-AG-000017
+      label: The Palo Alto Networks security platform that stores secret or private keys must use FIPS-approved key management technology and processes in the production and control of private/secret cryptographic keys.
+      meta:
+        stig: alg
+        severity: medium
+      test: operational_mode == 'fips-cc'
+      fail_message: The NGFW must be running in FIPS mode
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228834
+    
+    - name: PANW-AG-000020
+      label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must use NIST FIPS-validated cryptography to protect the integrity of remote access sessions.
+      meta:
+        stig: alg
+        severity: medium
+      when: TLS_gw or VPN_concentrator
+      test: operational_mode == 'fips-cc'
+      fail_message: The NGFW must be running in FIPS mode
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228835
 
-  - name: PANW-AG-000016
-    label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must use encryption services that implement NIST FIPS-validated cryptography to protect the confidentiality of remote access sessions.
-    meta:
-      stig: alg
-      severity: medium
-    test: operational_mode == 'fips-cc'
-    when: traffic_intermediary
-    fail_message: The NGFW must be running in FIPS mode
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228833
+    - name: deny_no_log_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: deny_no_log_pols
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and log-end="no" and not(log-start="yes") and not(disabled="yes")]
+        - name: deny_no_log_policies_names
+          capture_expression: deny_no_log_pols | map(attribute="entry.@name") | list
+    
+    - name: PANW-AG-000024
+      label: The Palo Alto Networks security platform must log violations of security policies.
+      meta:
+        stig: alg
+        severity: low
+      test: not deny_no_log_policies_names
+      fail_message: Deny policies without logging - {% for pol in deny_no_log_policies_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228836
+    
+    - name: PANW-AG-000035
+      label: The Palo Alto Networks security platform must only enable User-ID on trusted zones.
+      meta:
+        stig: alg
+        severity: medium
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228837
+      include: CIS_NGFW_benchmark_v90
+      include_snippets:
+        - name: capture_userid_enabled_zones
+        - name: userid_internal_zones_only
+    
+    - name: PANW-AG-000036
+      label: The Palo Alto Networks security platform must disable WMI probing if it is not used.
+      meta:
+        stig: alg
+        severity: medium
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      when: not use_WMI
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228838
+      include: CIS_NGFW_benchmark_v90
+      include_snippets:
+        - name: captured_wmi_probing_disabled
+        - name: wmi_probing_disabled
 
-  - name: PANW-AG-000017
-    label: The Palo Alto Networks security platform that stores secret or private keys must use FIPS-approved key management technology and processes in the production and control of private/secret cryptographic keys.
-    meta:
-      stig: alg
-      severity: medium
-    test: operational_mode == 'fips-cc'
-    fail_message: The NGFW must be running in FIPS mode
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228834
+    - name: capture_dns_proxy
+      cmd: parse
+      variable: config
+      outputs:
+        - name: capture_dns_proxy
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/dns-proxy/entry
+        - name: capture_dns_proxy_names
+          capture_expression: capture_dns_proxy | map(attribute="entry.@name") | list
+    
+    - name: PANW-AG-000037
+      label: The Palo Alto Networks security platform must not enable the DNS proxy.
+      meta:
+        stig: alg
+        severity: medium
+      test: not capture_dns_proxy_names 
+      fail_message: DNS proxy must not be configured
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228839
+    
+    - name: PANW-AG-000038
+      label: The Palo Alto Networks security platform must be configured to prohibit or restrict the use of functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228840
 
-  - name: PANW-AG-000020
-    label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must use NIST FIPS-validated cryptography to protect the integrity of remote access sessions.
-    meta:
-      stig: alg
-      severity: medium
-    when: TLS_gw or VPN_concentrator
-    test: operational_mode == 'fips-cc'
-    fail_message: The NGFW must be running in FIPS mode
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228835
+    - name: get_decryption_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: decryption_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/decryption/rules/entry
+        - name: ocsp_responders
+          capture_list:  /config/shared/ocsp-responder/entry
+    
+    - name: PANW-AG-000044
+      label: The Palo Alto Networks security platform that provides intermediary services for TLS must validate certificates used for TLS functions by performing RFC 5280-compliant certification path validation.
+      meta:
+        stig: alg
+        severity: medium
+      when: TLS_gw
+      test: not decryption_policies or ocsp_responders
+      fail_message: OCSP responders must be configured if decryption is used
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228841
+    
+    - name: PANW-AG-000047
+      label: The Palo Alto Networks security platform must protect against the use of internal systems from launching Denial of Service (DoS) attacks against other networks or endpoints.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228842
+    
+    - name: PANW-AG-000049
+      label: The Palo Alto Networks security platform must block phone home traffic.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228843
+    
+    - name: capture_zone_protect_profile_crafted_pkts
+      cmd: parse
+      variable: config
+      outputs:
+        - name: zone_protect_profile_pkt_attack_enabled
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/network/profiles/zone-protection-profile/entry
+            [discard-ip-spoof='yes']/@name
+        - name: zones_with_pkt_attack_enabled_object
+          capture_object: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone/entry
+          filter_items: |-
+            item | element_value('network.zone-protection-profile') not in zone_protect_profile_pkt_attack_enabled
+        - name: zones_permitting_spoofing
+          capture_expression: zones_with_pkt_attack_enabled_object | map(attribute="entry.@name") | list
 
-  - name: deny_no_log_policies
-    cmd: parse
-    variable: config
-    outputs:
-      - name: deny_no_log_pols
-        capture_list: |-
-          /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
-          [action="deny" and log-end="no" and not(log-start="yes") and not(disabled="yes")]
-      - name: deny_no_log_policies_names
-        capture_expression: deny_no_log_pols | map(attribute="entry.@name") | list
+    - name: PANW-AG-000050
+      label: The Palo Alto Networks security platform must deny outbound IP packets that contain an illegitimate address in the source address field.
+      meta:
+        stig: alg
+        severity: medium
+      test: not zones_permitting_spoofing
+      fail_message: Zones that permit IP Spoofing - {% for zone in zones_permitting_spoofing %}{{ zone }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228844
+    
+    - name: capture_default_permit_policy
+      cmd: parse
+      variable: config
+      outputs:
+        - name: default_any_any_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [application/member="any" and source/member="any" and destination/member="any" and action="allow" and not (disabled="yes")]/@name
 
-  - name: PANW-AG-000024
-    label: The Palo Alto Networks security platform must log violations of security policies.
-    meta:
-      stig: alg
-      severity: low
-    test: not deny_no_log_policies_names
-    fail_message: Deny policies without logging - {% for pol in deny_no_log_policies_names %}{{ pol }} {% endfor %}
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228836
+    - name: PANW-AG-000051
+      label: The Palo Alto Networks security platform must deny network communications traffic by default and allow network communications traffic by exception (i.e., deny all, permit by exception).
+      meta:
+        stig: alg
+        severity: medium
+      test: not default_any_any_policies
+      fail_message: Policies that permit by default - {% for pol in default_any_any_policies %}{{ pol }}{% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228845
 
-  - name: PANW-AG-000035
-    label: The Palo Alto Networks security platform must only enable User-ID on trusted zones.
-    meta:
-      stig: alg
-      severity: medium
-    fail_message: Click link for remediation instruction.
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228837
-    include: CIS_NGFW_benchmark_v90
-    include_snippets:
-      - name: capture_userid_enabled_zones
-      - name: userid_internal_zones_only
+    - name: capture_device_session_timeout_tcp
+      cmd: parse
+      variable: config
+      outputs:
+        - name: device_session_timeout_tcp
+          capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/session/timeout-tcp
+        - name: device_session_timeout_udp
+          capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/session/timeout-udp
+        - name: override_app_timeout
+          capture_list: /config/shared/override/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
+        - name: custom_app_timeout
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
+    
+    - name: PANW-AG-000052
+      label: The Palo Alto Networks security platform must terminate communications sessions after 15 minutes of inactivity.
+      meta:
+        stig: alg
+        severity: medium
+      # TCP default is higher than 900 so there must be a configuration element to be valid
+      test: (
+         device_session_timeout_tcp | int < 901
+         and ( not device_session_timeout_udp or device_session_timeout_udp | int < 901 )
+         and not override_app_timeout
+         and not custom_app_timeout
+         )
+      fail_message: |
+        {% if device_session_timeout_tcp | int > 900 or device_session_timeout_udp | int > 900 %}Default session timeout for TCP or UDP too high. {% endif %}
+        {% if override_app_timeout or custom_app_timeout %}Applications with timeout above 900: {% for app in custom_app_timeout %}{{ app }} {% endfor %} {% for app in override_app_timeout %}{{ app }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228846
+    
+    - name: PANW-AG-000060
+      label: The Palo Alto Networks security platform must update malicious code protection mechanisms and signature definitions whenever new releases are available in accordance with organizational configuration management policy and procedures.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228847
 
-  - name: PANW-AG-000036
-    label: The Palo Alto Networks security platform must disable WMI probing if it is not used.
-    meta:
-      stig: alg
-      severity: medium
-    fail_message: Click link for remediation instruction.
-    pass_message: Validation successful
-    when: not use_WMI
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228838
-    include: CIS_NGFW_benchmark_v90
-    include_snippets:
-      - name: captured_wmi_probing_disabled
-      - name: wmi_probing_disabled
+    - name: capture_av_profile_in_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_av_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
+            [
+              (decoder/entry[@name='smtp']/action='drop' or decoder/entry[@name='smtp']/action='reset-both')
+              and (decoder/entry[@name='smtp']/wildfire-action='drop' or decoder/entry[@name='smtp']/wildfire-action='reset-both')
+              and (decoder/entry[@name='pop3']/action='drop' or decoder/entry[@name='pop3']/action='reset-both')
+              and (decoder/entry[@name='pop3']/wildfire-action='drop' or decoder/entry[@name='pop3']/wildfire-action='reset-both')
+              and (decoder/entry[@name='imap']/action='drop' or decoder/entry[@name='imap']/action='reset-both')
+              and (decoder/entry[@name='imap']/wildfire-action='drop' or decoder/entry[@name='imap']/wildfire-action='reset-both')
+            ]/@name
+        - name: invalid_av_profiles
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry/@name
+          filter_items: item not in valid_av_profiles
+        - name: valid_av_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
+            entry[count(virus) > 0 and not(virus/member='default')]/@name
+        - name: invalid_av_profile_groups
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry/@name
+          filter_items: item not in valid_av_profile_groups
+        # At this point we can assume all profiles and profile-groups have vaild antivirus settings
+        - name: invalid_security_policies_av
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
+            [
+              action='allow'
+              and (
+                count(profile-setting/group/member) = 0
+                and (
+                  count(profile-setting/profiles/virus/member) = 0
+                  or profile-setting/profiles/virus/member='default'
+                )
+              ) 
+            ]/@name
 
-  - name: capture_dns_proxy
-    cmd: parse
-    variable: config
-    outputs:
-      - name: capture_dns_proxy
-        capture_list: /config/devices/entry[@name='localhost.localdomain']/network/dns-proxy/entry
-      - name: capture_dns_proxy_names
-        capture_expression: capture_dns_proxy | map(attribute="entry.@name") | list
+    - name: PANW-AG-000062
+      label: The Palo Alto Networks security platform must drop malicious code upon detection.
+      meta:
+        stig: alg
+        severity: medium
+      test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
+      fail_message: |
+        {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_av_profile_groups %}Invalid profile groups - {% for prof in invalid_av_profile_groups %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228848
+    
+    - name: PANW-AG-000063
+      label: The Palo Alto Networks security platform must delete or quarantine malicious code in response to malicious code detection.
+      meta:
+        stig: alg
+        severity: medium
+      test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
+      fail_message: |
+        {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_av_profile_groups %}Invalid profile groups - {% for prof in invalid_av_profile_groups %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228849
+    
+    - name: capture_virus_alerting
+      cmd: parse
+      variable: config
+      outputs:
+        - name: device_server_profile_email
+          capture_list: /config/shared/log-settings/email/entry/@name
+        - name: log_profiles_with_email 
+          capture_list: | 
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
+            [count(match-list/entry/send-email/member) > 0]/@name
+        - name: security_policies_with_virus_no_email
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
+            [
+              action='allow'
+              and not(disabled="yes")
+              and (
+                count(profile-seting/profile/virus/member) > 0
+                or count(profile-setting/group/member) > 0
+              )
+            ]
+          filter_items: item | element_value('log-setting') not in log_profiles_with_email 
+        - name: security_policies_with_virus_no_email_names
+          capture_expression: security_policies_with_virus_no_email | map(attribute="entry.@name") | list 
 
-  - name: PANW-AG-000037
-    label: The Palo Alto Networks security platform must not enable the DNS proxy.
-    meta:
-      stig: alg
-      severity: medium
-    test: not capture_dns_proxy_names
-    fail_message: DNS proxy must not be configured
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228839
+    - name: PANW-AG-000064
+      label: The Palo Alto Networks security platform must send an immediate (within seconds) alert to the system administrator, at a minimum, in response to malicious code detection.
+      meta:
+        stig: alg
+        severity: medium
+      test: not security_policies_with_virus_no_email_names
+      fail_message: AV policies that do not have email logging - {% for pol in security_policies_with_virus_no_email_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228850
 
-  - name: PANW-AG-000038
-    label: The Palo Alto Networks security platform must be configured to prohibit or restrict the use of functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments.
-    meta:
-      stig: alg
-      severity: medium
-    test: false
-    fail_message: Click link for remediation instruction.
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228840
+    
+    - name: PANW-AG-000065
+      label: The Palo Alto Networks security platform must automatically update malicious code protection mechanisms.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228851
+    
+    - name: PANW-AG-000073
+      label: The Palo Alto Networks security platform must deny or restrict detected prohibited mobile code.
+      meta:
+        stig: alg
+        severity: medium
+      test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
+      fail_message: |
+        {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_av_profile_groups %}Invalid profile groups - {% for prof in invalid_av_profile_groups %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228852
+    
+    - name: PANW-AG-000074
+      label: The Palo Alto Networks security platform must prevent the download of prohibited mobile code.
+      meta:
+        stig: alg
+        severity: medium
+      test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
+      fail_message: |
+        {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_av_profile_groups %}Invalid profile groups - {% for prof in invalid_av_profile_groups %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228853
+    
+    - name: PANW-AG-000078
+      label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must control remote access methods (inspect and filter traffic).
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228854
+    
+    - name: PANW-AG-000079
+      label: The Palo Alto Networks security, if used as a TLS gateway/decryption point or VPN concentrator, must provide the capability to immediately disconnect or disable remote access to the information system.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228855
+    
+    - name: PANW-AG-000080
+      label: To protect against data mining, the Palo Alto Networks security platform must detect and prevent SQL and other code injection attacks launched against data storage objects, including, at a minimum, databases, database records, queries, and fields.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228856
+    
+    - name: PANW-AG-000081
+      label: To protect against data mining, the Palo Alto Networks security platform must detect and prevent code injection attacks launched against application objects including, at a minimum, application URLs and application code.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228857
 
-  - name: get_decryption_policies
-    cmd: parse
-    variable: config
-    outputs:
-      - name: decryption_policies
-        capture_list: |-
-          /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/decryption/rules/entry
-      - name: ocsp_responders
-        capture_list:  /config/shared/ocsp-responder/entry
+    - name: capture_logging_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_syslog_profiles
+          capture_list: /config/shared/log-settings/syslog/entry[count(server)>0]/@name
+        - name: valid_syslog_log_forwarding_profile
+          capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
+        - name: valid_system_syslog_settings
+          capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
+    
+    - name: PANW-AG-000094
+      label: The Palo Alto Networks security platform must off-load audit records onto a different system or media than the system being audited.
+      meta:
+        stig: alg
+        severity: medium
+      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
+      fail_message: |
+        {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
+        {% if not valid_syslog_log_forwarding_profile %}No valid syslog log forwarding profiles. {% endif %}
+        {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228858
+    
+    - name: PANW-AG-000101
+      label: The Palo Alto Networks security platform being used for TLS/SSL decryption using PKI-based user authentication must only accept end entity certificates issued by DoD PKI or DoD-approved PKI Certificate Authorities (CAs) for the establishment of protected sessions.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228859
+    
+    - name: PANW-AG-000102
+      label: The Palo Alto Networks security platform must protect against Denial of Service (DoS) attacks by employing rate-based attack prevention behavior analysis (traffic thresholds).
+      meta:
+        stig: alg
+        severity: high
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228860
 
-  - name: PANW-AG-000044
-    label: The Palo Alto Networks security platform that provides intermediary services for TLS must validate certificates used for TLS functions by performing RFC 5280-compliant certification path validation.
-    meta:
-      stig: alg
-      severity: medium
-    when: TLS_gw
-    test: not decryption_policies or ocsp_responders
-    fail_message: OCSP responders must be configured if decryption is used
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228841
+    - name: capture_vulnerability_profile_rules
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_vulnerability_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry/rules/entry
+            [count(action/reset-both)>0]/../../@name
+        - name: valid_vulnerability_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
+            entry[count(vulnerability)>0 and not(vulnerability/member='default')]/@name
+        - name: invalid_vulnerability_interzone_security_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [
+              action="allow" and not(disabled="yes")
+              and (
+                not(to/member/text()=from/member/text())
+                or to/member='any' or from/member='any'
+                or count(to/member) > 1
+                or count(from/member) > 1
+                )
+            ]
+          filter_items: |-
+            item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
+            and item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
+        - name: invalid_vulnerability_interzone_security_policies_names
+          capture_expression: invalid_vulnerability_interzone_security_policies | map(attribute="entry.@name") | list
+    
+    - name: PANW-AG-000105
+      label: The Palo Alto Networks security platform must use a Vulnerability Protection Profile that blocks any critical, high, or medium threats.
+      meta:
+        stig: alg
+        severity: medium
+      test: not invalid_vulnerability_interzone_security_policies_names
+      fail_message: Policies with bad vulnerability profiles - {% for pol in invalid_vulnerability_interzone_security_policies_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228861
+    
+    - name: PANW-AG-000107
+      label: The Palo Alto Networks security platform must only allow incoming communications from organization-defined authorized sources forwarded to organization-defined authorized destinations.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228862
+    
+    - name: PANW-AG-000109
+      label: The Palo Alto Networks security platform must identify and log internal users associated with prohibited outgoing communications traffic.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228863
+    
+    - name: PANW-AG-000111
+      label: The Palo Alto Networks security platform must be configured to integrate with a system-wide intrusion detection system.
+      meta:
+        stig: alg
+        severity: low
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228864
+    
+    - name: PANW-AG-000112
+      label: The Palo Alto Networks security platform must detect use of network services that have not been authorized or approved by the ISSM and ISSO, at a minimum.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228865
+    
+    - name: PANW-AG-000113
+      label: The Palo Alto Networks security platform must generate a log record when unauthorized network services are detected.
+      meta:
+        stig: alg
+        severity: medium
+      test: not deny_no_log_policies_names
+      fail_message: Deny policies without logging - {% for pol in deny_no_log_policies_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228866
 
-  - name: PANW-AG-000047
-    label: The Palo Alto Networks security platform must protect against the use of internal systems from launching Denial of Service (DoS) attacks against other networks or endpoints.
-    meta:
-      stig: alg
-      severity: medium
-    test: false
-    fail_message: Click link for remediation instruction.
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228842
+    - name: deny_no_log_setting
+      cmd: parse
+      variable: config
+      outputs:
+        - name: deny_no_log_pols
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and not(log-setting) and not(disabled="yes")]/@name
+    
+    - name: PANW-AG-000114
+      label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when unauthorized network services are detected.
+      meta:
+        stig: alg
+        severity: medium
+      test: not deny_no_log_pols
+      fail_message: Deny policies without forwarding profiles - {%for pol in deny_no_log_pols %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228867
+    
+    - name: PANW-AG-000115
+      label: The Palo Alto Networks security platform must continuously monitor inbound communications traffic crossing internal security boundaries.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228868
+    
+    - name: PANW-AG-000116
+      label: The Palo Alto Networks security platform must continuously monitor outbound communications traffic crossing internal security boundaries.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228869
+    
+    - name: PANW-AG-000118
+      label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when threats identified by authoritative sources (e.g., IAVMs or CTOs) are detected.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228870
+    
+    - name: PANW-AG-000119
+      label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized privileged access is detected.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228871
+    
+    - name: PANW-AG-000120
+      label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized non-privileged access is detected.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228872
+    
+    - name: PANW-AG-000121
+      label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when denial of service incidents are detected.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228873
+    
+    - name: PANW-AG-000122
+      label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when new active propagation of malware infecting DoD systems or malicious code adversely affecting the operations and/or security of DoD systems is detected.
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228874
+    
+    - name: PANW-AG-000127
+      label: The Palo Alto Networks security platform must block traceroutes and ICMP probes originating from untrusted networks (e.g., ISP and other non-DoD networks).
+      meta:
+        stig: alg
+        severity: medium
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228875
+    
+    - name: PANW-AG-000141
+      label: The Palo Alto Networks security platform providing encryption intermediary services must implement NIST FIPS-validated cryptography to generate cryptographic hashes.
+      meta:
+        stig: alg
+        severity: medium
+      when: traffic_intermediary
+      test: operational_mode == 'fips-cc'
+      fail_message: The NGFW must be running in FIPS mode
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228876
+    
+    - name: PANW-AG-000143
+      label: The Palo Alto Networks security platform, if used for TLS/SSL decryption, must use NIST FIPS-validated cryptography to implement encryption.
+      meta:
+        stig: alg
+        severity: medium
+      when: TLS_gw
+      test: operational_mode == 'fips-cc'
+      fail_message: The NGFW must be running in FIPS mode
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228877
+    
+    - name: PANW-AG-000144
+      label: The Palo Alto Networks security platform must, at a minimum, off-load threat and traffic log records onto a centralized log server in real time.
+      meta:
+        stig: alg
+        severity: low
+      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
+      fail_message: |
+        {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
+        {% if not valid_syslog_log_forwarding_profile %}No valid syslog log forwarding profiles. {% endif %}
+        {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228878
 
-  - name: PANW-AG-000049
-    label: The Palo Alto Networks security platform must block phone home traffic.
-    meta:
-      stig: alg
-      severity: medium
-    test: false
-    fail_message: Click link for remediation instruction.
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228843
-
-  - name: capture_zone_protect_profile_crafted_pkts
-    cmd: parse
-    variable: config
-    outputs:
-      - name: zone_protect_profile_pkt_attack_enabled
-        capture_list: |-
-          /config/devices/entry[@name='localhost.localdomain']/network/profiles/zone-protection-profile/entry
-          [discard-ip-spoof='yes']/@name
-      - name: zones_with_pkt_attack_enabled_object
-        capture_object: |-
-          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/zone/entry
-        filter_items: |-
-          item | element_value('network.zone-protection-profile') not in zone_protect_profile_pkt_attack_enabled
-      - name: zones_permitting_spoofing
-        capture_expression: zones_with_pkt_attack_enabled_object | map(attribute="entry.@name") | list
-
-  - name: PANW-AG-000050
-    label: The Palo Alto Networks security platform must deny outbound IP packets that contain an illegitimate address in the source address field.
-    meta:
-      stig: alg
-      severity: medium
-    test: not zones_permitting_spoofing
-    fail_message: Zones that permit IP Spoofing - {% for zone in zones_permitting_spoofing %}{{ zone }} {% endfor %}
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228844
-
-  - name: capture_default_permit_policy
-    cmd: parse
-    variable: config
-    outputs:
-      - name: default_any_any_policies
-        capture_list: |-
-          /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
-          [application/member="any" and source/member="any" and destination/member="any" and action="allow" and not (disabled="yes")]/@name
-
-  - name: PANW-AG-000051
-    label: The Palo Alto Networks security platform must deny network communications traffic by default and allow network communications traffic by exception (i.e., deny all, permit by exception).
-    meta:
-      stig: alg
-      severity: medium
-    test: not default_any_any_policies
-    fail_message: Policies that permit by default - {% for pol in default_any_any_policies %}{{ pol }}{% endfor %}
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228845
-
-  - name: capture_device_session_timeout_tcp
-    cmd: parse
-    variable: config
-    outputs:
-      - name: device_session_timeout_tcp
-        capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/session/timeout-tcp
-      - name: device_session_timeout_udp
-        capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/session/timeout-udp
-      - name: override_app_timeout
-        capture_list: /config/shared/override/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
-      - name: custom_app_timeout
-        capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
-
-  - name: PANW-AG-000052
-    label: The Palo Alto Networks security platform must terminate communications sessions after 15 minutes of inactivity.
-    meta:
-      stig: alg
-      severity: medium
-    # TCP default is higher than 900 so there must be a configuration element to be valid
-    test: (
-      device_session_timeout_tcp | int < 901
-      and ( not device_session_timeout_udp or device_session_timeout_udp | int < 901 )
-      and not override_app_timeout
-      and not custom_app_timeout
-      )
-    fail_message: |
-      {% if device_session_timeout_tcp | int > 900 or device_session_timeout_udp | int > 900 %}Default session timeout for TCP or UDP too high. {% endif %}
-      {% if override_app_timeout or custom_app_timeout %}Applications with timeout above 900: {% for app in custom_app_timeout %}{{ app }} {% endfor %} {% for app in override_app_timeout %}{{ app }} {% endfor %}{% endif %}
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228846
-
-  - name: PANW-AG-000060
-    label: The Palo Alto Networks security platform must update malicious code protection mechanisms and signature definitions whenever new releases are available in accordance with organizational configuration management policy and procedures.
-    meta:
-      stig: alg
-      severity: medium
-    test: false
-    fail_message: Click link for remediation instruction.
-    pass_message: Validation successful
-    documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228847
-
-  - name: capture_av_profile_in_policies
-    cmd: parse
-    variable: config
-    outputs:
-      - name: valid_av_profiles
-        capture_list: |-
-          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
-          [
-            (decoder/entry[@name='smtp']/action='drop' or decoder/entry[@name='smtp']/action='reset-both')
-            and (decoder/entry[@name='smtp']/wildfire-action='drop' or decoder/entry[@name='smtp']/wildfire-action='reset-both')
-            and (decoder/entry[@name='pop3']/action='drop' or decoder/entry[@name='pop3']/action='reset-both')
-            and (decoder/entry[@name='pop3']/wildfire-action='drop' or decoder/entry[@name='pop3']/wildfire-action='reset-both')
-            and (decoder/entry[@name='imap']/action='drop' or decoder/entry[@name='imap']/action='reset-both')
-            and (decoder/entry[@name='imap']/wildfire-action='drop' or decoder/entry[@name='imap']/wildfire-action='reset-both')
-          ]/@name
-      - name: invalid_av_profiles
-        capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry/@name
-        filter_items: item not in valid_av_profiles
-      - name: valid_av_profile_groups
-        capture_list: |-
-          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
-          entry[count(virus) > 0 and not(virus/member='default')]/@name
-      - name: invalid_av_profile_groups
-        capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry/@name
-        filter_items: item not in valid_av_profile_groups
-      # At this point we can assume all profiles and profile-groups have vaild antivirus settings
-      - name: invalid_security_policies_av
-        capture_list: |-
-          /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
-          [
-            action='allow'
-            and (
-              count(profile-setting/group/member) = 0
+    - name: capture_smtp_policies_no_av
+      cmd: parse
+      variable: config
+      outputs:
+        - name: smtp_policies_no_av
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [
+              action="allow"
+              and not(disabled="yes")
               and (
                 count(profile-setting/profiles/virus/member) = 0
                 or profile-setting/profiles/virus/member='default'
