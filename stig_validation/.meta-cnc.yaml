@@ -580,14 +580,58 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228856
+
+    - name: capture_predefined_db_applications
+      cmd: op
+      cmd_str: <show><predefined><xpath>/predefined/application</xpath></predefined></show>
+      output_type: xml
+      outputs:
+        - name: predefined_db_applications
+          capture_list: /application/entry[subcategory="database"]/@name
+
+    - name: capture_vulnerability_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_vulnerability_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry/rules/entry
+            [count(action/reset-both)>0]/../../@name
+        - name: valid_vulnerability_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
+            entry[count(vulnerability)>0 and not(vulnerability/member='default')]/@name
+
+    - name: capture_invalid_db_vulnerability_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: application_groups_with_db
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application-group/entry
+          filter_items: item | json_query('entry.members.member | [@][]') | item_present(predefined_db_applications)
+        - name: application_groups_with_db_names
+          capture_expression: application_groups_with_db | json_query('[].entry."@name"')
+        - name: invalid_db_vulnerability_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not (disabled="yes")]
+          filter_items: |
+            item | json_query('entry.application.member | [@][]') | item_present(predefined_db_applications + application_groups_with_db_names)
+            and (
+              (not item | json_query('entry."profile-setting".group.member') and not item | json_query('entry."profile-setting".profiles.vulnerability.member'))
+              or (
+                item | json_query('entry."profile-setting".group.member') not in valid_vulnerability_profile_groups
+                and item | json_query('entry."profile-setting".profiles.vulnerability.member') not in valid_vulnerability_profiles
+              )
+            )
+        - name: invalid_db_vulnerability_policies_names
+          capture_expression: invalid_db_vulnerability_policies | json_query('[].entry."@name"')
     
     - name: PANW-AG-000081
       label: To protect against data mining, the Palo Alto Networks security platform must detect and prevent code injection attacks launched against application objects including, at a minimum, application URLs and application code.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_db_vulnerability_policies_names
+      fail_message: DB policies with invalid vulnerability profiles - {% for pol in invalid_db_vulnerability_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228857
 
@@ -639,14 +683,6 @@ snippets:
       cmd: parse
       variable: config
       outputs:
-        - name: valid_vulnerability_profiles
-          capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry/rules/entry
-            [count(action/reset-both)>0]/../../@name
-        - name: valid_vulnerability_profile_groups
-          capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
-            entry[count(vulnerability)>0 and not(vulnerability/member='default')]/@name
         - name: invalid_vulnerability_interzone_security_policies
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
