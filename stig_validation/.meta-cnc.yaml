@@ -720,14 +720,22 @@ snippets:
       fail_message: Non approved policies - {%for pol in non_approved_ppsm_policies_names%}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228862
+
+    - name: capture_user_id_mapping
+      cmd: cli
+      cmd_str: show user ip-user-mapping all
+      output_type: xml
+      outputs:
+        - name: captured_user_id_mapping
+          capture_value: /*
     
     - name: PANW-AG-000109
       label: The Palo Alto Networks security platform must identify and log internal users associated with prohibited outgoing communications traffic.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: captured_user_id_mapping
+      fail_message: No user ID mapping ouitput found.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228863
     
