@@ -58,6 +58,21 @@ variables:
       - key: No
         value: false
 
+  - name: PPSM_endpoints
+    description: Endpoints permitted by PPSM in CIDR format
+    type_hint: list
+    default: 192.168.1.0/24
+
+  - name: PPSM_applications
+    description: Endpoints permitted by PPSM in CIDR format
+    type_hint: list
+    default: web-browsing
+
+  - name: PPSM_services
+    description: Endpoints permitted by PPSM in CIDR format
+    type_hint: list
+    default: service-https
+
 snippets:
     
     - name: PANW-AG-000015
@@ -177,14 +192,59 @@ snippets:
       fail_message: DNS proxy must not be configured
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228839
-    
+
+    - name: capture_security_policy_objects
+      cmd: parse
+      variable: config
+      outputs:
+        - name: address_entries
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/address/entry
+          filter_items: item | permitted_address(PPSM_endpoints | listify)
+        - name: permitted_address_names
+          capture_expression: address_entries | json_query('[].entry."@name"')
+        - name: address_group_entries
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/address-group/entry
+          filter_items: item | json_query('entry.static.member | [@][]') | items_present(permitted_address_names)
+        - name: permitted_address_group_names
+          capture_expression: address_group_entries | json_query('[].entry."@name"')
+        - name: application_groups
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application-group/entry
+          filter_items: item | json_query('entry.members.member | [@][]') | items_present(PPSM_applications | listify)
+        - name: permitted_application_groups_names
+          capture_expression: application_groups | json_query('[].entry."@name"')
+        - name: service_groups
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/service-group/entry
+          filter_items: item | json_query('entry.members.member | [@][]') | items_present(PPSM_services | listify)
+        - name: permitted_service_groups_names
+          capture_expression: service_groups | json_query('[].entry."@name"')
+        - name: non_approved_ppsm_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not (disabled="yes")]
+          filter_items: |
+            (
+              item | json_query("entry.source.member=='any'")
+              or item | json_query("entry.destination.member=='any'")
+              or item | json_query("entry.service.member=='any'")
+              or ( item | json_query("entry.service.member=='application-default'") and item | json_query("entry.application.member=='any'") )
+              or not item | json_query('entry.source.[member][]') | items_present(permitted_address_names + permitted_address_group_names)
+              or not item | json_query('entry.destination.[member][]') | items_present(permitted_address_names + permitted_address_group_names)
+              or (
+                not item | json_query('entry.application.[member][]') | items_present(PPSM_applications | listify + permitted_application_groups_names)
+                and not item | json_query("entry.application.member=='any'")
+                )
+              or ( item | json_query("entry.application.member=='any'")
+                and not item | json_query('entry.service.[member][]') | items_present(PPSM_services | listify + permitted_service_groups_names )
+              )
+            )
+        - name: non_approved_ppsm_policies_names
+          capture_expression: non_approved_ppsm_policies | json_query('[].entry."@name"')
+   
     - name: PANW-AG-000038
       label: The Palo Alto Networks security platform must be configured to prohibit or restrict the use of functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not non_approved_ppsm_policies_names
+      fail_message: Non PPSM approved policies - {%for pol in non_approved_ppsm_policies_names%}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228840
 
