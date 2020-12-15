@@ -73,6 +73,16 @@ variables:
     type_hint: list
     default: service-https
 
+  - name: trusted_zones
+    description: Security zones conntaining trusted hosts
+    type_hint: list
+    default: trust
+
+  - name: untrusted_zones
+    description: Security zones conntaining untrusted hosts
+    type_hint: list
+    default: untrust
+
 snippets:
     
     - name: PANW-AG-000015
@@ -278,14 +288,42 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228842
+
+    - name: capture_spyware_profile
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_spyware_profiles_names
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/spyware/entry
+            [not(botnet-domains/lists/entry/action/allow) and not(botnet-domains/lists/entry/action/alert)]/@name
+        - name: valid_spyware_profile_groups
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry[spyware/member]
+          filter_items: item | json_query('entry.spyware.member') in valid_spyware_profiles_names
+        - name:  valid_spyware_profile_groups_names
+          capture_expression: valid_spyware_profile_groups | json_query('[].entry."@name"')
+        - name: invalid_spyware_security_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not (disabled="yes")]
+          filter_items: |
+              (item | json_query('entry.from.member | [@][]') | item_present(trusted_zones | listify) or item | json_query('entry.from.member') == "any")
+              and (item | json_query('entry.to.member | [@][]') | item_present(untrusted_zones | listify) or item | json_query('entry.to.member') == "any")
+              and (
+                (not item | json_query('entry."profile-setting".group.member') and not item | json_query('entry."profile-setting".profiles.spyware.member'))
+                or (
+                  not item | json_query('entry."profile-setting".group.member')  | item_present(valid_spyware_profile_groups_names)
+                  and not item | json_query('entry."profile-setting".profiles.spyware.member')  | item_present(valid_spyware_profiles_names)
+                )
+              )
+        - name: invalid_spyware_security_policies_names
+          capture_expression: invalid_spyware_security_policies | json_query('[].entry."@name"')
     
     - name: PANW-AG-000049
       label: The Palo Alto Networks security platform must block phone home traffic.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_spyware_security_policies_names
+      fail_message: Policies with invalid spyware profile - {% for pol in invalid_spyware_security_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228843
     
