@@ -83,6 +83,11 @@ variables:
     type_hint: list
     default: untrust
 
+  - name: netflow_interfaces
+    description: Interfaces collecting netflow information
+    type_hint: list
+    default: ethernet1/1
+
 snippets:
     
     - name: PANW-AG-000015
@@ -738,14 +743,25 @@ snippets:
       fail_message: No user ID mapping ouitput found.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228863
+
+    - name: capture_netflow_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: netflow_profiles
+          capture_list: /config/shared/server-profile/netflow/entry/@name
+        - name: interfaces_with_netflow
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry[layer3 or ip]/@name
+        - name: interfaces_missing_netflow
+          capture_expression: netflow_interfaces | listify | missing_items(interfaces_with_netflow)
     
     - name: PANW-AG-000111
       label: The Palo Alto Networks security platform must be configured to integrate with a system-wide intrusion detection system.
       meta:
         stig: alg
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not interfaces_missing_netflow
+      fail_message: Interfaces missing netflow - {% for int in interfaces_missing_netflow %}{{ int }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228864
     
