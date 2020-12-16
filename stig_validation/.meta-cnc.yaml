@@ -74,7 +74,7 @@ variables:
     default: service-https
 
   - name: trusted_zones
-    description: Security zones conntaining trusted hosts
+    description: Security zones conntaining trusted hosts (Includes DMZ)
     type_hint: list
     default: trust
 
@@ -97,6 +97,18 @@ variables:
     description: Applications that should have vulnerability protection applied
     type_hint: list
     default: web-browsing
+
+  - name: alert_mechanism
+    description: How the ISSO and ISSM receive alerts
+    type_hint: dropdown
+    default: snmptrap
+    dd_list:
+      - key: snmptrap
+        value: send-snmptrap
+      - key: syslog
+        value: send-syslog
+      - key: email
+        value: send-email
 
 snippets:
     
@@ -875,7 +887,40 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228870
+
+    - name: capture_alert_mechanisms
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_alert_server_profiles
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
+            [match-list/entry/{{alert_mechanism}}]/@name
+        - name: invalid_alert_mechanisms_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [
+              not(disabled="yes") and not(profile-setting/group/member)
+              and (
+                not(profile-setting/profiles/virus/member)
+                or not(profile-setting/profiles/spyware/member)
+                or not(profile-setting/profiles/vulnerability/member)
+              )
+            ]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(trusted_zones | listify + ["any"])
+          #and not( item | json_query('entry."log-setting"'))
+          # | item_present(valid_alert_server_profiles)
+
+        - name: invalid_alert_mechanisms_policies_names
+          capture_expression: invalid_alert_mechanisms_policies | map(attribute="entry.@name") | list
+
+        # - name: denied_and_logged_applications
+        #   capture_expression: unauthorized_policies | json_query('[].entry.application.member | [@][][]')
+        # - name: unauthorized_not_explicitly_denied_applications
+        #   capture_expression: unauthorized_applications | listify | difference(denied_and_logged_applications)
     
+    # TOOD: Make sure you account for no profiles configured at all in test
     - name: PANW-AG-000119
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized privileged access is detected.
       meta:
