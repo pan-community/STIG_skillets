@@ -720,7 +720,9 @@ snippets:
       name: PANW-AG-000102-zone
       output_type: validation
       pass_message: Hit Zone Pass Message
-      severity: high
+      meta:
+        stig: alg
+        severity: medium
       tags:
       - PANW-AG-000102
       test: |-
@@ -742,7 +744,9 @@ snippets:
       name: PANW-AG-000102-dos
       output_type: validation
       pass_message: Hit DOS Pass Message
-      severity: high
+      meta:
+        stig: alg
+        severity: medium
       tags:
       - PANW-AG-000102
       test: |-
