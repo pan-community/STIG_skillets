@@ -93,6 +93,11 @@ variables:
     type_hint: list
     default: web-browsing
 
+  - name: apps_with_vulnerability_protection
+    description: Applications that should have vulnerability protection applied
+    type_hint: list
+    default: web-browsing
+
 snippets:
     
     - name: PANW-AG-000015
@@ -635,13 +640,32 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228856
 
+    - name: capture_vulnerability_protected_apps
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_vulnerability_app_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not(disabled="yes")]
+          filter_items: |
+            (
+              item | json_query('entry.application.member | [@][]') | item_present(apps_with_vulnerability_protection | listify) 
+              or item.entry.application.member == "any"
+            )
+            and (
+              item | json_query('entry."profile-setting".group.member') not in valid_vulnerability_profile_groups
+              and item | json_query('entry."profile-setting".profiles.vulnerability.member') not in valid_vulnerability_profiles
+            )
+        - name: invalid_vulnerability_app_policies_names
+          capture_expression: invalid_vulnerability_app_policies | map(attribute="entry.@name") | list
+
     - name: PANW-AG-000081
       label: To protect against data mining, the Palo Alto Networks security platform must detect and prevent code injection attacks launched against application objects including, at a minimum, application URLs and application code.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_vulnerability_app_policies_names
+      fail_message: App policies with invalid vulnerability profile - {% for pol in invalid_vulnerability_app_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228857
 
@@ -837,9 +861,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      test: false
+      test: true
       fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
+      pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228869
     
     - name: PANW-AG-000118
@@ -847,9 +871,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      test: false
+      test: true 
       fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
+      pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228870
     
     - name: PANW-AG-000119
