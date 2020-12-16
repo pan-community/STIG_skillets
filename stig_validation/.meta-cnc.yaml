@@ -88,6 +88,11 @@ variables:
     type_hint: list
     default: ethernet1/1
 
+  - name: unauthorized_applications
+    description: Applications that should be explicitly denied and logged
+    type_hint: list
+    default: web-browsing
+
 snippets:
     
     - name: PANW-AG-000015
@@ -764,14 +769,27 @@ snippets:
       fail_message: Interfaces missing netflow - {% for int in interfaces_missing_netflow %}{{ int }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228864
+
+    - name: capture_unauthorized_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: unauthorized_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and not(log-end="no") and not(disabled="yes") and not(application/member="any")]
+        - name: denied_and_logged_applications
+          capture_expression: unauthorized_policies | json_query('[].entry.application.member | [@][][]')
+        - name: unauthorized_not_explicitly_denied_applications
+          capture_expression: unauthorized_applications | listify | difference(denied_and_logged_applications)
     
     - name: PANW-AG-000112
       label: The Palo Alto Networks security platform must detect use of network services that have not been authorized or approved by the ISSM and ISSO, at a minimum.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not unauthorized_not_explicitly_denied_applications
+      fail_message: Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228865
     
