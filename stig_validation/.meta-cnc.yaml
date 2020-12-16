@@ -753,7 +753,7 @@ snippets:
         - name: interfaces_with_netflow
           capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry[layer3 or ip]/@name
         - name: interfaces_missing_netflow
-          capture_expression: netflow_interfaces | listify | missing_items(interfaces_with_netflow)
+          capture_expression: netflow_interfaces | listify | difference(interfaces_with_netflow)
     
     - name: PANW-AG-000111
       label: The Palo Alto Networks security platform must be configured to integrate with a system-wide intrusion detection system.
