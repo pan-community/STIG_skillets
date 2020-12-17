@@ -118,20 +118,35 @@ snippets:
       outputs:
         - name: operational_mode
           capture_value: /system/operational-mode/text()
-    
+      tags:
+        - PANW-AG-000016
+        - PANW-AG-000017
+        - PANW-AG-000020
+        - PANW-AG-000141
+        - PANW-AG-000143
+        - online_mode_only
+
     - name: PANW-AG-000016
-      label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must use encryption services that implement NIST FIPS-validated cryptography to protect the confidentiality of remote access sessions.
+      label: |
+        The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator,
+        must use encryption services that implement NIST FIPS-validated cryptography to protect the confidentiality of
+        remote access sessions.
       meta:
         stig: alg
         severity: medium
       test: operational_mode == 'fips-cc'
-      when: traffic_intermediary
+      when: traffic_intermediary | default('no')
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228833
-    
+      tags:
+        - PANW-AG-000016
+        - online_mode_only
+
     - name: PANW-AG-000017
-      label: The Palo Alto Networks security platform that stores secret or private keys must use FIPS-approved key management technology and processes in the production and control of private/secret cryptographic keys.
+      label: |
+        The Palo Alto Networks security platform that stores secret or private keys must use FIPS-approved key
+        management technology and processes in the production and control of private/secret cryptographic keys.
       meta:
         stig: alg
         severity: medium
@@ -139,9 +154,14 @@ snippets:
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228834
-    
+      tags:
+        - PANW-AG-000017
+        - online_mode_only
+
     - name: PANW-AG-000020
-      label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must use NIST FIPS-validated cryptography to protect the integrity of remote access sessions.
+      label: |
+        The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator,
+        must use NIST FIPS-validated cryptography to protect the integrity of remote access sessions.
       meta:
         stig: alg
         severity: medium
@@ -150,6 +170,9 @@ snippets:
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228835
+      tags:
+        - PANW-AG-000020
+        - online_mode_only
 
     - name: deny_no_log_policies
       cmd: parse
@@ -161,7 +184,10 @@ snippets:
             [action="deny" and log-end="no" and not(log-start="yes") and not(disabled="yes")]
         - name: deny_no_log_policies_names
           capture_expression: deny_no_log_pols | map(attribute="entry.@name") | list
-    
+      tags:
+        - PANW-AG-000024
+        - PANW-AG-000113
+
     - name: PANW-AG-000024
       label: The Palo Alto Networks security platform must log violations of security policies.
       meta:
@@ -171,7 +197,9 @@ snippets:
       fail_message: Deny policies without logging - {% for pol in deny_no_log_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228836
-    
+      tags:
+        - PANW-AG-000024
+
     - name: PANW-AG-000035
       label: The Palo Alto Networks security platform must only enable User-ID on trusted zones.
       meta:
@@ -184,7 +212,9 @@ snippets:
       include_snippets:
         - name: capture_userid_enabled_zones
         - name: userid_internal_zones_only
-    
+      tags:
+        - PANW-AG-000035
+
     - name: PANW-AG-000036
       label: The Palo Alto Networks security platform must disable WMI probing if it is not used.
       meta:
@@ -198,6 +228,8 @@ snippets:
       include_snippets:
         - name: captured_wmi_probing_disabled
         - name: wmi_probing_disabled
+      tags:
+        - PANW-AG-000036
 
     - name: capture_dns_proxy
       cmd: parse
@@ -207,7 +239,9 @@ snippets:
           capture_list: /config/devices/entry[@name='localhost.localdomain']/network/dns-proxy/entry
         - name: capture_dns_proxy_names
           capture_expression: capture_dns_proxy | map(attribute="entry.@name") | list
-    
+      tags:
+        - PANW-AG-000037
+
     - name: PANW-AG-000037
       label: The Palo Alto Networks security platform must not enable the DNS proxy.
       meta:
@@ -217,6 +251,8 @@ snippets:
       fail_message: DNS proxy must not be configured
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228839
+      tags:
+        - PANW-AG-000037
 
     - name: capture_security_policy_objects
       cmd: parse
@@ -262,7 +298,10 @@ snippets:
             )
         - name: non_approved_ppsm_policies_names
           capture_expression: non_approved_ppsm_policies | json_query('[].entry."@name"')
-   
+      tags:
+        - PANW-AG-000038
+        - PANW-AG-000107
+
     - name: PANW-AG-000038
       label: The Palo Alto Networks security platform must be configured to prohibit or restrict the use of functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments.
       meta:
@@ -272,6 +311,8 @@ snippets:
       fail_message: Non PPSM approved policies - {%for pol in non_approved_ppsm_policies_names%}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228840
+      tags:
+        - PANW-AG-000038
 
     - name: get_decryption_policies
       cmd: parse
@@ -282,7 +323,10 @@ snippets:
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/decryption/rules/entry
         - name: ocsp_responders
           capture_list:  /config/shared/ocsp-responder/entry
-    
+      tags:
+        - PANW-AG-000044
+        - PANW-AG-000148
+
     - name: PANW-AG-000044
       label: The Palo Alto Networks security platform that provides intermediary services for TLS must validate certificates used for TLS functions by performing RFC 5280-compliant certification path validation.
       meta:
@@ -293,7 +337,9 @@ snippets:
       fail_message: OCSP responders must be configured if decryption is used
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228841
-    
+      tags:
+        - PANW-AG-000044
+
     - name: PANW-AG-000047
       label: The Palo Alto Networks security platform must protect against the use of internal systems from launching Denial of Service (DoS) attacks against other networks or endpoints.
       meta:
@@ -331,7 +377,9 @@ snippets:
               )
         - name: invalid_spyware_security_policies_names
           capture_expression: invalid_spyware_security_policies | json_query('[].entry."@name"')
-    
+      tags:
+        - PANW-AG-000049
+
     - name: PANW-AG-000049
       label: The Palo Alto Networks security platform must block phone home traffic.
       meta:
@@ -341,7 +389,9 @@ snippets:
       fail_message: Policies with invalid spyware profile - {% for pol in invalid_spyware_security_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228843
-    
+      tags:
+        - PANW-AG-000049
+
     - name: capture_zone_protect_profile_crafted_pkts
       cmd: parse
       variable: config
@@ -357,6 +407,8 @@ snippets:
             item | element_value('network.zone-protection-profile') not in zone_protect_profile_pkt_attack_enabled
         - name: zones_permitting_spoofing
           capture_expression: zones_with_pkt_attack_enabled_object | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000050
 
     - name: PANW-AG-000050
       label: The Palo Alto Networks security platform must deny outbound IP packets that contain an illegitimate address in the source address field.
@@ -367,7 +419,9 @@ snippets:
       fail_message: Zones that permit IP Spoofing - {% for zone in zones_permitting_spoofing %}{{ zone }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228844
-    
+      tags:
+        - PANW-AG-000050
+
     - name: capture_default_permit_policy
       cmd: parse
       variable: config
@@ -376,6 +430,8 @@ snippets:
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
             [application/member="any" and source/member="any" and destination/member="any" and action="allow" and not (disabled="yes")]/@name
+      tags:
+        - PANW-AG-000051
 
     - name: PANW-AG-000051
       label: The Palo Alto Networks security platform must deny network communications traffic by default and allow network communications traffic by exception (i.e., deny all, permit by exception).
@@ -386,6 +442,8 @@ snippets:
       fail_message: Policies that permit by default - {% for pol in default_any_any_policies %}{{ pol }}{% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228845
+      tags:
+        - PANW-AG-000051
 
     - name: capture_device_session_timeout_tcp
       cmd: parse
@@ -399,7 +457,9 @@ snippets:
           capture_list: /config/shared/override/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
         - name: custom_app_timeout
           capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
-    
+      tags:
+        - PANW-AG-000052
+
     - name: PANW-AG-000052
       label: The Palo Alto Networks security platform must terminate communications sessions after 15 minutes of inactivity.
       meta:
@@ -417,7 +477,9 @@ snippets:
         {% if override_app_timeout or custom_app_timeout %}Applications with timeout above 900: {% for app in custom_app_timeout %}{{ app }} {% endfor %} {% for app in override_app_timeout %}{{ app }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228846
-    
+      tags:
+        - PANW-AG-000052
+
     - name: PANW-AG-000060
       label: The Palo Alto Networks security platform must update malicious code protection mechanisms and signature definitions whenever new releases are available in accordance with organizational configuration management policy and procedures.
       meta:
@@ -427,6 +489,8 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228847
+      tags:
+        - PANW-AG-000060
 
     - name: capture_av_profile_in_policies
       cmd: parse
@@ -467,6 +531,11 @@ snippets:
                 )
               ) 
             ]/@name
+      tags:
+        - PANW-AG-000062
+        - PANW-AG-000063
+        - PANW-AG-000073
+        - PANW-AG-000074
 
     - name: PANW-AG-000062
       label: The Palo Alto Networks security platform must drop malicious code upon detection.
@@ -480,7 +549,9 @@ snippets:
         {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228848
-    
+      tags:
+        - PANW-AG-000062
+
     - name: PANW-AG-000063
       label: The Palo Alto Networks security platform must delete or quarantine malicious code in response to malicious code detection.
       meta:
@@ -518,6 +589,8 @@ snippets:
           filter_items: item | element_value('log-setting') not in log_profiles_with_email 
         - name: security_policies_with_virus_no_email_names
           capture_expression: security_policies_with_virus_no_email | map(attribute="entry.@name") | list 
+      tags:
+        - PANW-AG-000064
 
     - name: PANW-AG-000064
       label: The Palo Alto Networks security platform must send an immediate (within seconds) alert to the system administrator, at a minimum, in response to malicious code detection.
@@ -528,8 +601,9 @@ snippets:
       fail_message: AV policies that do not have email logging - {% for pol in security_policies_with_virus_no_email_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228850
+      tags:
+        - PANW-AG-000064
 
-    
     - name: PANW-AG-000065
       label: The Palo Alto Networks security platform must automatically update malicious code protection mechanisms.
       meta:
@@ -552,7 +626,9 @@ snippets:
         {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228852
-    
+      tags:
+        - PANW-AG-000073
+
     - name: PANW-AG-000074
       label: The Palo Alto Networks security platform must prevent the download of prohibited mobile code.
       meta:
@@ -565,7 +641,9 @@ snippets:
         {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228853
-    
+      tags:
+        - PANW-AG-000074
+
     - name: PANW-AG-000078
       label: The Palo Alto Networks security platform, if used as a TLS gateway/decryption point or VPN concentrator, must control remote access methods (inspect and filter traffic).
       meta:
@@ -575,7 +653,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228854
-    
+      tags:
+        - PANW-AG-000078
+
     - name: PANW-AG-000079
       label: The Palo Alto Networks security, if used as a TLS gateway/decryption point or VPN concentrator, must provide the capability to immediately disconnect or disable remote access to the information system.
       meta:
@@ -585,7 +665,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228855
-    
+      tags:
+        - PANW-AG-000079
+
     - name: capture_predefined_db_applications
       cmd: op
       cmd_str: <show><predefined><xpath>/predefined/application</xpath></predefined></show>
@@ -593,6 +675,8 @@ snippets:
       outputs:
         - name: predefined_db_applications
           capture_list: /application/entry[subcategory="database"]/@name
+      tags:
+        - PANW-AG-000080
 
     - name: capture_vulnerability_profiles
       cmd: parse
@@ -629,6 +713,8 @@ snippets:
             )
         - name: invalid_db_vulnerability_policies_names
           capture_expression: invalid_db_vulnerability_policies | json_query('[].entry."@name"')
+      tags:
+        - PANW-AG-000080
 
     - name: PANW-AG-000080
       label: To protect against data mining, the Palo Alto Networks security platform must detect and prevent SQL and other code injection attacks launched against data storage objects, including, at a minimum, databases, database records, queries, and fields.
@@ -639,6 +725,8 @@ snippets:
       fail_message: DB policies with invalid vulnerability profiles - {% for pol in invalid_db_vulnerability_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228856
+      tags:
+        - PANW-AG-000080
 
     - name: capture_vulnerability_protected_apps
       cmd: parse
@@ -658,6 +746,8 @@ snippets:
             )
         - name: invalid_vulnerability_app_policies_names
           capture_expression: invalid_vulnerability_app_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000081
 
     - name: PANW-AG-000081
       label: To protect against data mining, the Palo Alto Networks security platform must detect and prevent code injection attacks launched against application objects including, at a minimum, application URLs and application code.
@@ -668,6 +758,8 @@ snippets:
       fail_message: App policies with invalid vulnerability profile - {% for pol in invalid_vulnerability_app_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228857
+      tags:
+        - PANW-AG-000081
 
     - name: capture_logging_settings
       cmd: parse
@@ -679,7 +771,10 @@ snippets:
           capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
         - name: valid_system_syslog_settings
           capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
-    
+      tags:
+        - PANW-AG-000094
+        - PANW-AG-000144
+
     - name: PANW-AG-000094
       label: The Palo Alto Networks security platform must off-load audit records onto a different system or media than the system being audited.
       meta:
@@ -692,7 +787,9 @@ snippets:
         {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228858
-    
+      tags:
+        - PANW-AG-000094
+
     - name: PANW-AG-000101
       label: The Palo Alto Networks security platform being used for TLS/SSL decryption using PKI-based user authentication must only accept end entity certificates issued by DoD PKI or DoD-approved PKI Certificate Authorities (CAs) for the establishment of protected sessions.
       meta:
@@ -734,7 +831,9 @@ snippets:
             and item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
         - name: invalid_vulnerability_interzone_security_policies_names
           capture_expression: invalid_vulnerability_interzone_security_policies | map(attribute="entry.@name") | list
-    
+      tags:
+        - PANW-AG-000105
+
     - name: PANW-AG-000105
       label: The Palo Alto Networks security platform must use a Vulnerability Protection Profile that blocks any critical, high, or medium threats.
       meta:
@@ -744,7 +843,9 @@ snippets:
       fail_message: Policies with bad vulnerability profiles - {% for pol in invalid_vulnerability_interzone_security_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228861
-    
+      tags:
+        - PANW-AG-000105
+
     - name: PANW-AG-000107
       label: The Palo Alto Networks security platform must only allow incoming communications from organization-defined authorized sources forwarded to organization-defined authorized destinations.
       meta:
@@ -754,6 +855,8 @@ snippets:
       fail_message: Non approved policies - {%for pol in non_approved_ppsm_policies_names%}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228862
+      tags:
+        - PANW-AG-000107
 
     - name: capture_user_id_mapping
       cmd: cli
@@ -762,7 +865,10 @@ snippets:
       outputs:
         - name: captured_user_id_mapping
           capture_value: /*
-    
+      tags:
+        - PANW-AG-000109
+        - online_mode_only
+
     - name: PANW-AG-000109
       label: The Palo Alto Networks security platform must identify and log internal users associated with prohibited outgoing communications traffic.
       meta:
@@ -772,6 +878,9 @@ snippets:
       fail_message: No user ID mapping ouitput found.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228863
+      tags:
+        - PANW-AG-000109
+        - online_mode_only
 
     - name: capture_netflow_profiles
       cmd: parse
@@ -783,7 +892,9 @@ snippets:
           capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry[layer3 or ip]/@name
         - name: interfaces_missing_netflow
           capture_expression: netflow_interfaces | listify | difference(interfaces_with_netflow)
-    
+      tags:
+        - PANW-AG-000111
+
     - name: PANW-AG-000111
       label: The Palo Alto Networks security platform must be configured to integrate with a system-wide intrusion detection system.
       meta:
@@ -793,6 +904,8 @@ snippets:
       fail_message: Interfaces missing netflow - {% for int in interfaces_missing_netflow %}{{ int }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228864
+      tags:
+        - PANW-AG-000111
 
     - name: capture_unauthorized_policies
       cmd: parse
@@ -806,7 +919,9 @@ snippets:
           capture_expression: unauthorized_policies | json_query('[].entry.application.member | [@][][]')
         - name: unauthorized_not_explicitly_denied_applications
           capture_expression: unauthorized_applications | listify | difference(denied_and_logged_applications)
-    
+      tags:
+        - PANW-AG-000112
+
     - name: PANW-AG-000112
       label: The Palo Alto Networks security platform must detect use of network services that have not been authorized or approved by the ISSM and ISSO, at a minimum.
       meta:
@@ -816,7 +931,9 @@ snippets:
       fail_message: Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228865
-    
+      tags:
+        - PANW-AG-000112
+
     - name: PANW-AG-000113
       label: The Palo Alto Networks security platform must generate a log record when unauthorized network services are detected.
       meta:
@@ -826,6 +943,8 @@ snippets:
       fail_message: Deny policies without logging - {% for pol in deny_no_log_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228866
+      tags:
+        - PANW-AG-000113
 
     - name: deny_no_log_setting
       cmd: parse
@@ -835,7 +954,9 @@ snippets:
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
             [action="deny" and not(log-setting) and not(disabled="yes")]/@name
-    
+      tags:
+        - PANW-AG-000114
+
     - name: PANW-AG-000114
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when unauthorized network services are detected.
       meta:
@@ -845,7 +966,9 @@ snippets:
       fail_message: Deny policies without forwarding profiles - {%for pol in deny_no_log_pols %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228867
-    
+      tags:
+        - PANW-AG-000114
+
     - name: PANW-AG-000115
       label: The Palo Alto Networks security platform must continuously monitor inbound communications traffic crossing internal security boundaries.
       meta:
@@ -855,7 +978,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228868
-    
+      tags:
+        - PANW-AG-000115
+
     - name: PANW-AG-000116
       label: The Palo Alto Networks security platform must continuously monitor outbound communications traffic crossing internal security boundaries.
       meta:
@@ -865,7 +990,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228869
-    
+      tags:
+        - PANW-AG-000116
+
     - name: PANW-AG-000118
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when threats identified by authoritative sources (e.g., IAVMs or CTOs) are detected.
       meta:
@@ -875,7 +1002,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228870
-    
+      tags:
+        - PANW-AG-000118
+
     - name: PANW-AG-000119
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized privileged access is detected.
       meta:
@@ -885,7 +1014,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228871
-    
+      tags:
+        - PANW-AG-000119
+
     - name: PANW-AG-000120
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized non-privileged access is detected.
       meta:
@@ -895,7 +1026,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228872
-    
+      tags:
+        - PANW-AG-000120
+
     - name: PANW-AG-000121
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when denial of service incidents are detected.
       meta:
@@ -905,7 +1038,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228873
-    
+      tags:
+        - PANW-AG-000121
+
     - name: PANW-AG-000122
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when new active propagation of malware infecting DoD systems or malicious code adversely affecting the operations and/or security of DoD systems is detected.
       meta:
@@ -915,7 +1050,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228874
-    
+      tags:
+        - PANW-AG-000122
+
     - name: PANW-AG-000127
       label: The Palo Alto Networks security platform must block traceroutes and ICMP probes originating from untrusted networks (e.g., ISP and other non-DoD networks).
       meta:
@@ -925,7 +1062,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228875
-    
+      tags:
+        - PANW-AG-000127
+
     - name: PANW-AG-000141
       label: The Palo Alto Networks security platform providing encryption intermediary services must implement NIST FIPS-validated cryptography to generate cryptographic hashes.
       meta:
@@ -936,7 +1075,10 @@ snippets:
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228876
-    
+      tags:
+        - PANW-AG-000141
+        - online_mode_only
+
     - name: PANW-AG-000143
       label: The Palo Alto Networks security platform, if used for TLS/SSL decryption, must use NIST FIPS-validated cryptography to implement encryption.
       meta:
@@ -947,7 +1089,10 @@ snippets:
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228877
-    
+      tags:
+        - PANW-AG-000143
+        - online_mode_only
+
     - name: PANW-AG-000144
       label: The Palo Alto Networks security platform must, at a minimum, off-load threat and traffic log records onto a centralized log server in real time.
       meta:
@@ -960,6 +1105,8 @@ snippets:
         {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228878
+      tags:
+        - PANW-AG-000144
 
     - name: capture_smtp_policies_no_av
       cmd: parse
@@ -982,7 +1129,9 @@ snippets:
             and item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
         - name: smtp_policies_no_av_names
           capture_expression: smtp_policies_no_av | map(attribute="entry.@name") | list
-    
+      tags:
+        - PANW-AG-000147
+
     - name: PANW-AG-000147
       label: The Palo Alto Networks security platform must inspect inbound and outbound SMTP and Extended SMTP communications traffic (if authorized) for protocol compliance and protocol anomalies.
       meta:
@@ -992,6 +1141,8 @@ snippets:
       fail_message: SMTP policies without av - {% for pol in smtp_policies_no_av %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228879
+      tags:
+        - PANW-AG-000147
 
     - name: capture_ftp_policies_no_av
       cmd: parse
@@ -1011,7 +1162,9 @@ snippets:
             )
         - name: invalid_ftp_policies_names
           capture_expression: invalid_ftp_policies | map(attribute="entry.@name") | list
-    
+      tags:
+        - PANW-AG-000148
+
     - name: PANW-AG-000148
       label: The Palo Alto Networks security platform must inspect inbound and outbound FTP and FTPS communications traffic (if authorized) for protocol compliance and protocol anomalies.
       meta:
@@ -1023,6 +1176,8 @@ snippets:
         {% if invalid_ftp_policies_names %}Policies without proper profiles - {% for pol in invalid_ftp_policies_names %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228880
+      tags:
+        - PANW-AG-000148
 
     - name: capture_invalid_http_policies
       cmd: parse
@@ -1042,7 +1197,9 @@ snippets:
             )
         - name: invalid_http_policies_names
           capture_expression: invalid_http_policies | map(attribute="entry.@name") | list
-    
+      tags:
+        - PANW-AG-000149
+
     - name: PANW-AG-000149
       label: The Palo Alto Networks security platform must inspect inbound and outbound HTTP traffic (if authorized) for protocol compliance and protocol anomalies.
       meta:
@@ -1052,7 +1209,9 @@ snippets:
       fail_message: Policies without proper profiles - {% for pol in invalid_http_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228881
-    
+      tags:
+        - PANW-AG-000149
+
     - name: PANW-IP-000001
       label: The Palo Alto Networks security platform must enable Antivirus, Anti-spyware, and Vulnerability Protection for all authorized traffic.
       meta:
@@ -1062,7 +1221,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207688
-    
+      tags:
+        - PANW-IP-000001
+
     - name: PANW-IP-000007
       label: The Palo Alto Networks security platform must produce audit records containing information to establish the source of the event, including, at a minimum, originating source address.
       meta:
@@ -1072,7 +1233,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207689
-    
+      tags:
+        - PANW-IP-000007
+
     - name: PANW-IP-000008
       label: The Palo Alto Networks security platform must capture traffic of detected/dropped malicious code.
       meta:
@@ -1082,7 +1245,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207690
-    
+      tags:
+        - PANW-IP-000008
+
     - name: PANW-IP-000010
       label: In the event of a logging failure caused by the lack of audit record storage capacity, the Palo Alto Networks security platform must continue generating and storing audit records if possible, overwriting the oldest audit records in a first-in-first-out manner.
       meta:
@@ -1092,7 +1257,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207691
-    
+      tags:
+        - PANW-IP-000010
+
     - name: PANW-IP-000018
       label: The Palo Alto Networks security platform must have a DoS Protection Profile for outbound traffic applied to a policy for traffic originating from the internal zone going to the external zone.
       meta:
@@ -1102,7 +1269,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207692
-    
+      tags:
+        - PANW-IP-000018
+
     - name: PANW-IP-000020
       label: The Palo Alto Networks security platform must detect and deny any prohibited mobile or otherwise malicious code at the enclave boundary.
       meta:
@@ -1112,7 +1281,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207693
-    
+      tags:
+        - PANW-IP-000020
+
     - name: PANW-IP-000024
       label: The Palo Alto Networks security platform must install updates for application software files, signature definitions, detection heuristics, and vendor-provided rules when new releases are available in accordance with organizational configuration management policy and procedures.
       meta:
@@ -1122,7 +1293,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207694
-    
+      tags:
+        - PANW-IP-000024
+
     - name: PANW-IP-000026
       label: The Palo Alto Networks security platform must detect and drop any prohibited mobile or otherwise malicious code at internal boundaries.
       meta:
@@ -1132,7 +1305,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207695
-    
+      tags:
+        - PANW-IP-000026
+
     - name: PANW-IP-000028
       label: The Palo Alto Networks security platform must send an immediate (within seconds) alert to, at a minimum, the SA when malicious code is detected.
       meta:
@@ -1142,7 +1317,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207696
-    
+      tags:
+        - PANW-IP-000028
+
     - name: PANW-IP-000029
       label: The Palo Alto Networks security platform must automatically install updates to signature definitions, detection heuristics, and vendor-provided rules.
       meta:
@@ -1152,7 +1329,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207697
-    
+      tags:
+        - PANW-IP-000029
+
     - name: PANW-IP-000030
       label: The Palo Alto Networks security platform must block outbound ICMP Destination Unreachable, Redirect, and Address Mask reply messages.
       meta:
@@ -1162,7 +1341,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207698
-    
+      tags:
+        - PANW-IP-000030
+
     - name: PANW-IP-000031
       label: The Palo Alto Networks security platform must block malicious ICMP packets.
       meta:
@@ -1172,7 +1353,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207699
-    
+      tags:
+        - PANW-IP-000031
+
     - name: PANW-IP-000032
       label: To protect against unauthorized data mining, the Palo Alto Networks security platform must detect and prevent SQL and other code injection attacks launched against data storage objects, including, at a minimum, databases, database records, queries, and fields.
       meta:
@@ -1182,7 +1365,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207700
-    
+      tags:
+        - PANW-IP-000032
+
     - name: PANW-IP-000033
       label: To protect against unauthorized data mining, the Palo Alto Networks security platform must detect and prevent code injection attacks launched against application objects including, at a minimum, application URLs and application code.
       meta:
@@ -1192,7 +1377,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207701
-    
+      tags:
+        - PANW-IP-000033
+
     - name: PANW-IP-000039
       label: The Palo Alto Networks security platform must off-load log records to a centralized log server.
       meta:
@@ -1202,7 +1389,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207702
-    
+      tags:
+        - PANW-IP-000039
+
     - name: PANW-IP-000041
       label: The Palo Alto Networks security platform must protect against or limit the effects of known and unknown types of Denial of Service (DoS) attacks by employing rate-based attack prevention behavior analysis (traffic thresholds).
       meta:
@@ -1212,7 +1401,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207703
-    
+      tags:
+        - PANW-IP-000041
+
     - name: PANW-IP-000043
       label: The Palo Alto Networks security platform must use a Vulnerability Protection Profile that blocks any critical, high, or medium threats.
       meta:
@@ -1222,7 +1413,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207704
-    
+      tags:
+        - PANW-IP-000043
+
     - name: PANW-IP-000045
       label: Palo Alto Networks security platform components, including sensors, event databases, and management consoles must integrate with a network-wide monitoring capability.
       meta:
@@ -1232,7 +1425,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207705
-    
+      tags:
+        - PANW-IP-000045
+
     - name: PANW-IP-000046
       label: The Palo Alto Networks security platform must detect use of network services that have not been authorized or approved by the ISSM and ISSO, at a minimum.
       meta:
@@ -1242,7 +1437,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207706
-    
+      tags:
+        - PANW-IP-000046
+
     - name: PANW-IP-000047
       label: The Palo Alto Networks security platform must generate a log record when unauthorized network services are detected.
       meta:
@@ -1252,7 +1449,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207707
-    
+      tags:
+        - PANW-IP-000047
+
     - name: PANW-IP-000048
       label: The Palo Alto Networks security platform must generate an alert to the ISSO and ISSM, at a minimum, when unauthorized network services are detected.
       meta:
@@ -1262,7 +1461,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207708
-    
+      tags:
+        - PANW-IP-000048
+
     - name: PANW-IP-000049
       label: The Palo Alto Networks security platform must continuously monitor inbound communications traffic for unusual/unauthorized activities or conditions.
       meta:
@@ -1272,7 +1473,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207709
-    
+      tags:
+        - PANW-IP-000049
+
     - name: PANW-IP-000050
       label: The Palo Alto Networks security platform must continuously monitor outbound communications traffic for unusual/unauthorized activities or conditions.
       meta:
@@ -1282,7 +1485,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207710
-    
+      tags:
+        - PANW-IP-000050
+
     - name: PANW-IP-000051
       label: The Palo Alto Networks security platform must send an alert to, at a minimum, the ISSO and ISSM when intrusion detection events are detected which indicate a compromise or potential for compromise.
       meta:
@@ -1292,7 +1497,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207711
-    
+      tags:
+        - PANW-IP-000051
+
     - name: PANW-IP-000052
       label: The Palo Alto Networks security platform must send an alert to, at a minimum, the ISSO and ISSM when threats identified by authoritative sources (e.g., IAVMs or CTOs) are detected.
       meta:
@@ -1302,7 +1509,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207712
-    
+      tags:
+        - PANW-IP-000052
+
     - name: PANW-IP-000053
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized privileged or non-privileged access is detected.
       meta:
@@ -1312,7 +1521,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207713
-    
+      tags:
+        - PANW-IP-000053
+
     - name: PANW-IP-000055
       label: The Palo Alto Networks security platform must send an alert to, at a minimum, the ISSO and ISSM when denial of service incidents are detected.
       meta:
@@ -1322,7 +1533,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207714
-    
+      tags:
+        - PANW-IP-000055
+
     - name: PANW-IP-000056
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when new active propagation of malware infecting DoD systems or malicious code adversely affecting the operations and/or security of DoD systems is detected.
       meta:
@@ -1332,7 +1545,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207715
-    
+      tags:
+        - PANW-IP-000056
+
     - name: PANW-IP-000058
       label: The Palo Alto Networks security platform must off-load log records to a centralized log server in real-time.
       meta:
@@ -1342,7 +1557,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207716
-    
+      tags:
+        - PANW-IP-000058
+
     - name: PANW-NM-000015
       label: The Palo Alto Networks security platform must enforce the limit of three consecutive invalid logon attempts.
       meta:
@@ -1352,7 +1569,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62705
-    
+      tags:
+        - PANW-NW-000015
+
     - name: PANW-NM-000016
       label: The Palo Alto Networks security platform must display the Standard Mandatory DoD Notice and Consent Banner before granting access to the device.
       meta:
@@ -1362,7 +1581,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62707
-    
+      tags:
+        - PANW-NW-000016
+
     - name: PANW-NM-000023
       label: The Palo Alto Networks security platform must allow only the ISSM (or individuals or roles appointed by the ISSM) in the Audit Administrator (auditadmin) role, or in a custom role with full access to audit logs, or any account that has full access to audit logs.
       meta:
@@ -1372,7 +1593,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62709
-    
+      tags:
+        - PANW-NW-000023
+
     - name: PANW-NM-000024
       label: The Palo Alto Networks security platform must generate audit records when successful/unsuccessful attempts to access privileges occur.
       meta:
@@ -1382,7 +1605,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62711
-    
+      tags:
+        - PANW-NW-000024
+
     - name: PANW-NM-000029
       label: The Palo Alto Networks security platform must produce audit log records containing information (FQDN, unique hostname, management IP address) to establish the source of events.
       meta:
@@ -1392,7 +1617,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62713
-    
+      tags:
+        - PANW-NW-000029
+
     - name: PANW-NM-000042
       label: The Palo Alto Networks security platform must back up audit records at least every seven days onto a different system or system component than the system or component being audited.
       meta:
@@ -1402,7 +1629,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62715
-    
+      tags:
+        - PANW-NW-000042
+
     - name: PANW-NM-000046
       label: The Palo Alto Networks security platform must be configured to prohibit the use of all unnecessary and/or nonsecure functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments.
       meta:
@@ -1412,7 +1641,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62717
-    
+      tags:
+        - PANW-NW-000046
+
     - name: PANW-NM-000047
       label: The Palo Alto Networks security platform must uniquely identify and authenticate organizational administrators (or processes acting on behalf of organizational administrators).
       meta:
@@ -1422,7 +1653,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62719
-    
+      tags:
+        - PANW-NW-000047
+
     - name: PANW-NM-000051
       label: The Palo Alto Networks security platform must implement replay-resistant authentication mechanisms for network access to privileged accounts.
       meta:
@@ -1432,7 +1665,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62721
-    
+      tags:
+        - PANW-NW-000051
+
     - name: PANW-NM-000053
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce a minimum 15-character password length.
       meta:
@@ -1442,7 +1677,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62723
-    
+      tags:
+        - PANW-NW-000053
+
     - name: PANW-NM-000054
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must prohibit password reuse for a minimum of five generations.
       meta:
@@ -1452,7 +1689,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62725
-    
+      tags:
+        - PANW-NW-000054
+
     - name: PANW-NM-000055
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce password complexity by requiring that at least one upper-case character be used.
       meta:
@@ -1462,7 +1701,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62727
-    
+      tags:
+        - PANW-NW-000055
+
     - name: PANW-NM-000056
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce password complexity by requiring that at least one lower-case character be used.
       meta:
@@ -1472,7 +1713,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62729
-    
+      tags:
+        - PANW-NW-000056
+
     - name: PANW-NM-000057
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce password complexity by requiring that at least one numeric character be used.
       meta:
@@ -1482,7 +1725,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62731
-    
+      tags:
+        - PANW-NW-000057
+
     - name: PANW-NM-000058
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce password complexity by requiring that at least one special character be used.
       meta:
@@ -1492,7 +1737,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62733
-    
+      tags:
+        - PANW-NW-000058
+
     - name: PANW-NM-000059
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must require that when a password is changed, the characters are changed in at least 8 of the positions within the password.
       meta:
@@ -1502,7 +1749,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62735
-    
+      tags:
+        - PANW-NW-000059
+
     - name: PANW-NM-000061
       label: The Palo Alto Networks security platform must prohibit the use of unencrypted protocols for network access to privileged accounts.
       meta:
@@ -1512,7 +1761,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62737
-    
+      tags:
+        - PANW-NW-000061
+
     - name: PANW-NM-000062
       label: The Palo Alto Networks security platform must enforce 24 hours/1 day as the minimum password lifetime.
       meta:
@@ -1522,7 +1773,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62739
-    
+      tags:
+        - PANW-NW-000062
+
     - name: PANW-NM-000063
       label: The Palo Alto Networks security platform must enforce a 60-day maximum password lifetime restriction.
       meta:
@@ -1532,7 +1785,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62741
-    
+      tags:
+        - PANW-NW-000063
+
     - name: PANW-NM-000069
       label: The Palo Alto Networks security platform must terminate management sessions after 10 minutes of inactivity except to fulfill documented and validated mission requirements.
       meta:
@@ -1542,7 +1797,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62743
-    
+      tags:
+        - PANW-NW-000069
+
     - name: PANW-NM-000075
       label: Administrators in the role of either Security Administrator or Cryptographic Administrator must not also have the role of Audit Administrator.
       meta:
@@ -1552,7 +1809,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62745
-    
+      tags:
+        - PANW-NW-000075
+
     - name: PANW-NM-000092
       label: The Palo Alto Networks security platform must automatically lock the account until the locked account is released by an administrator when three unsuccessful logon attempts in 15 minutes are exceeded.
       meta:
@@ -1562,7 +1821,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62747
-    
+      tags:
+        - PANW-NW-000092
+
     - name: PANW-NM-000096
       label: The Palo Alto Networks security platform must generate an immediate alert when allocated audit record storage volume reaches 75% of repository maximum audit record storage capacity.
       meta:
@@ -1572,7 +1833,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62749
-    
+      tags:
+        - PANW-NW-000096
+
     - name: PANW-NM-000097
       label: The Palo Alto Networks security platform must have alarms enabled.
       meta:
@@ -1582,7 +1845,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62751
-    
+      tags:
+        - PANW-NW-000097
+
     - name: PANW-NM-000098
       label: The Palo Alto Networks security platform must compare internal information system clocks at least every 24 hours with an authoritative time server.
       meta:
@@ -1592,7 +1857,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62753
-    
+      tags:
+        - PANW-NW-000098
+
     - name: PANW-NM-000099
       label: The Palo Alto Networks security platform must synchronize internal information system clocks to the authoritative time source when the time difference is greater than one second.
       meta:
@@ -1602,7 +1869,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62755
-    
+      tags:
+        - PANW-NW-000099
+
     - name: PANW-NM-000100
       label: The Palo Alto Networks security platform must be configured to synchronize internal information system clocks with the primary and secondary time sources located in different geographic regions using redundant authoritative time sources.
       meta:
@@ -1612,7 +1881,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62757
-    
+      tags:
+        - PANW-NW-000100
+
     - name: PANW-NM-000101
       label: The Palo Alto Networks security platform must record time stamps for audit records that can be mapped to Coordinated Universal Time (UTC) or Greenwich Mean Time (GMT).
       meta:
@@ -1622,7 +1893,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62759
-    
+      tags:
+        - PANW-NW-000101
+
     - name: PANW-NM-000110
       label: The Palo Alto Networks security platform must accept and verify Personal Identity Verification (PIV) credentials.
       meta:
@@ -1632,7 +1905,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62761
-    
+      tags:
+        - PANW-NW-000110
+
     - name: PANW-NM-000114
       label: The Palo Alto Networks security platform must allow the use of a temporary password for system logons with an immediate change to a permanent password.
       meta:
@@ -1642,7 +1917,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62763
-    
+      tags:
+        - PANW-NW-000114
+
     - name: PANW-NM-000117
       label: The Palo Alto Networks security platform must only allow the use of secure protocols that implement cryptographic mechanisms to protect the integrity of maintenance and diagnostic communications for nonlocal maintenance sessions.
       meta:
@@ -1652,7 +1929,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62765
-    
+      tags:
+        - PANW-NW-000117
+
     - name: PANW-NM-000118
       label: The Palo Alto Networks security platform must not use SNMP Versions 1 or 2.
       meta:
@@ -1662,7 +1941,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62767
-    
+      tags:
+        - PANW-NW-000118
+
     - name: PANW-NM-000128
       label: The Palo Alto Networks security platform must off-load audit records onto a different system or media than the system being audited.
       meta:
@@ -1672,7 +1953,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62769
-    
+      tags:
+        - PANW-NW-000128
+
     - name: PANW-NM-000131
       label: The Palo Alto Networks security platform must use automated mechanisms to alert security personnel to threats identified by authoritative sources (e.g., CTOs) and IAW CJCSM 6510.01B.
       meta:
@@ -1682,7 +1965,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62771
-    
+      tags:
+        - PANW-NW-000131
+
     - name: PANW-NM-000136
       label: The Palo Alto Networks security platform must employ centrally managed authentication server(s).
       meta:
@@ -1692,7 +1977,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62773
-    
+      tags:
+        - PANW-NW-000136
+
     - name: PANW-NM-000141
       label: The Palo Alto Networks security platform must use DoD-approved PKI rather than proprietary or self-signed device certificates.
       meta:
@@ -1702,7 +1989,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62777
-    
+      tags:
+        - PANW-NW-000141
+
     - name: PANW-NM-000142
       label: The Palo Alto Networks security platform must not use Password Profiles.
       meta:
@@ -1712,7 +2001,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62779
-    
+      tags:
+        - PANW-NW-000142
+
     - name: PANW-NM-000143
       label: The Palo Alto Networks security platform must not use the default admin account password.
       meta:
@@ -1722,7 +2013,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62781
-    
+      tags:
+        - PANW-NW-000143
+
     - name: PANW-NM-000144
       label: The Palo Alto Networks security platform must generate an audit log record when the Data Plane CPU utilization is 100%.
       meta:
@@ -1732,7 +2025,9 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62783
-    
+      tags:
+        - PANW-NW-000144
+
     - name: PANW-NM-000145
       label: The Palo Alto Networks security platform must authenticate Network Time Protocol sources.
       meta:
@@ -1742,4 +2037,5 @@ snippets:
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62785
-    
+      tags:
+        - PANW-NW-000145
