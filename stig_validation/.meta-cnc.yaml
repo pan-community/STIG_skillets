@@ -100,16 +100,65 @@ variables:
 
 snippets:
     
+    - name: PANW-AG-000015-capture
+      cmd: parse
+      variable: config
+      outputs:
+        - name: decryption_rules
+          capture_list: |-
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/decryption/rules/entry
+            [not(action="no-decrypt") and not(disabled="yes")]
+
+        - name: security_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+
+        - name: decryption
+          capture_expression: |
+            decryption_rules |
+            json_query('[*].entry[].{source_zone: [from.member][], source_ip: [source.member][],
+            source_user: ["source-user".member][], destination_zone: [to.member][],
+            destination_ip: [destination.member][], service: [service.member][]}'
+            )
+
+        - name: decryption_names
+          capture_expression: |-
+            decryption_rules |
+            json_query('[*].entry[].{name: "@name", source_zone: [from.member][], source_ip: [source.member][],
+            source_user: ["source-user".member][], destination_zone: [to.member][],
+            destination_ip: [destination.member][], service: [service.member][]}'
+            )
+
+        - name: security
+          capture_expression: |-
+            security_policies |
+            json_query('[*].entry[].{name: "@name", source_zone: [from.member][], source_ip: [source.member][],
+            source_user: ["source-user".member][], destination_zone: [to.member][],
+            destination_ip: [destination.member][], service: [service.member][]}'
+            )
+      tags:
+        - PANW-AG-000015
+
     - name: PANW-AG-000015
-      label: The Palo Alto Networks security platform, if used to provide intermediary services for remote access communications traffic (TLS or SSL decryption), must ensure inbound and outbound traffic is monitored for compliance with remote access security policies.
+      label: |-
+        The Palo Alto Networks security platform, if used to provide intermediary services for remote access
+        communications traffic (TLS or SSL decryption), must ensure inbound and outbound traffic is monitored for
+        compliance with remote access security policies.
       meta:
         stig: alg
         severity: medium
-      test: false
+      test: |
+        (
+        ( decryption | length > 0 )
+        and ( decryption | difference(security)
+        )
+
       when: traffic_intermediary
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228832
+      tags:
+        - PANW-AG-000015
 
     - name: get_system_info
       cmd: cli
