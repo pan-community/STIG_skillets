@@ -1162,6 +1162,7 @@ snippets:
       tags:
         - PANW-AG-000119
         - PANW-AG-000120
+        - PANW-AG-000122
 
     - name: PANW-AG-000119
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized privileged access is detected.
@@ -1199,13 +1200,31 @@ snippets:
       tags:
         - PANW-AG-000121
 
+    - name: capture_interzone_intersubnet_alerts
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_intersubnet_alert_policies
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not(disabled="yes")]
+          filter_items: |
+            not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
+            or (
+              not item | json_query('entry."profile-setting".group.member')
+              and not item | json_query('entry."profile-setting".profiles.virus.member')
+            )
+        - name: invalid_intersubnet_alert_policies_names
+          capture_expression: invalid_intersubnet_alert_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000122
+
     - name: PANW-AG-000122
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when new active propagation of malware infecting DoD systems or malicious code adversely affecting the operations and/or security of DoD systems is detected.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_intersubnet_alert_policies_names
+      fail_message: Intersubnet policies with invalid alerting - {% for pol in invalid_intersubnet_alert_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228874
       tags:
