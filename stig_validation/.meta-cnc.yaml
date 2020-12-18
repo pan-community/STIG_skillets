@@ -1230,14 +1230,29 @@ snippets:
       tags:
         - PANW-AG-000122
 
+    - name: capture_icmp_deny_policy
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_deny_policy
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and not(disabled="yes") and source/member="any" and destination/member="any"
+            and application/member="icmp" and application/member="ipv6-icmp" and application/member="traceroute"]
+          filter_items: |
+             untrusted_zones | listify | items_present(item.entry.from.member) or "any" in item.entry.from.member
+             and trusted_zones | listify | items_present(item.entry.to.member) or "any" in item.entry.to.member
+      tags:
+        - PANW-AG-000127
+
     - name: PANW-AG-000127
       label: The Palo Alto Networks security platform must block traceroutes and ICMP probes originating from untrusted networks (e.g., ISP and other non-DoD networks).
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
+      test: icmp_deny_policy
+      fail_message: An explicit deny policy could not be found, click link for requirements.
+      pass_message: Identified policy - {% for pol in icmp_deny_policy %}{{ pol.entry["@name"] }} {% endfor %}
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228875
       tags:
         - PANW-AG-000127
