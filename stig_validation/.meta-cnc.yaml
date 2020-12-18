@@ -1103,9 +1103,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      test: false
+      test: true
       fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
+      pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228868
       tags:
         - PANW-AG-000115
