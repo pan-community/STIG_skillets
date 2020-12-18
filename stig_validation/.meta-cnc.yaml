@@ -353,17 +353,17 @@ snippets:
           capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not (disabled="yes")]
           filter_items: |
             (
-              item | json_query("entry.source.member=='any'")
-              or item | json_query("entry.destination.member=='any'")
-              or item | json_query("entry.service.member=='any'")
-              or ( item | json_query("entry.service.member=='application-default'") and item | json_query("entry.application.member=='any'") )
+              'any' in item.entry.source.member
+              or 'any' in item.entry.destination.member
+              or 'any' in item.entry.service.member
+              or ('application-default' in item.entry.service.member and 'any' in item.entry.application.member)
               or not item | json_query('entry.source.[member][]') | items_present(permitted_address_names + permitted_address_group_names)
               or not item | json_query('entry.destination.[member][]') | items_present(permitted_address_names + permitted_address_group_names)
               or (
                 not item | json_query('entry.application.[member][]') | items_present(PPSM_applications | listify + permitted_application_groups_names)
-                and not item | json_query("entry.application.member=='any'")
+                and not 'any' in item.entry.application.member
                 )
-              or ( item | json_query("entry.application.member=='any'")
+              or ( 'any' in item.entry.application.member
                 and not item | json_query('entry.service.[member][]') | items_present(PPSM_services | listify + permitted_service_groups_names )
               )
             )
