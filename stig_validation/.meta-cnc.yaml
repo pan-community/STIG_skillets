@@ -809,7 +809,7 @@ snippets:
           filter_items: |
             (
               item | json_query('entry.application.member | [@][]') | item_present(apps_with_vulnerability_protection | listify) 
-              or item.entry.application.member == "any"
+              or "any" in item.entry.application.member
             )
             and (
               item | json_query('entry."profile-setting".group.member') not in valid_vulnerability_profile_groups
