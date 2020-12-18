@@ -1188,13 +1188,27 @@ snippets:
       tags:
         - PANW-AG-000120
 
+    - name: capture_invalid_alert_dos_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_alert_dos_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes")]
+          filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
+        - name: invalid_alert_dos_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]
+      tags:
+        - PANW-AG-000121
+
     - name: PANW-AG-000121
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when denial of service incidents are detected.
       meta:
         stig: alg
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: valid_alert_dos_policies and not invalid_alert_dos_policies
+      fail_message: |
+        {% if not valid_alert_dos_policies %}No valid Dos Protection policies setup for alerts {% endif %}
+        {% if invalid_alert_dos_policies %}DoS Protection policies with invalid log forwarding - {% for pol in invalid_alert_dos_policies %}{{ pol.entry["@name"] }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228873
       tags:
