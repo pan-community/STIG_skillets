@@ -437,8 +437,8 @@ snippets:
         - name: invalid_spyware_security_policies
           capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not (disabled="yes")]
           filter_items: |
-              (item | json_query('entry.from.member | [@][]') | item_present(trusted_zones | listify) or item | json_query('entry.from.member') == "any")
-              and (item | json_query('entry.to.member | [@][]') | item_present(untrusted_zones | listify) or item | json_query('entry.to.member') == "any")
+              (item | json_query('entry.from.member | [@][]') | item_present(trusted_zones | listify) or 'any' in item.entry.from.member)
+              and (item | json_query('entry.to.member | [@][]') | item_present(untrusted_zones | listify) or 'any' in item.entry.to.member)
               and (
                 (not item | json_query('entry."profile-setting".group.member') and not item | json_query('entry."profile-setting".profiles.spyware.member'))
                 or (
