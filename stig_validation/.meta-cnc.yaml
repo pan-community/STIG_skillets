@@ -761,6 +761,12 @@ snippets:
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
             entry[count(vulnerability)>0 and not(vulnerability/member='default')]/@name
+      tags:
+        - PANW-AG-000080
+        - PANW-AG-000081
+        - PANW-AG-000105
+        - PANW-AG-000148
+        - PANW-AG-000149
 
     - name: capture_invalid_db_vulnerability_policies
       cmd: parse
