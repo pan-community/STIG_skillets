@@ -18,6 +18,36 @@ variables:
     type_hint: list
     default: emergency
 
+  - name: permit_http_ocsp
+    description: HTTP OCSP permitted on management interface
+    type_hint: dropdown
+    default: false
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
+
+  - name: permit_userid_syslog_listener_ssl
+    description: User-ID syslog listener permitted on management interface
+    type_hint: dropdown
+    default: false
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
+
+  - name: permit_userid
+    description: User-ID permitted on management interface
+    type_hint: dropdown
+    default: false
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
+
 snippets:
 
     - name: capture_failed_login
@@ -167,13 +197,32 @@ snippets:
       tags:
         - PANW-NW-000042
 
+    - name: capture_system_services
+      cmd: parse
+      variable: config
+      outputs:
+        - name: system_services
+          capture_object: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/service
+        - name: system_snmp_v3
+          capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/snmp-setting/access-setting/version/v3
+      tags:
+        - PANW-NM-000046
+
     - name: PANW-NM-000046
       label: The Palo Alto Networks security platform must be configured to prohibit the use of all unnecessary and/or nonsecure functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        (
+          system_services.service['disable-telnet'] == 'yes'
+          and ( not system_services.service['disable-http-ocsp'] == 'no' or permit_http_ocsp )
+          and ( not system_services.service['disable-userid-syslog-listener-ssl'] == 'no' or permit_userid_syslog_listener_ssl)
+          and ( not system_services.service['disable-userid-service'] == 'no' or permit_userid)
+        ) and system_snmp_v3
+      fail_message: |
+        {% if not system_snmp_v3 %}System is not set to use SNMPv3.{% endif %}
+        Unauthorized protocols are enabled on management port, click link for details.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62717
       tags:
