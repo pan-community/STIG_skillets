@@ -98,14 +98,27 @@ snippets:
       tags:
         - PANW-NW-000024
 
+    - name: capture_system_management_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: system_hostname
+          capture_value: /config/devices/entry/deviceconfig/system/hostname/text()
+        - name: system_syslog_hostname
+          capture_value: /config/devices/entry/deviceconfig/setting/management/hostname-type-in-syslog/text()
+      tags:
+        - PANW-NM-000029
+
     - name: PANW-NM-000029
       label: The Palo Alto Networks security platform must produce audit log records containing information (FQDN, unique hostname, management IP address) to establish the source of events.
       meta:
         stig: ndm
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
+      test: system_hostname and system_syslog_hostname in ["FQDN", "hostname", "ipv4-address", "ipv6-address"]
+      fail_message: |
+        {% if not system_hostname %}A unique hostname must be configured{% endif %}
+        {% if not system_syslog_hostname in ["FQDN", "hostname", "ipv4-address", "ipv6-address"] %}Vaild selection required for syslog hostname format.{% endif %}
+      pass_message: Validation successful, operator should validate hostname to be globally unique.
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62713
       tags:
         - PANW-NW-000029
