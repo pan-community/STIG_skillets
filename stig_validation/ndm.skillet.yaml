@@ -80,8 +80,30 @@ snippets:
           capture_list: /config/shared/log-settings/system/match-list/entry[send-syslog/member]
         - name: system_syslog_filters
           capture_expression: system_syslog | json_query("[].entry.filter | join(' , ', @)")
+        - name: valid_traffic_syslog_profile_names
+          capture_list: |
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/log-settings
+            /profiles/entry[match-list/entry/log-type="traffic" and match-list/entry/send-syslog/member]/@name
+        - name: valid_threat_syslog_profile
+          capture_list: |
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/log-settings
+            /profiles/entry[match-list/entry/log-type="threat" and match-list/entry/send-syslog/member]
+          filter_items: |
+            "All Logs" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+            or (
+              "critical" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "high" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "medium" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "low" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "informational" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+            )
+        - name: valid_threat_syslog_profile_names
+          capture_expression: valid_threat_syslog_profile | json_query('[].entry."@name"')
+        - name: valid_config_syslog_profile_names
+          capture_list: /config/shared/log-settings/config/match-list/entry[send-syslog/member]/@name
       tags:
         - PANW-NM-000024
+        - PANW-NM-000042
 
     - name: PANW-NM-000024
       label: The Palo Alto Networks security platform must generate audit records when successful/unsuccessful attempts to access privileges occur.
@@ -128,8 +150,18 @@ snippets:
       meta:
         stig: ndm
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        system_syslog and valid_traffic_syslog_profile_names and valid_threat_syslog_profile_names and valid_config_syslog_profile_names
+        and (
+          'All Logs' in system_syslog_filters
+          or ( 'critical' in system_syslog_filters and 'high' in system_syslog_filters and 'medium' in system_syslog_filters and 'low' in system_syslog_filters)
+        )
+      fail_message: |
+        {% if not system_syslog %}Missing system syslog settings
+        {% elif not valid_traffic_syslog_profile_names %}Missing syslog profiles for traffic logs
+        {% elif not valid_threat_syslog_profile_names %}Missing syslog profiles for threat logs
+        {% elif not valid_config_syslog_profile_names %}Missing syslog profiles for config logs
+        {% else %}All required traffic types not accounted for in system syslog settings, click link to review.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62715
       tags:
