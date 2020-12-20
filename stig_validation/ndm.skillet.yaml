@@ -72,13 +72,27 @@ snippets:
       tags:
         - PANW-NW-000023
 
+    - name: capture_system_syslog
+      cmd: parse
+      variable: config
+      outputs:
+        - name: system_syslog
+          capture_list: /config/shared/log-settings/system/match-list/entry[send-syslog/member]
+        - name: system_syslog_filters
+          capture_expression: system_syslog | json_query("[].entry.filter | join(' , ', @)")
+      tags:
+        - PANW-NM-000024
+
     - name: PANW-NM-000024
       label: The Palo Alto Networks security platform must generate audit records when successful/unsuccessful attempts to access privileges occur.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        'All Logs' in system_syslog_filters
+        or ( 'critical' in system_syslog_filters and 'high' in system_syslog_filters
+          and 'medium' in system_syslog_filters and 'low' in system_syslog_filters and 'informational' in system_syslog_filters )
+      fail_message: Not all syslog levels are accounted for in system logs, view link for more information.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62711
       tags:
