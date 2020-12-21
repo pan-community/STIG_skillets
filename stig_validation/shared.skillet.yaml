@@ -1,0 +1,24 @@
+---
+
+name: shared_snippets
+label : Shared snippets for gathering information
+
+description: These snippets are shared between STIGs
+
+type: pan_validation
+labels:
+    collection:
+        - stig
+        - Validation
+
+variables:
+
+snippets:
+
+    - name: get_system_info
+      cmd: cli
+      cmd_str: show system info
+      output_type: xml
+      outputs:
+        - name: operational_mode
+          capture_value: /system/operational-mode/text()

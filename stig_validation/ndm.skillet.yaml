@@ -1,6 +1,6 @@
 ---
 
-name: NDM STIG Validation for PAN-OS
+name: NDM_Validation
 label: skillet generated from NDM STIG documents at stigviewer.com
 
 description: This skillet accounts NDM STIG sersions
@@ -47,6 +47,18 @@ variables:
         value: true
       - key: No
         value: false
+
+  - name: centralized_authentication
+    description: Centralized authentication protocol in use
+    type_hint: dropdown
+    default: kerberos
+    dd_list:
+      - key: Kerberos
+        value: kerberos
+      - key: LDAP
+        value: ldap
+      - key: RADIUS
+        value: radius
 
 snippets:
 
@@ -240,13 +252,20 @@ snippets:
       tags:
         - PANW-NW-000047
 
+    - name: get_system_info
+      include: shared_snippets
+      include_snippets:
+        - name: get_system_info
+      tags:
+        - PANW-NM-000051
+
     - name: PANW-NM-000051
       label: The Palo Alto Networks security platform must implement replay-resistant authentication mechanisms for network access to privileged accounts.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: operational_mode == 'fips-cc' and (not centralized_authentication == 'ldap')
+      fail_message: "{% if not operational_mode == 'fips-cc' %}NGFW must be running in FIPS mode{% else %}Radius requires SSL{% endif %}"
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62721
       tags:

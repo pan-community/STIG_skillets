@@ -15,7 +15,6 @@ variables:
 
 snippets:
 
-  - name: traffic_intermediary
     - name: PANW-IP-000001
       label: The Palo Alto Networks security platform must enable Antivirus, Anti-spyware, and Vulnerability Protection for all authorized traffic.
       meta:
