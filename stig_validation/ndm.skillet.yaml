@@ -236,8 +236,11 @@ snippets:
           capture_object: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/service
         - name: system_snmp_v3
           capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/system/snmp-setting/access-setting/version/v3
+        - name: snmp_profiles_not_v3_names
+          capture_value: /config/shared/log-settings/snmptrap/entry[not(version/v3)]/@name
       tags:
         - PANW-NM-000046
+        - PANW-NM-000118
 
     - name: PANW-NM-000046
       label: The Palo Alto Networks security platform must be configured to prohibit the use of all unnecessary and/or nonsecure functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments.
@@ -653,8 +656,10 @@ snippets:
       meta:
         stig: ndm
         severity: high
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: system_snmp_v3 and not snmp_profiles_not_v3_names
+      fail_message: |
+        {% if snmp_profiles_not_v3_names %}SNMP Profiles not using v3 - {% for prof in snmp_profiles_not_v3_names %}{{ prof }}{% endfor %}
+        {% else %} System must be configured to use SNMP v3.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62767
       tags:
