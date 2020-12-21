@@ -70,6 +70,15 @@ variables:
       - key: No
         value: false
 
+  - name: admin_verified_ntp_geographic_diversity
+    description: NTP servers verified in different geographic regions
+    type_hint: dropdown
+    default: false
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
 snippets:
 
     - name: capture_failed_login
@@ -531,6 +540,7 @@ snippets:
       tags:
         - PANW-NW-000098
         - PANW-NW-000099
+        - PANW-NW-000100
 
     - name: PANW-NM-000098
       label: The Palo Alto Networks security platform must compare internal information system clocks at least every 24 hours with an authoritative time server.
@@ -561,8 +571,11 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        ntp_servers | tag_present('primary-ntp-server.ntp-server-address')
+        and ntp_servers | tag_present('secondary-ntp-server.ntp-server-address')
+        and admin_verified_ntp_geographic_diversity
+      fail_message: NGFW must have a primary and a secondary NTP server configured, and admin must confirm NTP servers are in different geographic regions
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62757
       tags:
