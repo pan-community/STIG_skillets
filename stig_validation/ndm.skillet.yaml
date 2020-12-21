@@ -457,13 +457,25 @@ snippets:
       tags:
         - PANW-NW-000075
 
+    - name: capture_admin_user_lockout_time
+      cmd: parse
+      variable: config
+      outputs:
+        - name: vaild_lockout_time_authentication_profiles
+          capture_list: /config/shared/authentication-profile/entry[lockout/lockout-time=0]/@name
+        - name: invalid_lockout_time_admin_users
+          capture_list: /config/mgt-config/users/entry[not(@name="{{ emergency_admin_account }}")]
+          filter_items: item | json_query('entry."authentication-profile"') not in vaild_lockout_time_authentication_profiles
+      tags:
+        - PANW-NM-000092
+
     - name: PANW-NM-000092
       label: The Palo Alto Networks security platform must automatically lock the account until the locked account is released by an administrator when three unsuccessful logon attempts in 15 minutes are exceeded.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_lockout_time_admin_users
+      fail_message: Users with invalid lockout-time settings - {% for user in invalid_lockout_time_admin_users %}{{ user.entry["@name"] }}{% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62747
       tags:
