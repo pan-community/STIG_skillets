@@ -387,13 +387,22 @@ snippets:
       tags:
         - PANW-NW-000061
 
+    - name: capture_password_complexity_block_change_period
+      cmd: parse
+      variable: config
+      outputs:
+        - name: password_change_period_block
+          capture_value: /config/mgt-config/password-complexity/password-change-period-block/text()
+      tags:
+        - PANW-NW-000062
+
     - name: PANW-NM-000062
       label: The Palo Alto Networks security platform must enforce 24 hours/1 day as the minimum password lifetime.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: password_change_period_block == "1"
+      fail_message: Block Password Change Period (days) must be set to 1
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62739
       tags:
