@@ -282,6 +282,7 @@ snippets:
         - name: capture_password_complexity_min_special_chars
         - name: capture_password_complexity_new_password_differs
         - name: capture_disable_http_telnet_for_mgmt_intf
+        - name: capture_password_complexity_change_period
       tags:
         - PANW-NM-000053
         - PANW-NM-000054
@@ -290,6 +291,7 @@ snippets:
         - PANW-NM-000057
         - PANW-NM-000058
         - PANW-NM-000061
+        - PANW-NM-000063
 
     - name: PANW-NM-000053
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce a minimum 15-character password length.
@@ -413,8 +415,8 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: password_min_change_period == "60"
+      fail_message: Required Password Change Period (days) must be set to 60 
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62741
       tags:
