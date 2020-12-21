@@ -614,13 +614,22 @@ snippets:
       tags:
         - PANW-NW-000110
 
+    - name: capture_temporary_password
+      cmd: parse
+      variable: config
+      outputs:
+        - name: change_passwrod_at_first_login
+          capture_value: /config/mgt-config/password-complexity/password-change-on-first-login
+      tags:
+        - PANW-NM-000114
+
     - name: PANW-NM-000114
       label: The Palo Alto Networks security platform must allow the use of a temporary password for system logons with an immediate change to a permanent password.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: change_passwrod_at_first_login == "yes"
+      fail_message: The "Require Password Change on First Login" box must be checked
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62763
       tags:
