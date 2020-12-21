@@ -491,6 +491,7 @@ snippets:
           capture_expression: system_alarm_settings | json_query('"common-criteria-alarm-generation"."log-databases-alarm-threshold"')
       tags:
         - PANW-NM-000096
+        - PANW-NM-000097
 
     - name: PANW-NM-000096
       label: The Palo Alto Networks security platform must generate an immediate alert when allocated audit record storage volume reaches 75% of repository maximum audit record storage capacity.
@@ -516,8 +517,8 @@ snippets:
       meta:
         stig: ndm
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: system_alarm_settings["common-criteria-alarm-generation"]["enable-alarm-generation"] == "yes"
+      fail_message: Device -> Log Settings -> Alarms -> Enable Alarms must be checked
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62751
       tags:
