@@ -481,13 +481,31 @@ snippets:
       tags:
         - PANW-NW-000092
 
+    - name: capture_system_alarm_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: system_alarm_settings
+          capture_object: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/management/common-criteria-alarm-generation
+        - name: system_alarm_thresholds
+          capture_expression: system_alarm_settings | json_query('"common-criteria-alarm-generation"."log-databases-alarm-threshold"')
+      tags:
+        - PANW-NM-000096
+
     - name: PANW-NM-000096
       label: The Palo Alto Networks security platform must generate an immediate alert when allocated audit record storage volume reaches 75% of repository maximum audit record storage capacity.
       meta:
         stig: ndm
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        system_alarm_settings["common-criteria-alarm-generation"]["enable-alarm-generation"] == "yes"
+        and system_alarm_thresholds.traffic == "75"
+        and system_alarm_thresholds.threat == "75"
+        and system_alarm_thresholds.config == "75"
+        and system_alarm_thresholds.system == "75"
+        and system_alarm_thresholds.alarm == "75"
+        and system_alarm_thresholds.hipmatch == "75"
+      fail_message: Traffic, threat, config, system, alarm, and hipmatch DB thresholds must be set to 75, click link for info.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62749
       tags:
