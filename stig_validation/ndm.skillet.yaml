@@ -530,6 +530,7 @@ snippets:
         - name: capture_redundant_ntp_servers_configured
       tags:
         - PANW-NW-000098
+        - PANW-NW-000099
 
     - name: PANW-NM-000098
       label: The Palo Alto Networks security platform must compare internal information system clocks at least every 24 hours with an authoritative time server.
@@ -548,8 +549,8 @@ snippets:
       meta:
         stig: ndm
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: ntp_servers | tag_present('primary-ntp-server.ntp-server-address') and ntp_servers | tag_present('secondary-ntp-server.ntp-server-address')
+      fail_message: NGFW must have a primary and a secondary NTP server configured.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62755
       tags:
