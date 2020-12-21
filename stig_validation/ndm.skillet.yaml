@@ -279,12 +279,14 @@ snippets:
         - name: capture_password_complexity_min_uppercase
         - name: capture_password_complexity_min_lowercase
         - name: capture_password_complexity_min_numeric
+        - name: capture_password_complexity_min_special_chars
       tags:
         - PANW-NM-000053
         - PANW-NM-000054
         - PANW-NM-000055
         - PANW-NM-000056
         - PANW-NM-000057
+        - PANW-NM-000058
 
     - name: PANW-NM-000053
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce a minimum 15-character password length.
@@ -351,8 +353,8 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: password_min_special == "1"
+      fail_message: Minimum special characters must be 1.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62733
       tags:
