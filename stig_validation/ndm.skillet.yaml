@@ -165,6 +165,7 @@ snippets:
       tags:
         - PANW-NM-000024
         - PANW-NM-000042
+        - PANW-NM-000128
 
     - name: PANW-NM-000024
       label: The Palo Alto Networks security platform must generate audit records when successful/unsuccessful attempts to access privileges occur.
@@ -670,8 +671,18 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        system_syslog and valid_traffic_syslog_profile_names and valid_threat_syslog_profile_names and valid_config_syslog_profile_names
+        and (
+          'All Logs' in system_syslog_filters
+          or ( 'critical' in system_syslog_filters and 'high' in system_syslog_filters and 'medium' in system_syslog_filters and 'low' in system_syslog_filters)
+        )
+      fail_message: |
+        {% if not system_syslog %}Missing system syslog settings
+        {% elif not valid_traffic_syslog_profile_names %}Missing syslog profiles for traffic logs
+        {% elif not valid_threat_syslog_profile_names %}Missing syslog profiles for threat logs
+        {% elif not valid_config_syslog_profile_names %}Missing syslog profiles for config logs
+        {% else %}All required traffic types not accounted for in system syslog settings, click link to review.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62769
       tags:
