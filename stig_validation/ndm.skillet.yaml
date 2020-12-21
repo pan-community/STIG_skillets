@@ -312,6 +312,7 @@ snippets:
         - PANW-NM-000058
         - PANW-NM-000061
         - PANW-NM-000069
+        - PANW-NM-000117
 
     - name: PANW-NM-000053
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce a minimum 15-character password length.
@@ -640,8 +641,8 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: mgmt_disable_http != 'no' and mgmt_disable_telnet != 'no'
+      fail_message: HTTP and telnet must be disabled for system management.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62765
       tags:
