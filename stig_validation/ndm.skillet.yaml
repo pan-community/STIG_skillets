@@ -581,13 +581,22 @@ snippets:
       tags:
         - PANW-NW-000100
 
+    - name: capture_time_zone
+      cmd: parse
+      variable: config
+      outputs:
+        - name: system_time_zone
+          capture_value: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/system/timezone
+      tags:
+        - PANW-NM-000101
+
     - name: PANW-NM-000101
       label: The Palo Alto Networks security platform must record time stamps for audit records that can be mapped to Coordinated Universal Time (UTC) or Greenwich Mean Time (GMT).
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: system_time_zone == "UTC" or system_time_zone == "GMT"
+      fail_message: Configured system time zone must be either UTC or GMT
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62759
       tags:
