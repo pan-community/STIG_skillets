@@ -15,7 +15,7 @@ variables:
 
   - name: emergency_admin_account
     description: Emergency administration account  
-    type_hint: list
+    type_hint: text
     default: emergency
 
   - name: permit_http_ocsp
@@ -59,6 +59,16 @@ variables:
         value: ldap
       - key: RADIUS
         value: radius
+
+  - name: authorized_no_idle_timeout
+    description: Emergency administration account  
+    type_hint: dropdown
+    default: false
+    dd_list:
+      - key: Yes
+        value: true
+      - key: No
+        value: false
 
 snippets:
 
@@ -283,6 +293,7 @@ snippets:
         - name: capture_password_complexity_new_password_differs
         - name: capture_disable_http_telnet_for_mgmt_intf
         - name: capture_password_complexity_change_period
+        - name: capture_admin_idle_timeout
       tags:
         - PANW-NM-000053
         - PANW-NM-000054
@@ -291,7 +302,7 @@ snippets:
         - PANW-NM-000057
         - PANW-NM-000058
         - PANW-NM-000061
-        - PANW-NM-000063
+        - PANW-NM-000069
 
     - name: PANW-NM-000053
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce a minimum 15-character password length.
@@ -427,8 +438,8 @@ snippets:
       meta:
         stig: ndm
         severity: high
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: authorized_no_idle_timeout or admin_idle_timeout | int <= 10
+      fail_message: Admin idle timeout must be 10 minutes or less if no documentation is provided authorizing otherwise
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62743
       tags:
