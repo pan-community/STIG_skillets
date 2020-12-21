@@ -271,13 +271,20 @@ snippets:
       tags:
         - PANW-NW-000051
 
+    - name: capture_password_complexity_min_length
+      include: CIS_NGFW_benchmark_v90
+      include_snippets:
+        - name: capture_password_complexity_min_length
+      tags:
+        - PANW-NM-000053
+
     - name: PANW-NM-000053
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce a minimum 15-character password length.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: password_min_length == "15"
+      fail_message: Minimum password length must be set to 15
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62723
       tags:
