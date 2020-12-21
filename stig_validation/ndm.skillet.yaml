@@ -271,12 +271,16 @@ snippets:
       tags:
         - PANW-NW-000051
 
-    - name: capture_password_complexity_min_length
+    - name: capture_password_complexity
       include: CIS_NGFW_benchmark_v90
       include_snippets:
         - name: capture_password_complexity_min_length
+        - name: capture_password_complexity_reuse_limit
+        - name: capture_password_complexity_min_uppercase
       tags:
         - PANW-NM-000053
+        - PANW-NM-000054
+        - PANW-NM-000055
 
     - name: PANW-NM-000053
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce a minimum 15-character password length.
@@ -290,20 +294,13 @@ snippets:
       tags:
         - PANW-NW-000053
 
-    - name: capture_password_complexity_reuse_limit
-      include: CIS_NGFW_benchmark_v90
-      include_snippets:
-        - name: capture_password_complexity_reuse_limit
-      tags:
-        - PANW-NM-000054
-
     - name: PANW-NM-000054
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must prohibit password reuse for a minimum of five generations.
       meta:
         stig: ndm
         severity: medium
       test: password_history_count == "5"
-      fail_message: Click link for remediation instruction.
+      fail_message: Prevent password reuse limit must be 5.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62725
       tags:
@@ -314,8 +311,8 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: password_min_uppercase == "1"
+      fail_message: Minimum uppercase letters must be 1.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62727
       tags:
