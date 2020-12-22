@@ -780,6 +780,8 @@ snippets:
       outputs:
         - name: password_profiles
           capture_list: /config/mgt-config/password-profile/entry
+      tags:
+        - PANW-NW-000142
 
     - name: PANW-NM-000142
       label: The Palo Alto Networks security platform must not use Password Profiles.
@@ -805,13 +807,22 @@ snippets:
       tags:
         - PANW-NW-000143
 
+    - name: capture_log_on_high_dp_load
+      cmd: parse
+      variable: config
+      outputs:
+        - name: log_on_high_dp_load
+          capture_value: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/management/enable-log-high-dp-load
+      tags:
+        - PANW-NW-000144
+
     - name: PANW-NM-000144
       label: The Palo Alto Networks security platform must generate an audit log record when the Data Plane CPU utilization is 100%.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: log_on_high_dp_load == "yes"
+      fail_message: Enable Log on High DP Load must be checked.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62783
       tags:
