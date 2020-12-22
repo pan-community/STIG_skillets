@@ -50,6 +50,9 @@ snippets:
             ) and (
               not item | json_query('entry."profile-setting".group.member') | item_present(valid_non_default_profile_groups)
             )
+      tags:
+        - PANW-IP-000001
+        - PANW-IP-000008
 
     - name: PANW-IP-000001
       label: The Palo Alto Networks security platform must enable Antivirus, Anti-spyware, and Vulnerability Protection for all authorized traffic.
@@ -75,13 +78,44 @@ snippets:
       tags:
         - PANW-IP-000007
 
+    - name: capture_non_default_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: non_pcap_vulnerability_profiles
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry
+            [not(@name="strict") and not(@name="default")]
+          filter_items: |
+            "disable" in item | json_query('entry.rules.entry[]."packet-capture"')
+        - name: non_pcap_spyware_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/spyware/entry
+            [not(@name="strict") and not(@name="default")]
+          filter_items: |
+            "disable" in item | json_query('entry."botnet-domains".lists.entry[]."packet-capture"')
+        - name: non_pcap_virus_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
+            [not(@name="default") and not(packet-capture="yes")]/@name
+      tags:
+        - PANW-IP-000008
+
     - name: PANW-IP-000008
       label: The Palo Alto Networks security platform must capture traffic of detected/dropped malicious code.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        not invalid_interzone_non_default_profile_policies
+        and not non_pcap_spyware_profiles
+        and not non_pcap_virus_profiles
+        and not non_pcap_vulnerability_profiles
+      fail_message: |
+        {% if invalid_interzone_non_default_profile_policies %}Policies that do not have non-default profiles - {% for pol in invalid_interzone_non_default_profile_policies %}{{ pol.entry["@name"] }} {% endfor %}{% endif %}
+        {% if non_pcap_spyware_profiles %}Spyware profiles that do not have extended pcap enabled - {% for prof in non_pcap_spyware_profiles %}{{ prof.entry["@name"] }} {% endfor %}{% endif %}
+        {% if non_pcap_virus_profiles %}Anti-virus profiles that do not have pcap enabled - {% for prof in non_pcap_virus_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if non_pcap_vulnerability_profiles %}Vulnerability profiles that do not have extended pcap enabled - {% for prof in non_pcap_vulnerability_profiles %}{{ prof.entry["@name"] }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207690
       tags:
