@@ -774,13 +774,20 @@ snippets:
       tags:
         - PANW-NW-000141
 
+    - name: capture_password_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: password_profiles
+          capture_list: /config/mgt-config/password-profile/entry
+
     - name: PANW-NM-000142
       label: The Palo Alto Networks security platform must not use Password Profiles.
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not password_profiles
+      fail_message: Password profiles may not be configured, remove all password profiles.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62779
       tags:
