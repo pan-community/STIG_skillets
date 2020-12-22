@@ -1,6 +1,6 @@
 ---
 
-name: ALG STIG Validation for PAN-OS
+name: IDPS_Validation
 label: skillet generated from ALG STIG documents at stigviewer.com
 
 description: This skillet accounts ALG STIG sersions
@@ -15,13 +15,49 @@ variables:
 
 snippets:
 
+    - name: capture_non_default_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: non_default_vulnerability_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry
+            [not(@name="strict") and not(@name="default")]/@name
+        - name: non_default_spyware_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/spyware/entry
+            [not(@name="strict") and not(@name="default")]/@name
+        - name: non_default_virus_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
+            [not(@name="default")]/@name
+        - name: valid_non_default_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry
+            [ count(virus) > 0 and not(virus/member='default')
+              and count(vulnerability) > 0 and not(vulnerability/member='default') and not(vulnerability/member='strict')
+              and count(spyware) > 0 and not(spyware/member='default') and not(spyware/member='strict')
+            ]/@name
+        - name: invalid_interzone_non_default_profile_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="allow" and not(disabled="yes") and (not(to/member/text()=from/member/text()) or to/member='any' or from/member='any')
+             or count(to/member) > 1 or count(from/member) > 1]
+          filter_items: |
+            ( not item | json_query('entry."profile-setting".profiles.virus.member') | item_present(non_default_virus_profiles)
+              or not item | json_query('entry."profile-setting".profiles.vulnerability.member') | item_present(non_default_vulnerability_profiles)
+              or not item | json_query('entry."profile-setting".profiles.spyware.member') | item_present(non_default_spyware_profiles)
+            ) and (
+              not item | json_query('entry."profile-setting".group.member') | item_present(valid_non_default_profile_groups)
+            )
+
     - name: PANW-IP-000001
       label: The Palo Alto Networks security platform must enable Antivirus, Anti-spyware, and Vulnerability Protection for all authorized traffic.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_interzone_non_default_profile_policies
+      fail_message: Policies that do not have non-default profiles - {% for pol in invalid_interzone_non_default_profile_policies %}{{ pol.entry["@name"] }} {% endfor %} 
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207688
       tags:

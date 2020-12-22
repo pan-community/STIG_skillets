@@ -1,6 +1,6 @@
 ---
 
-name: ALG STIG Validation for PAN-OS
+name: ALG_Validation
 label: skillet generated from ALG STIG documents at stigviewer.com
 
 description: This skillet accounts ALG STIG sersions
