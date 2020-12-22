@@ -700,13 +700,63 @@ snippets:
       tags:
         - PANW-NW-000131
 
+    - name: capture_centralized_admin_accounts
+      cmd: parse
+      variable: config
+      outputs:
+        # Kerberos
+        - name: kerberos_authentication_profiles
+          capture_list: /config/shared/authentication-profile/entry[single-sign-on/kerberos-keytab]/@name
+        - name: kerberos_accounts
+          capture_list: /config/mgt-config/users/entry[not(@name="{{ emergency_admin_account }}")]
+          filter_items: item.entry["authentication-profile"] in kerberos_authentication_profiles
+        - name: non_kerberos_accounts
+          capture_list: /config/mgt-config/users/entry[not(@name="{{ emergency_admin_account }}")]
+          filter_items: item.entry["authentication-profile"] not in kerberos_authentication_profiles
+        # LDAP
+        - name: ldap_authentication_profiles
+          capture_list: /config/shared/authentication-profile/entry[method/ldap/server-profile]/@name
+        - name: ldap_accounts
+          capture_list: /config/mgt-config/users/entry[not(@name="{{ emergency_admin_account }}")]
+          filter_items: item.entry["authentication-profile"] in ldap_authentication_profiles
+        - name: non_ldap_accounts
+          capture_list: /config/mgt-config/users/entry[not(@name="{{ emergency_admin_account }}")]
+          filter_items: item.entry["authentication-profile"] not in ldap_authentication_profiles
+        # RADIUS
+        - name: radius_authentication_profiles
+          capture_list: /config/shared/authentication-profile/entry[method/radius/server-profile]/@name
+        - name: radius_accounts
+          capture_list: /config/mgt-config/users/entry[not(@name="{{ emergency_admin_account }}")]
+          filter_items: item.entry["authentication-profile"] in radius_authentication_profiles
+        - name: non_radius_accounts
+          capture_list: /config/mgt-config/users/entry[not(@name="{{ emergency_admin_account }}")]
+          filter_items: item.entry["authentication-profile"] not in radius_authentication_profiles
+      tags:
+        - PANW-NW-000136
+
     - name: PANW-NM-000136
       label: The Palo Alto Networks security platform must employ centrally managed authentication server(s).
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        ( centralized_authentication == "kerberos" and kerberos_accounts and not non_kerberos_accounts )
+        or ( centralized_authentication == "ldap" and ldap_accounts and not non_ldap_accounts )
+        or ( centralized_authentication == "radius" and radius_accounts and not non_radius_accounts )
+      fail_message: |
+        {% if centralized_authentication == "kerberos"%}
+          {% if not kerberos_accounts %}Kerberos selected but found no kerberos admin users{% else %}
+            Kerberos selected but found non kerberos admin accounts - {% for account in non_kerberos_accounts %}{{ account.entry["@name"] }} {% endfor %}
+          {% endif %}
+        {% elif centralized_authentication == "ldap"%}
+          {% if not ldap_accounts %}LDAP selected but found no LDAP admin users{% else %}
+            LDAP selected but found non LDAP admin accounts - {% for account in non_ldap_accounts %}{{ account.entry["@name"] }} {% endfor %}
+          {% endif %}
+        {% elif centralized_authentication == "radius"%}
+          {% if not radius_accounts %}RADIUS selected but found no RADIUS admin users{% else %}
+            RADIUS selected but found non RADIUS admin accounts - {% for account in non_radius_accounts %}{{ account.entry["@name"] }} {% endfor %}
+          {% endif %}
+        {% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62773
       tags:
