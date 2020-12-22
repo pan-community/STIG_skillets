@@ -546,6 +546,7 @@ snippets:
         - PANW-NW-000098
         - PANW-NW-000099
         - PANW-NW-000100
+        - PANW-NW-000145
 
     - name: PANW-NM-000098
       label: The Palo Alto Networks security platform must compare internal information system clocks at least every 24 hours with an authoritative time server.
@@ -833,8 +834,16 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |
+        (
+          ntp_servers["ntp-servers"]["primary-ntp-server"]["authentication-type"] | tag_present("autokey")
+          or ntp_servers["ntp-servers"]["primary-ntp-server"]["authentication-type"] | tag_present("symmetric-key")
+        )
+        and (
+          ntp_servers["ntp-servers"]["secondary-ntp-server"]["authentication-type"] | tag_present("autokey")
+          or ntp_servers["ntp-servers"]["secondary-ntp-server"]["authentication-type"] | tag_present("symmetric-key")
+        )
+      fail_message: Both primary and secondary NTP servers require either Autokey or Symmetric Key authentication to be configured.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62785
       tags:
