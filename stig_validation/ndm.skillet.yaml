@@ -114,8 +114,9 @@ snippets:
       meta:
         stig: ndm
         severity: low
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: "Verify that displayed login banner is concistent with STIG"
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62707
       tags:
@@ -126,8 +127,9 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Verify appropriate administrator accounts as per the STIG
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62709
       tags:
@@ -268,8 +270,9 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62719
       tags:
@@ -464,8 +467,9 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Not implemented
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62745
       tags:
@@ -613,8 +617,9 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Certificates mus tbe manually verified as per the STIG
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62761
       tags:
@@ -694,8 +699,9 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Not implemented
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62771
       tags:
@@ -768,8 +774,9 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Certificates mus tbe manually verified as per the STIG
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62777
       tags:
@@ -801,8 +808,9 @@ snippets:
       meta:
         stig: ndm
         severity: high
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Manually validate default login credentials do not work
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62781
       tags:
