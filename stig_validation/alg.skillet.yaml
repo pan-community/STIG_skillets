@@ -404,8 +404,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Has to be tested and merged in.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228842
 
@@ -544,8 +545,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228847
       tags:
@@ -613,8 +615,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228851
     
@@ -653,8 +656,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Has to be tested and merged
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228854
       tags:
@@ -665,8 +669,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Has to be tested and merged
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228855
       tags:
@@ -805,8 +810,9 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Approved certificates have to be manually verified.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228859
     
