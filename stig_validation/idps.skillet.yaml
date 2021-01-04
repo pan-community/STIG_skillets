@@ -145,13 +145,23 @@ snippets:
       tags:
         - PANW-IP-000018
 
+    - name: capture_av_profile_in_policies
+      include: shared_snippets
+      include_snippets:
+        - name: capture_av_profile_in_policies
+      tags:
+        - PANW-IP-000020
+
     - name: PANW-IP-000020
       label: The Palo Alto Networks security platform must detect and deny any prohibited mobile or otherwise malicious code at the enclave boundary.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
+      fail_message: |
+        {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_av_profile_groups %}Invalid profile groups - {% for prof in invalid_av_profile_groups %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207693
       tags:

@@ -552,44 +552,9 @@ snippets:
         - PANW-AG-000060
 
     - name: capture_av_profile_in_policies
-      cmd: parse
-      variable: config
-      outputs:
-        - name: valid_av_profiles
-          capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
-            [
-              (decoder/entry[@name='smtp']/action='drop' or decoder/entry[@name='smtp']/action='reset-both')
-              and (decoder/entry[@name='smtp']/wildfire-action='drop' or decoder/entry[@name='smtp']/wildfire-action='reset-both')
-              and (decoder/entry[@name='pop3']/action='drop' or decoder/entry[@name='pop3']/action='reset-both')
-              and (decoder/entry[@name='pop3']/wildfire-action='drop' or decoder/entry[@name='pop3']/wildfire-action='reset-both')
-              and (decoder/entry[@name='imap']/action='drop' or decoder/entry[@name='imap']/action='reset-both')
-              and (decoder/entry[@name='imap']/wildfire-action='drop' or decoder/entry[@name='imap']/wildfire-action='reset-both')
-            ]/@name
-        - name: invalid_av_profiles
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry/@name
-          filter_items: item not in valid_av_profiles
-        - name: valid_av_profile_groups
-          capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
-            entry[count(virus) > 0 and not(virus/member='default')]/@name
-        - name: invalid_av_profile_groups
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry/@name
-          filter_items: item not in valid_av_profile_groups
-        # At this point we can assume all profiles and profile-groups have vaild antivirus settings
-        - name: invalid_security_policies_av
-          capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
-            [
-              action='allow'
-              and (
-                count(profile-setting/group/member) = 0
-                and (
-                  count(profile-setting/profiles/virus/member) = 0
-                  or profile-setting/profiles/virus/member='default'
-                )
-              ) 
-            ]/@name
+      include: shared_snippets
+      include_snippets:
+        - name: capture_av_profile_in_policies
       tags:
         - PANW-AG-000062
         - PANW-AG-000063
