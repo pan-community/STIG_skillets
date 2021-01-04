@@ -195,13 +195,20 @@ snippets:
       tags:
         - PANW-IP-000026
 
+    - name: capture_virus_alerting
+      include: shared_snippets
+      include_snippets:
+        - name: capture_virus_alerting
+      tags:
+        - PANW-IP-000028
+
     - name: PANW-IP-000028
       label: The Palo Alto Networks security platform must send an immediate (within seconds) alert to, at a minimum, the SA when malicious code is detected.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not security_policies_with_virus_no_email_names
+      fail_message: AV policies that do not have email logging - {% for pol in security_policies_with_virus_no_email_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207696
       tags:

@@ -588,34 +588,14 @@ snippets:
         {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228849
-    
+
     - name: capture_virus_alerting
-      cmd: parse
-      variable: config
-      outputs:
-        - name: device_server_profile_email
-          capture_list: /config/shared/log-settings/email/entry/@name
-        - name: log_profiles_with_email 
-          capture_list: | 
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
-            [count(match-list/entry/send-email/member) > 0]/@name
-        - name: security_policies_with_virus_no_email
-          capture_list: |
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
-            [
-              action='allow'
-              and not(disabled="yes")
-              and (
-                count(profile-seting/profile/virus/member) > 0
-                or count(profile-setting/group/member) > 0
-              )
-            ]
-          filter_items: item | element_value('log-setting') not in log_profiles_with_email 
-        - name: security_policies_with_virus_no_email_names
-          capture_expression: security_policies_with_virus_no_email | map(attribute="entry.@name") | list 
+      include: shared_snippets
+      include_snippets:
+        - name: capture_virus_alerting
       tags:
         - PANW-AG-000064
-
+    
     - name: PANW-AG-000064
       label: The Palo Alto Networks security platform must send an immediate (within seconds) alert to the system administrator, at a minimum, in response to malicious code detection.
       meta:
