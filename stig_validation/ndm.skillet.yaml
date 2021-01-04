@@ -3,7 +3,7 @@
 name: NDM_Validation
 label: skillet generated from NDM STIG documents at stigviewer.com
 
-description: This skillet accounts NDM STIG sersions
+description: This skillet accounts NDM STIG versions
 
 type: pan_validation
 labels:

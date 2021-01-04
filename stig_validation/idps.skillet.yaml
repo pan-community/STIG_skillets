@@ -1,9 +1,9 @@
 ---
 
 name: IDPS_Validation
-label: skillet generated from ALG STIG documents at stigviewer.com
+label: skillet generated from IDPS STIG documents at stigviewer.com
 
-description: This skillet accounts ALG STIG sersions
+description: This skillet accounts for IDPS STIG versions
 
 type: pan_validation
 labels:
