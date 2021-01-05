@@ -257,13 +257,22 @@ snippets:
       tags:
         - PANW-IP-000031
 
+    - name: capture_predefined_db_applications
+      include: shared_snippets
+      include_snippets:
+        - name: capture_predefined_db_applications
+        - name: capture_vulnerability_profiles
+        - name: capture_invalid_db_vulnerability_policies
+      tags:
+        - PANW-IP-000032
+
     - name: PANW-IP-000032
       label: To protect against unauthorized data mining, the Palo Alto Networks security platform must detect and prevent SQL and other code injection attacks launched against data storage objects, including, at a minimum, databases, database records, queries, and fields.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_db_vulnerability_policies_names
+      fail_message: DB policies with invalid vulnerability profiles - {% for pol in invalid_db_vulnerability_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207700
       tags:
