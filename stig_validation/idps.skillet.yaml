@@ -238,14 +238,21 @@ snippets:
       tags:
         - PANW-IP-000030
 
+    - name: capture_icmp_deny_policy
+      include: shared_snippets
+      include_snippets:
+        - name: capture_icmp_deny_policy
+      tags:
+        - PANW-IP-000031
+
     - name: PANW-IP-000031
       label: The Palo Alto Networks security platform must block malicious ICMP packets.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
+      test: icmp_deny_policy
+      fail_message: An explicit deny policy could not be found, click link for requirements.
+      pass_message: Identified policy - {% for pol in icmp_deny_policy %}{{ pol.entry["@name"] }} {% endfor %}
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207699
       tags:
         - PANW-IP-000031

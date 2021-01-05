@@ -87,3 +87,16 @@ snippets:
           filter_items: item | element_value('log-setting') not in log_profiles_with_email 
         - name: security_policies_with_virus_no_email_names
           capture_expression: security_policies_with_virus_no_email | map(attribute="entry.@name") | list 
+
+    - name: capture_icmp_deny_policy
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_deny_policy
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and not(disabled="yes") and source/member="any" and destination/member="any"
+            and application/member="icmp" and application/member="ipv6-icmp" and application/member="traceroute"]
+          filter_items: |
+             untrusted_zones | listify | items_present(item.entry.from.member) or "any" in item.entry.from.member
+             and trusted_zones | listify | items_present(item.entry.to.member) or "any" in item.entry.to.member

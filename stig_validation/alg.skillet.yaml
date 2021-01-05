@@ -1190,17 +1190,9 @@ snippets:
         - PANW-AG-000122
 
     - name: capture_icmp_deny_policy
-      cmd: parse
-      variable: config
-      outputs:
-        - name: icmp_deny_policy
-          capture_list: |
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
-            [action="deny" and not(disabled="yes") and source/member="any" and destination/member="any"
-            and application/member="icmp" and application/member="ipv6-icmp" and application/member="traceroute"]
-          filter_items: |
-             untrusted_zones | listify | items_present(item.entry.from.member) or "any" in item.entry.from.member
-             and trusted_zones | listify | items_present(item.entry.to.member) or "any" in item.entry.to.member
+      include: shared_snippets
+      include_snippets:
+        - name: capture_icmp_deny_policy
       tags:
         - PANW-AG-000127
 
