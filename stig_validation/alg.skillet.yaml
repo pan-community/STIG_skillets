@@ -727,8 +727,8 @@ snippets:
               or "any" in item.entry.application.member
             )
             and (
-              item | json_query('entry."profile-setting".group.member') not in valid_vulnerability_profile_groups
-              and item | json_query('entry."profile-setting".profiles.vulnerability.member') not in valid_vulnerability_profiles
+              item | json_query('entry."profile-setting".group.member[0]') not in valid_vulnerability_profile_groups
+              and item | json_query('entry."profile-setting".profiles.vulnerability.member[0]') not in valid_vulnerability_profiles
             )
         - name: invalid_vulnerability_app_policies_names
           capture_expression: invalid_vulnerability_app_policies | map(attribute="entry.@name") | list
