@@ -278,13 +278,20 @@ snippets:
       tags:
         - PANW-IP-000032
 
+    - name: capture_vulnerability_protected_apps
+      include: shared_snippets
+      include_snippets:
+        - name: capture_vulnerability_protected_apps
+      tags:
+        - PANW-IP-000033
+
     - name: PANW-IP-000033
       label: To protect against unauthorized data mining, the Palo Alto Networks security platform must detect and prevent code injection attacks launched against application objects including, at a minimum, application URLs and application code.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_vulnerability_app_policies_names
+      fail_message: App policies with invalid vulnerability profile - {% for pol in invalid_vulnerability_app_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207701
       tags:
