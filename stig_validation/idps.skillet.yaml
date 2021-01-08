@@ -18,6 +18,23 @@ variables:
     type_hint: list
     default: ethernet1/1
 
+  - name: trusted_zones
+    description: Security zones conntaining trusted hosts (Includes DMZ)
+    type_hint: list
+    default: trust
+
+  - name: alert_mechanism
+    description: How the ISSO and ISSM receive alerts
+    type_hint: dropdown
+    default: snmptrap
+    dd_list:
+      - key: snmptrap
+        value: send-snmptrap
+      - key: syslog
+        value: send-syslog
+      - key: email
+        value: send-email
+
 snippets:
 
     - name: capture_non_default_profiles
@@ -453,13 +470,20 @@ snippets:
       tags:
         - PANW-IP-000052
 
+    - name: capture_alert_mechanisms
+      include: shared_snippets
+      include_snippets:
+        - name: capture_alert_mechanisms
+      tags:
+        - PANW-IP-000053
+
     - name: PANW-IP-000053
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized privileged or non-privileged access is detected.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_alert_mechanisms_policies_names
+      fail_message: Policies without valid alerting - {% for pol in invalid_alert_mechanisms_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207713
       tags:

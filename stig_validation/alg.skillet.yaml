@@ -1028,30 +1028,9 @@ snippets:
         - PANW-AG-000118
 
     - name: capture_alert_mechanisms
-      cmd: parse
-      variable: config
-      outputs:
-        - name: valid_alert_server_profiles
-          capture_list: |
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
-            [match-list/entry/{{alert_mechanism}}]/@name
-        - name: invalid_alert_mechanisms_policies
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
-          filter_items: |
-            item | json_query('entry.to.member | [@][]') | item_present(trusted_zones | listify + ["any"])
-            and (
-              not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
-              or (
-                not item | json_query('entry."profile-setting".group.member')
-                and (
-                  not item | json_query('entry."profile-setting".profiles.virus.member')
-                  or not item | json_query('entry."profile-setting".profiles.vulnerability.member')
-                  or not item | json_query('entry."profile-setting".profiles.spyware.member')
-                )
-              )
-            )
-        - name: invalid_alert_mechanisms_policies_names
-          capture_expression: invalid_alert_mechanisms_policies | map(attribute="entry.@name") | list
+      include: shared_snippets
+      include_snippets:
+        - name: capture_alert_mechanisms
       tags:
         - PANW-AG-000119
         - PANW-AG-000120
