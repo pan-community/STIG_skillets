@@ -211,3 +211,13 @@ snippets:
             )
         - name: invalid_alert_mechanisms_policies_names
           capture_expression: invalid_alert_mechanisms_policies | map(attribute="entry.@name") | list
+
+    - name: capture_invalid_alert_dos_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_alert_dos_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes")]
+          filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
+        - name: invalid_alert_dos_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]

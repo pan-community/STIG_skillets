@@ -476,6 +476,7 @@ snippets:
         - name: capture_alert_mechanisms
       tags:
         - PANW-IP-000053
+        - PANW-IP-000055
 
     - name: PANW-IP-000053
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized privileged or non-privileged access is detected.
@@ -489,13 +490,22 @@ snippets:
       tags:
         - PANW-IP-000053
 
+    - name: capture_invalid_alert_dos_policies
+      include: shared_snippets
+      include_snippets:
+        - name: capture_invalid_alert_dos_policies
+      tags:
+        - PANW-IP-000055
+
     - name: PANW-IP-000055
       label: The Palo Alto Networks security platform must send an alert to, at a minimum, the ISSO and ISSM when denial of service incidents are detected.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: valid_alert_dos_policies and not invalid_alert_dos_policies
+      fail_message: |
+        {% if not valid_alert_dos_policies %}No valid Dos Protection policies setup for alerts {% endif %}
+        {% if invalid_alert_dos_policies %}DoS Protection policies with invalid log forwarding - {% for pol in invalid_alert_dos_policies %}{{ pol.entry["@name"] }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207714
       tags:

@@ -1034,6 +1034,7 @@ snippets:
       tags:
         - PANW-AG-000119
         - PANW-AG-000120
+        - PANW-AG-000121
         - PANW-AG-000122
 
     - name: PANW-AG-000119
@@ -1061,14 +1062,9 @@ snippets:
         - PANW-AG-000120
 
     - name: capture_invalid_alert_dos_policies
-      cmd: parse
-      variable: config
-      outputs:
-        - name: valid_alert_dos_policies
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes")]
-          filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
-        - name: invalid_alert_dos_policies
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]
+      include: shared_snippets
+      include_snippets:
+        - name: capture_invalid_alert_dos_policies
       tags:
         - PANW-AG-000121
 
