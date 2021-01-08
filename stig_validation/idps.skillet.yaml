@@ -511,13 +511,20 @@ snippets:
       tags:
         - PANW-IP-000055
 
+    - name: capture_interzone_intersubnet_alerts
+      include: shared_snippets
+      include_snippets:
+        - name: capture_interzone_intersubnet_alerts
+      tags:
+        - PANW-IP-000056
+
     - name: PANW-IP-000056
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when new active propagation of malware infecting DoD systems or malicious code adversely affecting the operations and/or security of DoD systems is detected.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not invalid_intersubnet_alert_policies_names
+      fail_message: Intersubnet policies with invalid alerting - {% for pol in invalid_intersubnet_alert_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207715
       tags:

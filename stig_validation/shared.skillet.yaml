@@ -221,3 +221,19 @@ snippets:
           filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
         - name: invalid_alert_dos_policies
           capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]
+
+    - name: capture_interzone_intersubnet_alerts
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_intersubnet_alert_policies
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not(disabled="yes")]
+          filter_items: |
+            not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
+            or (
+              not item | json_query('entry."profile-setting".group.member')
+              and not item | json_query('entry."profile-setting".profiles.virus.member')
+            )
+        - name: invalid_intersubnet_alert_policies_names
+          capture_expression: invalid_intersubnet_alert_policies | map(attribute="entry.@name") | list
