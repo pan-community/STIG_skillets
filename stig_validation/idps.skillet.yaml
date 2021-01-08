@@ -408,9 +408,10 @@ snippets:
       meta:
         stig: idps
         severity: medium
-      test: false
+        action_required: true
+      test: true
       fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
+      pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207709
       tags:
         - PANW-IP-000049
@@ -420,9 +421,10 @@ snippets:
       meta:
         stig: idps
         severity: medium
-      test: false
+        action_required: true
+      test: true
       fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
+      pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207710
       tags:
         - PANW-IP-000050

@@ -994,6 +994,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        action_required: 'true'
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -1006,6 +1007,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        action_required: 'true'
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
