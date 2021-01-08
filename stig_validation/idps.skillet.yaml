@@ -13,6 +13,11 @@ labels:
 
 variables:
 
+  - name: netflow_interfaces
+    description: Interfaces collecting netflow information
+    type_hint: list
+    default: ethernet1/1
+
 snippets:
 
     - name: capture_non_default_profiles
@@ -343,13 +348,20 @@ snippets:
       tags:
         - PANW-IP-000043
 
+    - name: capture_netflow_profiles
+      include: shared_snippets
+      include_snippets:
+        - name: capture_netflow_profiles
+      tags:
+        - PANW-IP-000045
+
     - name: PANW-IP-000045
       label: Palo Alto Networks security platform components, including sensors, event databases, and management consoles must integrate with a network-wide monitoring capability.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not interfaces_missing_netflow
+      fail_message: Interfaces missing netflow - {% for int in interfaces_missing_netflow %}{{ int }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207705
       tags:
