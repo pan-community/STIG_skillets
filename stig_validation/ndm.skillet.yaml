@@ -114,7 +114,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: "Verify that displayed login banner is concistent with STIG"
       pass_message: Validation successful
@@ -127,7 +127,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Verify appropriate administrator accounts as per the STIG
       pass_message: Validation successful
@@ -270,7 +270,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
       pass_message: Validation successful
@@ -467,7 +467,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Not implemented
       pass_message: Validation successful
@@ -617,7 +617,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Certificates mus tbe manually verified as per the STIG
       pass_message: Validation successful
@@ -699,7 +699,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Not implemented
       pass_message: Validation successful
@@ -774,7 +774,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Certificates mus tbe manually verified as per the STIG
       pass_message: Validation successful

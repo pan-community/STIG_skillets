@@ -404,7 +404,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Has to be tested and merged in.
       pass_message: Validation successful
@@ -545,7 +545,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -615,7 +615,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -656,7 +656,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Has to be tested and merged
       pass_message: Validation successful
@@ -669,7 +669,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Has to be tested and merged
       pass_message: Validation successful
@@ -762,7 +762,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Approved certificates have to be manually verified.
       pass_message: Validation successful
@@ -994,7 +994,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -1007,7 +1007,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
