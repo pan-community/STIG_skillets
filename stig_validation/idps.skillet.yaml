@@ -325,6 +325,7 @@ snippets:
         - name: capture_logging_settings
       tags:
         - PANW-IP-000039
+        - PANW-IP-000058
 
     - name: PANW-IP-000039
       label: The Palo Alto Networks security platform must off-load log records to a centralized log server.
@@ -535,8 +536,11 @@ snippets:
       meta:
         stig: idps
         severity: low
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
+      fail_message: |
+        {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
+        {% if not valid_syslog_log_forwarding_profile %}No valid syslog log forwarding profiles. {% endif %}
+        {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207716
       tags:
