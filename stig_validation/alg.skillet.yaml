@@ -105,7 +105,7 @@ variables:
       - key: email
         value: send-email
 
-  - name: dos_strategy
+  - name: protection_strategy
     description: DoS Prevention Strategy
     type_hint: dropdown
     default: zone
@@ -116,7 +116,7 @@ variables:
         value: dos
 
 snippets:
-    
+
     - name: PANW-AG-000015-capture
       cmd: parse
       variable: config
@@ -306,7 +306,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      test: not capture_dns_proxy_names 
+      test: not capture_dns_proxy_names
       fail_message: DNS proxy must not be configured
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228839
@@ -404,11 +404,13 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: Has to be tested and merged in.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228842
+      tags:
+        - PANW-AG-000047
 
     - name: capture_spyware_profile
       cmd: parse
@@ -545,7 +547,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -590,6 +592,8 @@ snippets:
         {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228849
+      tags:
+        - PANW-AG-000063
 
     - name: capture_virus_alerting
       include: shared_snippets
@@ -597,7 +601,7 @@ snippets:
         - name: capture_virus_alerting
       tags:
         - PANW-AG-000064
-    
+
     - name: PANW-AG-000064
       label: The Palo Alto Networks security platform must send an immediate (within seconds) alert to the system administrator, at a minimum, in response to malicious code detection.
       meta:
@@ -615,12 +619,14 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228851
-    
+      tags:
+        PANW-AG-000065
+
     - name: PANW-AG-000073
       label: The Palo Alto Networks security platform must deny or restrict detected prohibited mobile code.
       meta:
@@ -656,7 +662,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: Has to be tested and merged
       pass_message: Validation successful
@@ -669,7 +675,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: Has to be tested and merged
       pass_message: Validation successful
@@ -762,12 +768,14 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: Approved certificates have to be manually verified.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228859
-    
+      tags:
+        - PANW-AG-000101
+
     - name: PANW-AG-000102-capture
       cmd: parse
       variable: config
@@ -812,7 +820,7 @@ snippets:
           and internal_zone in zones_with_intended_dos_zone_protection_profile
           and dmz_zone in zones_with_intended_dos_zone_protection_profile
           )
-      when: dos_strategy == "zone"
+      when: protection_strategy == "zone"
 
     - cmd: validate
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62601
@@ -834,7 +842,7 @@ snippets:
           and internal_zone_with_intended_dos_protection_policy | length
           and dmz_zone_with_intended_dos_protection_policy | length
           )
-      when: dos_strategy == "dos"
+      when: protection_strategy == "dos"
 
     - name: capture_vulnerability_profile_rules
       cmd: parse
@@ -1020,7 +1028,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      test: true 
+      test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228870
@@ -1181,7 +1189,7 @@ snippets:
             ]
           filter_items: |
             item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
-            and item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+            and item | element_value('profile-setting.group.member') not in valid_av_profile_groups
         - name: smtp_policies_no_av_names
           capture_expression: smtp_policies_no_av | map(attribute="entry.@name") | list
       tags:
@@ -1212,7 +1220,7 @@ snippets:
               item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
               or item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
             ) and (
-              item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+              item | element_value('profile-setting.group.member') not in valid_av_profile_groups
               or item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
             )
         - name: invalid_ftp_policies_names
@@ -1247,7 +1255,7 @@ snippets:
               item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
               or item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
             ) and (
-              item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+              item | element_value('profile-setting.group.member') not in valid_av_profile_groups
               or item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
             )
         - name: invalid_http_policies_names
