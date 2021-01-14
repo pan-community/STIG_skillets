@@ -1,0 +1,38 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  collections:
+    - paloaltonetworks.panos
+    - pan_commnunity.skillet
+
+  vars:
+    provider:
+      ip_address: '{{ ip_address }}'
+      username: '{{ username }}'
+      password: '{{ password }}'
+
+  tasks:
+    - name: Include User Variables
+      include_vars: vars/main.yml
+
+    - set_fact:
+        skillet_filter:
+          __filter_snippets:
+            include_by_tag: PANW-AG-000060
+
+    - set_fact:
+        skillet_vars:        '{{ skillet_vars | combine(skillet_filter) }}'
+
+    - name: execute stig validation skillet
+      pan_community.skillet.panos_validate:
+        skillet_path: '{{ playbook_dir }}/../stig_validation'
+        skillet: 'ALG_Validation'
+        provider: '{{ provider }}'
+        vars: '{{ skillet_vars }}'
+      register: skillet_output
+
+    - name: validation output
+      debug:
+        msg:
+          - 'Validation Outut: {{ (skillet_output.stdout | from_json).pan_validation["PANW-AG-000060"]["output_message"] }}'
