@@ -3,7 +3,6 @@
   gather_facts: false
 
   collections:
-    - paloaltonetworks.panos
     - pan_commnunity.skillet
 
   vars:
