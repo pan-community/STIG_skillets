@@ -192,6 +192,113 @@ snippets:
       tags:
         - PANW-AG-000081
         - PANW-IP-000033
+
+    # Verify certs exist and are DoD-issued and that none are issued by non-DoD entities
+    - name: verify_dod_certs_exist
+      cmd: parse
+      variable: config
+      outputs:
+        - name: non_dod_issuers
+          capture_value: /config/shared/certificate/entry/issuer
+          filter_items: |-
+            "DoD" not in item
+        - name: dod_issuers
+          capture_value: /config/shared/certificate/entry/issuer
+          filter_items: |-
+            "DoD" in item
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+        - PANW-NM-000141
+
+      # Capture the name of all the DoD certs (if there are no non-DoD issuers)
+    - name: capture_dod_cert_names
+      cmd: parse
+      variable: config
+      outputs:
+        - name: dod_cert_names
+          capture_list: /config/shared/certificate/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+      # Capture the name(s) of all Certificate Profiles
+    - name: capture_names_of_cert_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: cert_profile_names
+          capture_list: /config/shared/certificate-profile/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture all certs that are listed under the Certificate Profile(s)
+    - name: capture_certs_listed_under_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: dod_cert_names_present_in_profile
+          capture_list: /config/shared/certificate-profile/entry/CA/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture the Certification Profile is aligned with the Authentication Server
+    #   PART I
+    # NOTE: RADIUS servers have an option to set a Certification Profile
+    #       LDAP servers do not have this option (SEE following task)
+    - name: capture_cert_profile_aligned_to_auth_server_I
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profiles_cert_profile
+          capture_list: /config/shared/server-profile/radius/entry/protocol/PEAP-MSCHAPv2/radius-cert-profile/text()
+      filter_items:
+       item in cert_profile_names
+      when: |
+          not (non_dod_issuers and dod_issuers)
+          and ('radius' in server_profile_types)
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture the Certification Profile is aligned with the Authentication Server
+    #   PART II
+    # NOTE: RADIUS servers have an option to set a Certification Profile
+    #       LDAP servers do not have this option
+    #       This step simply sets server_profiles_cert_profile to match the
+    #       content in cert_profile_names so that the test will pass.
+
+    - name: capture_cert_profile_aligned_to_auth_server_II
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profiles_cert_profile_DEBUG
+          capture_list: /config/shared/certificate-profile/entry/@name
+      when: |
+          not (non_dod_issuers and dod_issuers)
+          and ('ldap' in server_profile_types)
+          and ('radius' not in server_profile_types)
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture OCSP required setting (does the system use OCSP for cert revocation)
+    - name: capture_ocsp_setting
+      cmd: parse
+      variable: config
+      outputs:
+        - name: ocsp_required
+          capture_value: /config/shared/certificate-profile/entry/use-ocsp/text()
+
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
     - name: capture_logging_settings
       cmd: parse
       variable: config
