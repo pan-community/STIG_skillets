@@ -612,18 +612,68 @@ snippets:
       tags:
         - PANW-NM-000101
 
+    - name: verify_dod_certs_exist
+      include: shared_snippets
+      include_snippets:
+        - name: verify_dod_certs_exist
+      tags:
+        - PANW-NM-000110
+
+      # Capture server profile(s) (ie. RADIUS, LDAP, etc.)
+    - name: capture_server_profile_types
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profile_types
+          capture_value: /config/shared/server-profile/*
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-NM-000110
+
+    - name: confirm_settings_and_profile_alignment_with_auth_server
+      include: shared_snippets
+      include_snippets:
+        - name: capture_dod_cert_names
+        - name: capture_names_of_cert_profiles
+        - name: capture_certs_listed_under_profiles
+        - name: capture_cert_profile_aligned_to_auth_server_I
+        - name: capture_cert_profile_aligned_to_auth_server_II
+        - name: capture_ocsp_setting
+
+      tags:
+        - PANW-NM-000110
+
     - name: PANW-NM-000110
       label: The Palo Alto Networks security platform must accept and verify Personal Identity Verification (PIV) credentials.
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
-      test: false
-      fail_message: Certificates mus tbe manually verified as per the STIG
+      when: TLS_gw
+      test: |
+        ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
+        and (not non_dod_issuers and dod_issuers)
+        and ({{ server_profiles_cert_profile | sort }} == {{ cert_profile_names | sort }} )
+        and (ocsp_required == 'yes')
+      fail_message: Click link for remediation instruction.
       pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62761
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62777
       tags:
         - PANW-NM-000110
+
+
+
+    - name: PANW-NM-000141
+      label: The Palo Alto Networks security platform must use DoD-approved PKI rather than proprietary or self-signed device certificates.
+      meta:
+        stig: ndm
+        severity: medium
+        action_required: 'true'
+      test: not non_dod_issuers and dod_issuers
+      fail_message: Certificates must be manually verified as per the STIG
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62777
+      tags:
+        - PANW-NM-000141
 
     - name: capture_temporary_password
       cmd: parse
@@ -768,19 +818,6 @@ snippets:
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62773
       tags:
         - PANW-NM-000136
-
-    - name: PANW-NM-000141
-      label: The Palo Alto Networks security platform must use DoD-approved PKI rather than proprietary or self-signed device certificates.
-      meta:
-        stig: ndm
-        severity: medium
-        action_required: 'true'
-      test: false
-      fail_message: Certificates mus tbe manually verified as per the STIG
-      pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62777
-      tags:
-        - PANW-NM-000141
 
     - name: capture_password_profiles
       cmd: parse

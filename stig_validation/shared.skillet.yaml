@@ -22,6 +22,8 @@ snippets:
       outputs:
         - name: operational_mode
           capture_value: /system/operational-mode/text()
+      tags:
+        - PANW-NM-000051
 
     - name: capture_av_profile_in_policies
       cmd: parse
@@ -62,6 +64,13 @@ snippets:
                 )
               ) 
             ]/@name
+      tags:
+        - PANW-AG-000062
+        - PANW-AG-000063
+        - PANW-AG-000073
+        - PANW-AG-000074
+        - PANW-IP-000020
+        - PANW-IP-000026
 
     - name: capture_virus_alerting
       cmd: parse
@@ -69,8 +78,8 @@ snippets:
       outputs:
         - name: device_server_profile_email
           capture_list: /config/shared/log-settings/email/entry/@name
-        - name: log_profiles_with_email 
-          capture_list: | 
+        - name: log_profiles_with_email
+          capture_list: |
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
             [count(match-list/entry/send-email/member) > 0]/@name
         - name: security_policies_with_virus_no_email
@@ -84,9 +93,12 @@ snippets:
                 or count(profile-setting/group/member) > 0
               )
             ]
-          filter_items: item | element_value('log-setting') not in log_profiles_with_email 
+          filter_items: item | element_value('log-setting') not in log_profiles_with_email
         - name: security_policies_with_virus_no_email_names
-          capture_expression: security_policies_with_virus_no_email | map(attribute="entry.@name") | list 
+          capture_expression: security_policies_with_virus_no_email | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000064
+        - PANW-IP-000028
 
     - name: capture_icmp_deny_policy
       cmd: parse
@@ -100,6 +112,9 @@ snippets:
           filter_items: |
              untrusted_zones | listify | items_present(item.entry.from.member) or "any" in item.entry.from.member
              and trusted_zones | listify | items_present(item.entry.to.member) or "any" in item.entry.to.member
+      tags:
+        - PANW-AG-000127
+        - PANW-IP-000031
 
     - name: capture_predefined_db_applications
       cmd: op
@@ -108,6 +123,9 @@ snippets:
       outputs:
         - name: predefined_db_applications
           capture_list: /application/entry[subcategory="database"]/@name
+      tags:
+        - PANW-AG-000080
+        - PANW-IP-000032
 
     - name: capture_vulnerability_profiles
       cmd: parse
@@ -121,7 +139,13 @@ snippets:
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
             entry[count(vulnerability)>0 and not(vulnerability/member='default')]/@name
-        
+      tags:
+        - PANW-AG-000080
+        - PANW-AG-000081
+        - PANW-AG-000105
+        - PANW-AG-000148
+        - PANW-AG-000149
+
     - name: capture_invalid_db_vulnerability_policies
       cmd: parse
       variable: config
@@ -144,6 +168,8 @@ snippets:
             )
         - name: invalid_db_vulnerability_policies_names
           capture_expression: invalid_db_vulnerability_policies | json_query('[].entry."@name"')
+      tags:
+        - PANW-AG-000080
 
     - name: capture_vulnerability_protected_apps
       cmd: parse
@@ -154,7 +180,7 @@ snippets:
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not(disabled="yes")]
           filter_items: |
             (
-              item | json_query('entry.application.member | [@][]') | item_present(apps_with_vulnerability_protection | listify) 
+              item | json_query('entry.application.member | [@][]') | item_present(apps_with_vulnerability_protection | listify)
               or "any" in item.entry.application.member
             )
             and (
@@ -163,6 +189,115 @@ snippets:
             )
         - name: invalid_vulnerability_app_policies_names
           capture_expression: invalid_vulnerability_app_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000081
+        - PANW-IP-000033
+
+    # Verify certs exist and are DoD-issued and that none are issued by non-DoD entities
+    - name: verify_dod_certs_exist
+      cmd: parse
+      variable: config
+      outputs:
+        - name: non_dod_issuers
+          capture_value: /config/shared/certificate/entry/issuer
+          filter_items: |-
+            "DoD" not in item
+        - name: dod_issuers
+          capture_value: /config/shared/certificate/entry/issuer
+          filter_items: |-
+            "DoD" in item
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+        - PANW-NM-000141
+
+      # Capture the name of all the DoD certs (if there are no non-DoD issuers)
+    - name: capture_dod_cert_names
+      cmd: parse
+      variable: config
+      outputs:
+        - name: dod_cert_names
+          capture_list: /config/shared/certificate/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+      # Capture the name(s) of all Certificate Profiles
+    - name: capture_names_of_cert_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: cert_profile_names
+          capture_list: /config/shared/certificate-profile/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture all certs that are listed under the Certificate Profile(s)
+    - name: capture_certs_listed_under_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: dod_cert_names_present_in_profile
+          capture_list: /config/shared/certificate-profile/entry/CA/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture the Certification Profile is aligned with the Authentication Server
+    #   PART I
+    # NOTE: RADIUS servers have an option to set a Certification Profile
+    #       LDAP servers do not have this option (SEE following task)
+    - name: capture_cert_profile_aligned_to_auth_server_I
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profiles_cert_profile
+          capture_list: /config/shared/server-profile/radius/entry/protocol/PEAP-MSCHAPv2/radius-cert-profile/text()
+      filter_items:
+       item in cert_profile_names
+      when: |
+          not (non_dod_issuers and dod_issuers)
+          and ('radius' in server_profile_types)
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture the Certification Profile is aligned with the Authentication Server
+    #   PART II
+    # NOTE: RADIUS servers have an option to set a Certification Profile
+    #       LDAP servers do not have this option
+    #       This step simply sets server_profiles_cert_profile to match the
+    #       content in cert_profile_names so that the test will pass.
+
+    - name: capture_cert_profile_aligned_to_auth_server_II
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profiles_cert_profile_DEBUG
+          capture_list: /config/shared/certificate-profile/entry/@name
+      when: |
+          not (non_dod_issuers and dod_issuers)
+          and ('ldap' in server_profile_types)
+          and ('radius' not in server_profile_types)
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture OCSP required setting (does the system use OCSP for cert revocation)
+    - name: capture_ocsp_setting
+      cmd: parse
+      variable: config
+      outputs:
+        - name: ocsp_required
+          capture_value: /config/shared/certificate-profile/entry/use-ocsp/text()
+
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
 
     - name: capture_logging_settings
       cmd: parse
