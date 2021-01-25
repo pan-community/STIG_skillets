@@ -1,0 +1,12 @@
+---
+# Initial connection information
+ip_address: '10.10.10.10'
+username: 'admin'
+password: 'Super Secret 1!!'
+auth_code: 'IBADCODE'
+
+skillet_vars:
+  no_vars: 'are defined'
+  skip_62601: true
+  allowed_network_services: [ 1, 2, 3 ]
+  dos_strategy: zone
