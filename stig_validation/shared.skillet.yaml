@@ -309,6 +309,9 @@ snippets:
           capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
         - name: valid_system_syslog_settings
           capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
+      tags:
+        - PANW-AG-000094
+        - PANW-NM-000144
 
     - name: capture_netflow_profiles
       cmd: parse

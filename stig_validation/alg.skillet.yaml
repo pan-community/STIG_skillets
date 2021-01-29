@@ -741,15 +741,9 @@ snippets:
         - PANW-AG-000081
 
     - name: capture_logging_settings
-      cmd: parse
-      variable: config
-      outputs:
-        - name: valid_syslog_profiles
-          capture_list: /config/shared/log-settings/syslog/entry[count(server)>0]/@name
-        - name: valid_syslog_log_forwarding_profile
-          capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
-        - name: valid_system_syslog_settings
-          capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
+      include: shared_snippets
+      include_snippets:
+        - name: capture_logging_settings
       tags:
         - PANW-AG-000094
         - PANW-AG-000144
