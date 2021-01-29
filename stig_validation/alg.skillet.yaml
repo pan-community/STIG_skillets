@@ -105,7 +105,7 @@ variables:
       - key: email
         value: send-email
 
-  - name: dos_strategy
+  - name: protection_strategy
     description: DoS Prevention Strategy
     type_hint: dropdown
     default: zone
@@ -116,7 +116,7 @@ variables:
         value: dos
 
 snippets:
-    
+
     - name: PANW-AG-000015-capture
       cmd: parse
       variable: config
@@ -188,6 +188,7 @@ snippets:
         - PANW-AG-000016
         - PANW-AG-000017
         - PANW-AG-000020
+        - PANW-AG-000101
         - PANW-AG-000141
         - PANW-AG-000143
         - online_mode_only
@@ -306,7 +307,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      test: not capture_dns_proxy_names 
+      test: not capture_dns_proxy_names
       fail_message: DNS proxy must not be configured
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228839
@@ -404,11 +405,13 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: Has to be tested and merged in.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228842
+      tags:
+        - PANW-AG-000047
 
     - name: capture_spyware_profile
       cmd: parse
@@ -545,7 +548,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -590,6 +593,8 @@ snippets:
         {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228849
+      tags:
+        - PANW-AG-000063
 
     - name: capture_virus_alerting
       include: shared_snippets
@@ -597,7 +602,7 @@ snippets:
         - name: capture_virus_alerting
       tags:
         - PANW-AG-000064
-    
+
     - name: PANW-AG-000064
       label: The Palo Alto Networks security platform must send an immediate (within seconds) alert to the system administrator, at a minimum, in response to malicious code detection.
       meta:
@@ -615,12 +620,14 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228851
-    
+      tags:
+        PANW-AG-000065
+
     - name: PANW-AG-000073
       label: The Palo Alto Networks security platform must deny or restrict detected prohibited mobile code.
       meta:
@@ -656,7 +663,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: Has to be tested and merged
       pass_message: Validation successful
@@ -669,7 +676,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        action_required: 'true'
       test: false
       fail_message: Has to be tested and merged
       pass_message: Validation successful
@@ -734,10 +741,15 @@ snippets:
         - PANW-AG-000081
 
     - name: capture_logging_settings
-      include: shared_snippets
-      include_snippets:
-        - name: capture_logging_settings
-
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_syslog_profiles
+          capture_list: /config/shared/log-settings/syslog/entry[count(server)>0]/@name
+        - name: valid_syslog_log_forwarding_profile
+          capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
+        - name: valid_system_syslog_settings
+          capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
       tags:
         - PANW-AG-000094
         - PANW-AG-000144
@@ -757,17 +769,81 @@ snippets:
       tags:
         - PANW-AG-000094
 
+# =======================================
+
+    - name: verify_dod_certs_exist
+      include: shared_snippets
+      include_snippets:
+        - name: verify_dod_certs_exist
+      tags:
+        - PANW-AG-000101
+
+      # Capture server profile(s) (ie. RADIUS, LDAP, etc.)
+    - name: capture_server_profile_types
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profile_types
+          capture_value: /config/shared/server-profile/*
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+
+    - name: confirm_settings_and_profile_alignment_with_auth_server
+      include: shared_snippets
+      include_snippets:
+        #- name: verify_dod_certs_exist
+        - name: capture_dod_cert_names
+        - name: capture_names_of_cert_profiles
+        - name: capture_certs_listed_under_profiles
+        - name: capture_cert_profile_aligned_to_auth_server_I
+        - name: capture_cert_profile_aligned_to_auth_server_II
+        - name: capture_ocsp_setting
+
+      tags:
+        - PANW-AG-000101
+
+    # Capture "Block session if certificate status is unknown" state.
+    - name: PANW-AG-000101
+      cmd: parse
+      variable: config
+      outputs:
+        - name: unknown_cert_session_block
+          capture_list: /config/shared/certificate-profile/entry/block-unknown-cert/text()
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+
+    # Capture "Block session if certificate status cannot be retrieved within timeout" state
+    - name: PANW-AG-000101
+      cmd: parse
+      variable: config
+      outputs:
+        - name: timeout_session_block
+          capture_list: /config/shared/certificate-profile/entry/block-timeout-cert/text()
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+
     - name: PANW-AG-000101
       label: The Palo Alto Networks security platform being used for TLS/SSL decryption using PKI-based user authentication must only accept end entity certificates issued by DoD PKI or DoD-approved PKI Certificate Authorities (CAs) for the establishment of protected sessions.
       meta:
         stig: alg
         severity: medium
-        action_required: true
-      test: false
-      fail_message: Approved certificates have to be manually verified.
+      when: TLS_gw
+      test: |
+        ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
+        and (not non_dod_issuers and dod_issuers)
+        and (not 'no' in unknown_cert_session_block)
+        and (not 'no' in timeout_session_block)
+        and ({{ server_profiles_cert_profile | sort }} == {{ cert_profile_names | sort }} )
+        and (ocsp_required == 'yes')
+      fail_message: Click link for remediation instruction.
       pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228859
-    
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228859```
+      tags:
+        - PANW-AG-000101
+
     - name: PANW-AG-000102-capture
       cmd: parse
       variable: config
@@ -812,7 +888,7 @@ snippets:
           and internal_zone in zones_with_intended_dos_zone_protection_profile
           and dmz_zone in zones_with_intended_dos_zone_protection_profile
           )
-      when: dos_strategy == "zone"
+      when: protection_strategy == "zone"
 
     - cmd: validate
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62601
@@ -834,7 +910,7 @@ snippets:
           and internal_zone_with_intended_dos_protection_policy | length
           and dmz_zone_with_intended_dos_protection_policy | length
           )
-      when: dos_strategy == "dos"
+      when: protection_strategy == "dos"
 
     - name: capture_vulnerability_profile_rules
       cmd: parse
@@ -909,9 +985,15 @@ snippets:
         - online_mode_only
 
     - name: capture_netflow_profiles
-      include: shared_snippets
-      include_snippets:
-        - name: capture_netflow_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: netflow_profiles
+          capture_list: /config/shared/server-profile/netflow/entry/@name
+        - name: interfaces_with_netflow
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry[layer3 or ip]/@name
+        - name: interfaces_missing_netflow
+          capture_expression: netflow_interfaces | listify | difference(interfaces_with_netflow)
       tags:
         - PANW-AG-000111
 
@@ -1020,7 +1102,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      test: true 
+      test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228870
@@ -1028,9 +1110,30 @@ snippets:
         - PANW-AG-000118
 
     - name: capture_alert_mechanisms
-      include: shared_snippets
-      include_snippets:
-        - name: capture_alert_mechanisms
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_alert_server_profiles
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
+            [match-list/entry/{{alert_mechanism}}]/@name
+        - name: invalid_alert_mechanisms_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(trusted_zones | listify + ["any"])
+            and (
+              not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
+              or (
+                not item | json_query('entry."profile-setting".group.member')
+                and (
+                  not item | json_query('entry."profile-setting".profiles.virus.member')
+                  or not item | json_query('entry."profile-setting".profiles.vulnerability.member')
+                  or not item | json_query('entry."profile-setting".profiles.spyware.member')
+                )
+              )
+            )
+        - name: invalid_alert_mechanisms_policies_names
+          capture_expression: invalid_alert_mechanisms_policies | map(attribute="entry.@name") | list
       tags:
         - PANW-AG-000119
         - PANW-AG-000120
@@ -1062,9 +1165,14 @@ snippets:
         - PANW-AG-000120
 
     - name: capture_invalid_alert_dos_policies
-      include: shared_snippets
-      include_snippets:
-        - name: capture_invalid_alert_dos_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_alert_dos_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes")]
+          filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
+        - name: invalid_alert_dos_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]
       tags:
         - PANW-AG-000121
 
@@ -1083,9 +1191,20 @@ snippets:
         - PANW-AG-000121
 
     - name: capture_interzone_intersubnet_alerts
-      include: shared_snippets
-      include_snippets:
-        - name: capture_interzone_intersubnet_alerts
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_intersubnet_alert_policies
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not(disabled="yes")]
+          filter_items: |
+            not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
+            or (
+              not item | json_query('entry."profile-setting".group.member')
+              and not item | json_query('entry."profile-setting".profiles.virus.member')
+            )
+        - name: invalid_intersubnet_alert_policies_names
+          capture_expression: invalid_intersubnet_alert_policies | map(attribute="entry.@name") | list
       tags:
         - PANW-AG-000122
 
@@ -1181,7 +1300,7 @@ snippets:
             ]
           filter_items: |
             item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
-            and item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+            and item | element_value('profile-setting.group.member') not in valid_av_profile_groups
         - name: smtp_policies_no_av_names
           capture_expression: smtp_policies_no_av | map(attribute="entry.@name") | list
       tags:
@@ -1212,7 +1331,7 @@ snippets:
               item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
               or item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
             ) and (
-              item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+              item | element_value('profile-setting.group.member') not in valid_av_profile_groups
               or item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
             )
         - name: invalid_ftp_policies_names
@@ -1247,7 +1366,7 @@ snippets:
               item | element_value('profile-setting.profiles.virus.member') not in valid_av_profiles
               or item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
             ) and (
-              item | element_value('profile-setting.group.member') not in valid_av_profile_groups 
+              item | element_value('profile-setting.group.member') not in valid_av_profile_groups
               or item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
             )
         - name: invalid_http_policies_names
