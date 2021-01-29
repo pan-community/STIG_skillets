@@ -387,3 +387,6 @@ snippets:
             )
         - name: invalid_intersubnet_alert_policies_names
           capture_expression: invalid_intersubnet_alert_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-IP-000056
+        - PANW-AG-000122
