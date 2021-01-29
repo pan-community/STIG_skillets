@@ -368,6 +368,9 @@ snippets:
           filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
         - name: invalid_alert_dos_policies
           capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]
+      tags:
+        - PANW-AG-000121
+        - PANW-IP-000055
 
     - name: capture_interzone_intersubnet_alerts
       cmd: parse
