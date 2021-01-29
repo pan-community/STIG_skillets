@@ -114,7 +114,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: "Verify that displayed login banner is concistent with STIG"
       pass_message: Validation successful
@@ -127,7 +127,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Verify appropriate administrator accounts as per the STIG
       pass_message: Validation successful
@@ -270,7 +270,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
       pass_message: Validation successful
@@ -467,7 +467,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Not implemented
       pass_message: Validation successful
@@ -667,7 +667,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: not non_dod_issuers and dod_issuers
       fail_message: Certificates must be manually verified as per the STIG
       pass_message: Validation successful
@@ -749,7 +749,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Not implemented
       pass_message: Validation successful
@@ -845,7 +845,7 @@ snippets:
       meta:
         stig: ndm
         severity: high
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Manually validate default login credentials do not work
       pass_message: Validation successful

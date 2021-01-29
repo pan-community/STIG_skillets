@@ -405,7 +405,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Has to be tested and merged in.
       pass_message: Validation successful
@@ -548,7 +548,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -620,7 +620,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -663,7 +663,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Has to be tested and merged
       pass_message: Validation successful
@@ -676,7 +676,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Has to be tested and merged
       pass_message: Validation successful
