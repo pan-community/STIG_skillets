@@ -317,9 +317,11 @@ snippets:
         - name: netflow_profiles
           capture_list: /config/shared/server-profile/netflow/entry/@name
         - name: interfaces_with_netflow
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry/@name
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry[layer3 or ip]/@name
         - name: interfaces_missing_netflow
           capture_expression: netflow_interfaces | listify | difference(interfaces_with_netflow)
+      tags:
+        - PANW-AG-000111
 
     - name: capture_alert_mechanisms
       cmd: parse
