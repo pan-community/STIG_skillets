@@ -3,7 +3,7 @@
 name: NDM_Validation
 label: skillet generated from NDM STIG documents at stigviewer.com
 
-description: This skillet accounts NDM STIG sersions
+description: This skillet accounts NDM STIG versions
 
 type: pan_validation
 labels:
@@ -14,7 +14,7 @@ labels:
 variables:
 
   - name: emergency_admin_account
-    description: Emergency administration account  
+    description: Emergency administration account
     type_hint: text
     default: emergency
 
@@ -61,7 +61,7 @@ variables:
         value: radius
 
   - name: authorized_no_idle_timeout
-    description: Emergency administration account  
+    description: Emergency administration account
     type_hint: dropdown
     default: false
     dd_list:
@@ -107,31 +107,33 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62705
       tags:
-        - PANW-NW-000015
+        - PANW-NM-000015
 
     - name: PANW-NM-000016
       label: The Palo Alto Networks security platform must display the Standard Mandatory DoD Notice and Consent Banner before granting access to the device.
       meta:
         stig: ndm
         severity: low
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: "Verify that displayed login banner is concistent with STIG"
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62707
       tags:
-        - PANW-NW-000016
+        - PANW-NM-000016
 
     - name: PANW-NM-000023
       label: The Palo Alto Networks security platform must allow only the ISSM (or individuals or roles appointed by the ISSM) in the Audit Administrator (auditadmin) role, or in a custom role with full access to audit logs, or any account that has full access to audit logs.
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Verify appropriate administrator accounts as per the STIG
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62709
       tags:
-        - PANW-NW-000023
+        - PANW-NM-000023
 
     - name: capture_system_syslog
       cmd: parse
@@ -180,7 +182,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62711
       tags:
-        - PANW-NW-000024
+        - PANW-NM-000024
 
     - name: capture_system_management_settings
       cmd: parse
@@ -205,7 +207,7 @@ snippets:
       pass_message: Validation successful, operator should validate hostname to be globally unique.
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62713
       tags:
-        - PANW-NW-000029
+        - PANW-NM-000029
 
     - name: PANW-NM-000042
       label: The Palo Alto Networks security platform must back up audit records at least every seven days onto a different system or system component than the system or component being audited.
@@ -227,7 +229,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62715
       tags:
-        - PANW-NW-000042
+        - PANW-NM-000042
 
     - name: capture_system_services
       cmd: parse
@@ -261,19 +263,20 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62717
       tags:
-        - PANW-NW-000046
+        - PANW-NM-000046
 
     - name: PANW-NM-000047
       label: The Palo Alto Networks security platform must uniquely identify and authenticate organizational administrators (or processes acting on behalf of organizational administrators).
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62719
       tags:
-        - PANW-NW-000047
+        - PANW-NM-000047
 
     - name: get_system_info
       include: shared_snippets
@@ -292,7 +295,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62721
       tags:
-        - PANW-NW-000051
+        - PANW-NM-000051
 
     - name: capture_password_complexity
       include: CIS_NGFW_benchmark_v90
@@ -328,7 +331,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62723
       tags:
-        - PANW-NW-000053
+        - PANW-NM-000053
 
     - name: PANW-NM-000054
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must prohibit password reuse for a minimum of five generations.
@@ -340,7 +343,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62725
       tags:
-        - PANW-NW-000054
+        - PANW-NM-000054
 
     - name: PANW-NM-000055
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce password complexity by requiring that at least one upper-case character be used.
@@ -352,7 +355,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62727
       tags:
-        - PANW-NW-000055
+        - PANW-NM-000055
 
     - name: PANW-NM-000056
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce password complexity by requiring that at least one lower-case character be used.
@@ -364,7 +367,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62729
       tags:
-        - PANW-NW-000056
+        - PANW-NM-000056
 
     - name: PANW-NM-000057
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce password complexity by requiring that at least one numeric character be used.
@@ -376,7 +379,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62731
       tags:
-        - PANW-NW-000057
+        - PANW-NM-000057
 
     - name: PANW-NM-000058
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must enforce password complexity by requiring that at least one special character be used.
@@ -388,7 +391,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62733
       tags:
-        - PANW-NW-000058
+        - PANW-NM-000058
 
     - name: PANW-NM-000059
       label: If multifactor authentication is not available and passwords must be used, the Palo Alto Networks security platform must require that when a password is changed, the characters are changed in at least 8 of the positions within the password.
@@ -400,7 +403,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62735
       tags:
-        - PANW-NW-000059
+        - PANW-NM-000059
 
     - name: PANW-NM-000061
       label: The Palo Alto Networks security platform must prohibit the use of unencrypted protocols for network access to privileged accounts.
@@ -412,7 +415,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62737
       tags:
-        - PANW-NW-000061
+        - PANW-NM-000061
 
     - name: capture_password_complexity_block_change_period
       cmd: parse
@@ -421,7 +424,7 @@ snippets:
         - name: password_change_period_block
           capture_value: /config/mgt-config/password-complexity/password-change-period-block/text()
       tags:
-        - PANW-NW-000062
+        - PANW-NM-000062
 
     - name: PANW-NM-000062
       label: The Palo Alto Networks security platform must enforce 24 hours/1 day as the minimum password lifetime.
@@ -433,7 +436,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62739
       tags:
-        - PANW-NW-000062
+        - PANW-NM-000062
 
     - name: PANW-NM-000063
       label: The Palo Alto Networks security platform must enforce a 60-day maximum password lifetime restriction.
@@ -441,11 +444,11 @@ snippets:
         stig: ndm
         severity: medium
       test: password_min_change_period == "60"
-      fail_message: Required Password Change Period (days) must be set to 60 
+      fail_message: Required Password Change Period (days) must be set to 60
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62741
       tags:
-        - PANW-NW-000063
+        - PANW-NM-000063
 
     - name: PANW-NM-000069
       label: The Palo Alto Networks security platform must terminate management sessions after 10 minutes of inactivity except to fulfill documented and validated mission requirements.
@@ -457,19 +460,20 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62743
       tags:
-        - PANW-NW-000069
+        - PANW-NM-000069
 
     - name: PANW-NM-000075
       label: Administrators in the role of either Security Administrator or Cryptographic Administrator must not also have the role of Audit Administrator.
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Not implemented
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62745
       tags:
-        - PANW-NW-000075
+        - PANW-NM-000075
 
     - name: capture_admin_user_lockout_time
       cmd: parse
@@ -493,7 +497,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62747
       tags:
-        - PANW-NW-000092
+        - PANW-NM-000092
 
     - name: capture_system_alarm_settings
       cmd: parse
@@ -524,7 +528,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62749
       tags:
-        - PANW-NW-000096
+        - PANW-NM-000096
 
     - name: PANW-NM-000097
       label: The Palo Alto Networks security platform must have alarms enabled.
@@ -536,17 +540,17 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62751
       tags:
-        - PANW-NW-000097
+        - PANW-NM-000097
 
     - name: capture_redundant_ntp_servers_configured
       include: CIS_NGFW_benchmark_v90
       include_snippets:
         - name: capture_redundant_ntp_servers_configured
       tags:
-        - PANW-NW-000098
-        - PANW-NW-000099
-        - PANW-NW-000100
-        - PANW-NW-000145
+        - PANW-NM-000098
+        - PANW-NM-000099
+        - PANW-NM-000100
+        - PANW-NM-000145
 
     - name: PANW-NM-000098
       label: The Palo Alto Networks security platform must compare internal information system clocks at least every 24 hours with an authoritative time server.
@@ -558,7 +562,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62753
       tags:
-        - PANW-NW-000098
+        - PANW-NM-000098
 
     - name: PANW-NM-000099
       label: The Palo Alto Networks security platform must synchronize internal information system clocks to the authoritative time source when the time difference is greater than one second.
@@ -570,7 +574,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62755
       tags:
-        - PANW-NW-000099
+        - PANW-NM-000099
 
     - name: PANW-NM-000100
       label: The Palo Alto Networks security platform must be configured to synchronize internal information system clocks with the primary and secondary time sources located in different geographic regions using redundant authoritative time sources.
@@ -585,7 +589,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62757
       tags:
-        - PANW-NW-000100
+        - PANW-NM-000100
 
     - name: capture_time_zone
       cmd: parse
@@ -606,19 +610,70 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62759
       tags:
-        - PANW-NW-000101
+        - PANW-NM-000101
+
+    - name: verify_dod_certs_exist
+      include: shared_snippets
+      include_snippets:
+        - name: verify_dod_certs_exist
+      tags:
+        - PANW-NM-000110
+
+      # Capture server profile(s) (ie. RADIUS, LDAP, etc.)
+    - name: capture_server_profile_types
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profile_types
+          capture_value: /config/shared/server-profile/*
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-NM-000110
+
+    - name: confirm_settings_and_profile_alignment_with_auth_server
+      include: shared_snippets
+      include_snippets:
+        - name: capture_dod_cert_names
+        - name: capture_names_of_cert_profiles
+        - name: capture_certs_listed_under_profiles
+        - name: capture_cert_profile_aligned_to_auth_server_I
+        - name: capture_cert_profile_aligned_to_auth_server_II
+        - name: capture_ocsp_setting
+
+      tags:
+        - PANW-NM-000110
 
     - name: PANW-NM-000110
       label: The Palo Alto Networks security platform must accept and verify Personal Identity Verification (PIV) credentials.
       meta:
         stig: ndm
         severity: medium
-      test: false
+      when: TLS_gw
+      test: |
+        ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
+        and (not non_dod_issuers and dod_issuers)
+        and ({{ server_profiles_cert_profile | sort }} == {{ cert_profile_names | sort }} )
+        and (ocsp_required == 'yes')
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62761
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62777
       tags:
-        - PANW-NW-000110
+        - PANW-NM-000110
+
+
+
+    - name: PANW-NM-000141
+      label: The Palo Alto Networks security platform must use DoD-approved PKI rather than proprietary or self-signed device certificates.
+      meta:
+        stig: ndm
+        severity: medium
+        action_required: 'true'
+      test: not non_dod_issuers and dod_issuers
+      fail_message: Certificates must be manually verified as per the STIG
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62777
+      tags:
+        - PANW-NM-000141
 
     - name: capture_temporary_password
       cmd: parse
@@ -639,7 +694,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62763
       tags:
-        - PANW-NW-000114
+        - PANW-NM-000114
 
     - name: PANW-NM-000117
       label: The Palo Alto Networks security platform must only allow the use of secure protocols that implement cryptographic mechanisms to protect the integrity of maintenance and diagnostic communications for nonlocal maintenance sessions.
@@ -651,7 +706,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62765
       tags:
-        - PANW-NW-000117
+        - PANW-NM-000117
 
     - name: PANW-NM-000118
       label: The Palo Alto Networks security platform must not use SNMP Versions 1 or 2.
@@ -665,7 +720,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62767
       tags:
-        - PANW-NW-000118
+        - PANW-NM-000118
 
     - name: PANW-NM-000128
       label: The Palo Alto Networks security platform must off-load audit records onto a different system or media than the system being audited.
@@ -687,19 +742,20 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62769
       tags:
-        - PANW-NW-000128
+        - PANW-NM-000128
 
     - name: PANW-NM-000131
       label: The Palo Alto Networks security platform must use automated mechanisms to alert security personnel to threats identified by authoritative sources (e.g., CTOs) and IAW CJCSM 6510.01B.
       meta:
         stig: ndm
         severity: medium
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Not implemented
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62771
       tags:
-        - PANW-NW-000131
+        - PANW-NM-000131
 
     - name: capture_centralized_admin_accounts
       cmd: parse
@@ -733,7 +789,7 @@ snippets:
           capture_list: /config/mgt-config/users/entry[not(@name="{{ emergency_admin_account }}")]
           filter_items: item.entry["authentication-profile"] not in radius_authentication_profiles
       tags:
-        - PANW-NW-000136
+        - PANW-NM-000136
 
     - name: PANW-NM-000136
       label: The Palo Alto Networks security platform must employ centrally managed authentication server(s).
@@ -761,19 +817,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62773
       tags:
-        - PANW-NW-000136
-
-    - name: PANW-NM-000141
-      label: The Palo Alto Networks security platform must use DoD-approved PKI rather than proprietary or self-signed device certificates.
-      meta:
-        stig: ndm
-        severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62777
-      tags:
-        - PANW-NW-000141
+        - PANW-NM-000136
 
     - name: capture_password_profiles
       cmd: parse
@@ -782,7 +826,7 @@ snippets:
         - name: password_profiles
           capture_list: /config/mgt-config/password-profile/entry
       tags:
-        - PANW-NW-000142
+        - PANW-NM-000142
 
     - name: PANW-NM-000142
       label: The Palo Alto Networks security platform must not use Password Profiles.
@@ -794,19 +838,20 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62779
       tags:
-        - PANW-NW-000142
+        - PANW-NM-000142
 
     - name: PANW-NM-000143
       label: The Palo Alto Networks security platform must not use the default admin account password.
       meta:
         stig: ndm
         severity: high
+        action_required: 'true'
       test: false
-      fail_message: Click link for remediation instruction.
+      fail_message: Manually validate default login credentials do not work
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62781
       tags:
-        - PANW-NW-000143
+        - PANW-NM-000143
 
     - name: capture_log_on_high_dp_load
       cmd: parse
@@ -815,7 +860,7 @@ snippets:
         - name: log_on_high_dp_load
           capture_value: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/management/enable-log-high-dp-load
       tags:
-        - PANW-NW-000144
+        - PANW-NM-000144
 
     - name: PANW-NM-000144
       label: The Palo Alto Networks security platform must generate an audit log record when the Data Plane CPU utilization is 100%.
@@ -827,7 +872,7 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62783
       tags:
-        - PANW-NW-000144
+        - PANW-NM-000144
 
     - name: PANW-NM-000145
       label: The Palo Alto Networks security platform must authenticate Network Time Protocol sources.
@@ -847,4 +892,4 @@ snippets:
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62785
       tags:
-        - PANW-NW-000145
+        - PANW-NM-000145
