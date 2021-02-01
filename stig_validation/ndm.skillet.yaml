@@ -850,15 +850,24 @@ snippets:
       tags:
         - PANW-NM-000142
 
+    - name: capture_default_admin
+      cmd: parse
+      variable: config
+      outputs:
+        - name: default_admin
+          capture_object: /config/mgt-config/users/entry[@name="admin"]
+      tags:
+        - PANW-NM-000143
+
     - name: PANW-NM-000143
       label: The Palo Alto Networks security platform must not use the default admin account password.
       meta:
         stig: ndm
         severity: high
-        action_required: true
-      test: false
-      fail_message: Manually validate default login credentials do not work
-      pass_message: Validation successful
+        action_required: '{{ default_admin is mapping }}'
+      test: not default_admin
+      fail_message: Default user of admin configured, manually perform login test to determin pass fail
+      pass_message: Default admin user not found
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62781
       tags:
         - PANW-NM-000143
