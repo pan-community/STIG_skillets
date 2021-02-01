@@ -265,15 +265,25 @@ snippets:
       tags:
         - PANW-NM-000046
 
+    - name: capture_admin_no_auth_profile
+      cmd: parse
+      variable: config
+      outputs:
+        - name: admin_no_auth_profile
+          capture_list: /config/mgt-config/users/entry[not(authentication-profile)]/@name
+          filter_items: item != emergency_admin_account
+      tags:
+        - PANW-NM-000047
+
     - name: PANW-NM-000047
       label: The Palo Alto Networks security platform must uniquely identify and authenticate organizational administrators (or processes acting on behalf of organizational administrators).
       meta:
         stig: ndm
         severity: medium
         action_required: true
-      test: false
-      fail_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
-      pass_message: Validation successful
+      test: not admin_no_auth_profile
+      fail_message: Admin accounts without auth profile - {% for admin in admin_no_auth_profile %}{{ admin }} {% endfor %}
+      pass_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62719
       tags:
         - PANW-NM-000047
