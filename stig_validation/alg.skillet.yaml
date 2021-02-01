@@ -998,17 +998,9 @@ snippets:
         - PANW-AG-000111
 
     - name: capture_unauthorized_policies
-      cmd: parse
-      variable: config
-      outputs:
-        - name: unauthorized_policies
-          capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
-            [action="deny" and not(log-end="no") and not(disabled="yes") and not(application/member="any")]
-        - name: denied_and_logged_applications
-          capture_expression: unauthorized_policies | json_query('[].entry.application.member | [@][][]')
-        - name: unauthorized_not_explicitly_denied_applications
-          capture_expression: unauthorized_applications | listify | difference(denied_and_logged_applications)
+      include: shared_snippets
+      include_snippets:
+        - name: capture_unauthorized_policies
       tags:
         - PANW-AG-000112
 
