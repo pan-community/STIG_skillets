@@ -169,7 +169,6 @@ snippets:
         ( decryption | length > 0 )
         and ( decryption | difference(security)
         )
-
       when: traffic_intermediary
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -664,8 +663,13 @@ snippets:
         stig: alg
         severity: medium
         action_required: true
-      test: false
-      fail_message: Has to be tested and merged
+      test: |
+        (
+        ( decryption | length > 0 )
+        and ( decryption | difference(security)
+        )
+      when: traffic_intermediary
+      fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228854
       tags:
@@ -677,8 +681,13 @@ snippets:
         stig: alg
         severity: medium
         action_required: true
-      test: false
-      fail_message: Has to be tested and merged
+      test: |
+        (
+        ( decryption | length > 0 )
+        and ( decryption | difference(security)
+        )
+      when: traffic_intermediary
+      fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228855
       tags:
