@@ -114,7 +114,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: "Verify that displayed login banner is concistent with STIG"
       pass_message: Validation successful
@@ -127,7 +127,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Verify appropriate administrator accounts as per the STIG
       pass_message: Validation successful
@@ -265,15 +265,25 @@ snippets:
       tags:
         - PANW-NM-000046
 
+    - name: capture_admin_no_auth_profile
+      cmd: parse
+      variable: config
+      outputs:
+        - name: admin_no_auth_profile
+          capture_list: /config/mgt-config/users/entry[not(authentication-profile)]/@name
+          filter_items: item != emergency_admin_account
+      tags:
+        - PANW-NM-000047
+
     - name: PANW-NM-000047
       label: The Palo Alto Networks security platform must uniquely identify and authenticate organizational administrators (or processes acting on behalf of organizational administrators).
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
-      test: false
-      fail_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
-      pass_message: Validation successful
+        action_required: true
+      test: not admin_no_auth_profile
+      fail_message: Admin accounts without auth profile - {% for admin in admin_no_auth_profile %}{{ admin }} {% endfor %}
+      pass_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62719
       tags:
         - PANW-NM-000047
@@ -467,7 +477,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Not implemented
       pass_message: Validation successful
@@ -667,7 +677,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: not non_dod_issuers and dod_issuers
       fail_message: Certificates must be manually verified as per the STIG
       pass_message: Validation successful
@@ -749,7 +759,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Not implemented
       pass_message: Validation successful
@@ -840,15 +850,24 @@ snippets:
       tags:
         - PANW-NM-000142
 
+    - name: capture_default_admin
+      cmd: parse
+      variable: config
+      outputs:
+        - name: default_admin
+          capture_object: /config/mgt-config/users/entry[@name="admin"]
+      tags:
+        - PANW-NM-000143
+
     - name: PANW-NM-000143
       label: The Palo Alto Networks security platform must not use the default admin account password.
       meta:
         stig: ndm
         severity: high
-        action_required: 'true'
-      test: false
-      fail_message: Manually validate default login credentials do not work
-      pass_message: Validation successful
+        action_required: '{{ default_admin is mapping }}'
+      test: not default_admin
+      fail_message: Default user of admin configured, manually perform login test to determin pass fail
+      pass_message: Default admin user not found
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62781
       tags:
         - PANW-NM-000143

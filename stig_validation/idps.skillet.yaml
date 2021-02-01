@@ -23,6 +23,11 @@ variables:
     type_hint: list
     default: trust
 
+  - name: unauthorized_applications
+    description: Applications that should be explicitly denied and logged
+    type_hint: list
+    default: web-browsing
+
   - name: alert_mechanism
     description: How the ISSO and ISSM receive alerts
     type_hint: dropdown
@@ -385,13 +390,22 @@ snippets:
       tags:
         - PANW-IP-000045
 
+    - name: capture_unauthorized_policies
+      include: shared_snippets
+      include_snippets:
+        - name: capture_unauthorized_policies
+      tags:
+        - PANW-IP-000046
+
     - name: PANW-IP-000046
       label: The Palo Alto Networks security platform must detect use of network services that have not been authorized or approved by the ISSM and ISSO, at a minimum.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not unauthorized_not_explicitly_denied_applications and unauthorized_applications
+      fail_message: |
+        {% if not unauthorized_applications %}A list of unauthorized applications must be supplied
+        {% else %}Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207706
       tags:
@@ -402,20 +416,27 @@ snippets:
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not unauthorized_not_explicitly_denied_applications
+      fail_message: Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207707
       tags:
         - PANW-IP-000047
+
+    - name: capture_unauthorized_policies_no_logging
+      cmd: parse
+      variable: config
+      outputs:
+        - name: unauthorized_policies_no_logging 
+          capture_expression: unauthorized_policies | json_query('[?!(entry."log-setting")].entry."@name"')
 
     - name: PANW-IP-000048
       label: The Palo Alto Networks security platform must generate an alert to the ISSO and ISSM, at a minimum, when unauthorized network services are detected.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: not unauthorized_policies_no_logging 
+      fail_message: Policies denying unauthorized traffic without logging - {% for pol in unauthorized_policies_no_logging %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207708
       tags:

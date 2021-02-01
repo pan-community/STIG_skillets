@@ -309,6 +309,9 @@ snippets:
           capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
         - name: valid_system_syslog_settings
           capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
+      tags:
+        - PANW-AG-000094
+        - PANW-NM-000144
 
     - name: capture_netflow_profiles
       cmd: parse
@@ -317,9 +320,11 @@ snippets:
         - name: netflow_profiles
           capture_list: /config/shared/server-profile/netflow/entry/@name
         - name: interfaces_with_netflow
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry/@name
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry[layer3 or ip]/@name
         - name: interfaces_missing_netflow
           capture_expression: netflow_interfaces | listify | difference(interfaces_with_netflow)
+      tags:
+        - PANW-AG-000111
 
     - name: capture_alert_mechanisms
       cmd: parse
@@ -346,6 +351,13 @@ snippets:
             )
         - name: invalid_alert_mechanisms_policies_names
           capture_expression: invalid_alert_mechanisms_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000119
+        - PANW-AG-000120
+        - PANW-AG-000121
+        - PANW-AG-000122
+        - PANW-IP-000053
+        - PANW-IP-000055
 
     - name: capture_invalid_alert_dos_policies
       cmd: parse
@@ -356,6 +368,9 @@ snippets:
           filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
         - name: invalid_alert_dos_policies
           capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]
+      tags:
+        - PANW-AG-000121
+        - PANW-IP-000055
 
     - name: capture_interzone_intersubnet_alerts
       cmd: parse
@@ -372,3 +387,24 @@ snippets:
             )
         - name: invalid_intersubnet_alert_policies_names
           capture_expression: invalid_intersubnet_alert_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-IP-000056
+        - PANW-AG-000122
+
+    - name: capture_unauthorized_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: unauthorized_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and not(log-end="no") and not(disabled="yes") and not(application/member="any")]
+        - name: denied_and_logged_applications
+          capture_expression: unauthorized_policies | json_query('[].entry.application.member | [@][][]')
+        - name: unauthorized_not_explicitly_denied_applications
+          capture_expression: unauthorized_applications | listify | difference(denied_and_logged_applications)
+      tags:
+        - PANW-AG-000112
+        - PANW-IP-000046
+        - PANW-IP-000047
+        - PANW-IP-000048

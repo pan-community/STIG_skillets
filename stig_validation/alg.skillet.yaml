@@ -169,7 +169,6 @@ snippets:
         ( decryption | length > 0 )
         and ( decryption | difference(security)
         )
-
       when: traffic_intermediary
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -405,7 +404,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: Has to be tested and merged in.
       pass_message: Validation successful
@@ -548,7 +547,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -620,7 +619,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
+        action_required: true
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -663,9 +662,14 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
-      test: false
-      fail_message: Has to be tested and merged
+        action_required: true
+      test: |
+        (
+        ( decryption | length > 0 )
+        and ( decryption | difference(security)
+        )
+      when: traffic_intermediary
+      fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228854
       tags:
@@ -676,9 +680,14 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: 'true'
-      test: false
-      fail_message: Has to be tested and merged
+        action_required: true
+      test: |
+        (
+        ( decryption | length > 0 )
+        and ( decryption | difference(security)
+        )
+      when: traffic_intermediary
+      fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228855
       tags:
@@ -741,15 +750,9 @@ snippets:
         - PANW-AG-000081
 
     - name: capture_logging_settings
-      cmd: parse
-      variable: config
-      outputs:
-        - name: valid_syslog_profiles
-          capture_list: /config/shared/log-settings/syslog/entry[count(server)>0]/@name
-        - name: valid_syslog_log_forwarding_profile
-          capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
-        - name: valid_system_syslog_settings
-          capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
+      include: shared_snippets
+      include_snippets:
+        - name: capture_logging_settings
       tags:
         - PANW-AG-000094
         - PANW-AG-000144
@@ -985,15 +988,9 @@ snippets:
         - online_mode_only
 
     - name: capture_netflow_profiles
-      cmd: parse
-      variable: config
-      outputs:
-        - name: netflow_profiles
-          capture_list: /config/shared/server-profile/netflow/entry/@name
-        - name: interfaces_with_netflow
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry[layer3 or ip]/@name
-        - name: interfaces_missing_netflow
-          capture_expression: netflow_interfaces | listify | difference(interfaces_with_netflow)
+      include: shared_snippets
+      include_snippets:
+        - name: capture_netflow_profiles
       tags:
         - PANW-AG-000111
 
@@ -1010,17 +1007,9 @@ snippets:
         - PANW-AG-000111
 
     - name: capture_unauthorized_policies
-      cmd: parse
-      variable: config
-      outputs:
-        - name: unauthorized_policies
-          capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
-            [action="deny" and not(log-end="no") and not(disabled="yes") and not(application/member="any")]
-        - name: denied_and_logged_applications
-          capture_expression: unauthorized_policies | json_query('[].entry.application.member | [@][][]')
-        - name: unauthorized_not_explicitly_denied_applications
-          capture_expression: unauthorized_applications | listify | difference(denied_and_logged_applications)
+      include: shared_snippets
+      include_snippets:
+        - name: capture_unauthorized_policies
       tags:
         - PANW-AG-000112
 
@@ -1110,30 +1099,9 @@ snippets:
         - PANW-AG-000118
 
     - name: capture_alert_mechanisms
-      cmd: parse
-      variable: config
-      outputs:
-        - name: valid_alert_server_profiles
-          capture_list: |
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
-            [match-list/entry/{{alert_mechanism}}]/@name
-        - name: invalid_alert_mechanisms_policies
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
-          filter_items: |
-            item | json_query('entry.to.member | [@][]') | item_present(trusted_zones | listify + ["any"])
-            and (
-              not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
-              or (
-                not item | json_query('entry."profile-setting".group.member')
-                and (
-                  not item | json_query('entry."profile-setting".profiles.virus.member')
-                  or not item | json_query('entry."profile-setting".profiles.vulnerability.member')
-                  or not item | json_query('entry."profile-setting".profiles.spyware.member')
-                )
-              )
-            )
-        - name: invalid_alert_mechanisms_policies_names
-          capture_expression: invalid_alert_mechanisms_policies | map(attribute="entry.@name") | list
+      include: shared_snippets
+      include_snippets:
+        - name: capture_alert_mechanisms
       tags:
         - PANW-AG-000119
         - PANW-AG-000120
@@ -1165,14 +1133,9 @@ snippets:
         - PANW-AG-000120
 
     - name: capture_invalid_alert_dos_policies
-      cmd: parse
-      variable: config
-      outputs:
-        - name: valid_alert_dos_policies
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes")]
-          filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
-        - name: invalid_alert_dos_policies
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]
+      include: shared_snippets
+      include_snippets:
+        - name: capture_invalid_alert_dos_policies
       tags:
         - PANW-AG-000121
 
@@ -1191,20 +1154,9 @@ snippets:
         - PANW-AG-000121
 
     - name: capture_interzone_intersubnet_alerts
-      cmd: parse
-      variable: config
-      outputs:
-        - name: invalid_intersubnet_alert_policies
-          capture_list: |
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not(disabled="yes")]
-          filter_items: |
-            not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
-            or (
-              not item | json_query('entry."profile-setting".group.member')
-              and not item | json_query('entry."profile-setting".profiles.virus.member')
-            )
-        - name: invalid_intersubnet_alert_policies_names
-          capture_expression: invalid_intersubnet_alert_policies | map(attribute="entry.@name") | list
+      include: shared_snippets
+      include_snippets:
+        - name: capture_interzone_intersubnet_alerts
       tags:
         - PANW-AG-000122
 
