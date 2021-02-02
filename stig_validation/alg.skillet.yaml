@@ -115,6 +115,18 @@ variables:
       - key: Dos
         value: dos
 
+  - name: dos_zone_protection_profiles
+    description: Dos zone profile for internal zones if zone protection is used
+    type_hint: list
+    default:
+      - trusted_zone_protection
+
+  - name: dos_policies
+    description: Zone policies for internal zones if dos policies are used
+    type_hint: list
+    default:
+      - dos_policy
+
 snippets:
 
     - name: PANW-AG-000015-capture
@@ -847,73 +859,54 @@ snippets:
       tags:
         - PANW-AG-000101
 
-    - name: PANW-AG-000102-capture
+    - name: capture_dos_protection
       cmd: parse
       variable: config
       outputs:
-      -   name: zones_with_protection_profiles
-          capture_value: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile/../../@name
-      -   name: zone_protection_profiles
-          capture_list: /config/devices/entry[@name="localhost.localdomain"]/network/profiles/zone-protection-profile/entry/@name
-      -   name: zones_with_intended_dos_zone_protection_profile
-          capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry/network/zone-protection-profile[text()
-              = "{{ dos_zone_protection_profile }}"]/../../@name
-      -   name: dos_protection_policies
-          capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry/@name
-      -   name: internal_zone_with_intended_dos_protection_policy
-          capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry/to/zone/member[text()
-              = "{{ internal_zone }}"]
-      -   name: dmz_zone_with_intended_dos_protection_policy
-          capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry/to/zone/member[text()
-              = "{{ dmz_zone }}"]
+        -   name: zone_protection_profiles
+            capture_list: /config/devices/entry[@name="localhost.localdomain"]/network/profiles/zone-protection-profile/entry/@name
+        -   name: zones_with_intended_dos_zone_protection_profile
+            capture_list: |
+              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry[
+                {% for prof in dos_zone_protection_profiles %} network/zone-protection-profile/text()='{{ prof }}' {% if not loop.last %} or {% endif %}{% endfor %}
+              ]/@name
+        -   name: zones_without_required_zone_protection
+            capture_expression: trusted_zones | difference(zones_with_intended_dos_zone_protection_profile)
+        -   name: dos_policies_without_profile
+            capture_list: |
+              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
+                not(protection/classified/profile)
+                and {% for pol in dos_policies %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %}
+              ]/@name
+        -   name: dos_policies_with_profile
+            capture_list: |
+              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
+                protection/classified/profile
+                and ({% for pol in dos_policies %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %})
+              ]
+        -   name: zones_without_policy_protection
+            capture_expression: trusted_zones | difference(dos_policies_with_profile | json_query("[].entry.to.zone.member[]"))
       tags:
-      - PANW-AG-000102
+        - PANW-AG-000102
 
-    - cmd: validate
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62601
-      fail_message: Hit the Zone Fail Message
-      label: The Palo Alto Networks security platform must protect against Denial of
-          Service (DoS) attacks by employing rate-based attack prevention behavior analysis
-          (traffic thresholds).
-      name: PANW-AG-000102-zone
-      output_type: validation
-      pass_message: Hit Zone Pass Message
+    - name: PANW-AG-000102
+      label: The Palo Alto Networks security platform must protect against Denial of Service (DoS) attacks by employing rate-based attack prevention behavior analysis (traffic thresholds).
       meta:
         stig: alg
         severity: medium
-      tags:
-      - PANW-AG-000102
       test: |-
-          (
-          zone_protection_profiles | length
-          and internal_zone in zones_with_protection_profiles
-          and dmz_zone in zones_with_protection_profiles
-          and internal_zone in zones_with_intended_dos_zone_protection_profile
-          and dmz_zone in zones_with_intended_dos_zone_protection_profile
-          )
-      when: protection_strategy == "zone"
-
-    - cmd: validate
+          (protection_strategy == "zone" and ( zone_protection_profiles | length and not zones_without_required_zone_protection | length ))
+          or (protection_strategy == "dos" and ( not dos_policies_without_profile and not zones_without_policy_protection ))
+      fail_message: |
+        {% if protection_strategy == "zone" %}
+          {% if not zone_protection_profiles %}No zone protection profiles found{% else %}Zones without required zone protection profile - {% for zone in zones_without_required_zone_protection %}{{ zone }} {% endfor %}{% endif %}
+        {% else %}
+          {% if dos_policies_without_profile %}DoS policies missing DoS profile - {% for pol in dos_policies_without_profile %}{{ pol }} {% endfor %}{% else %}Zones not covered by policy protection - {% for zone in zones_without_policy_protection %}{{ zone }} {% endfor %}{% endif %}
+        {% endif %}
+      pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2019-12-20/finding/V-62601
-      fail_message: Hit DOS Fail Message
-      label: The Palo Alto Networks security platform must protect against Denial of
-          Service (DoS) attacks by employing rate-based attack prevention behavior analysis
-          (traffic thresholds).
-      name: PANW-AG-000102-dos
-      output_type: validation
-      pass_message: Hit DOS Pass Message
-      meta:
-        stig: alg
-        severity: medium
       tags:
-      - PANW-AG-000102
-      test: |-
-          (
-          dos_protection_policies | length
-          and internal_zone_with_intended_dos_protection_policy | length
-          and dmz_zone_with_intended_dos_protection_policy | length
-          )
-      when: protection_strategy == "dos"
+        - PANW-AG-000102
 
     - name: capture_vulnerability_profile_rules
       cmd: parse
