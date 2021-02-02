@@ -86,6 +86,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_interzone_non_default_profile_policies
       fail_message: Policies that do not have non-default profiles - {% for pol in invalid_interzone_non_default_profile_policies %}{{ pol.entry["@name"] }} {% endfor %} 
       pass_message: Validation successful
@@ -98,6 +99,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -133,6 +135,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: |
         not invalid_interzone_non_default_profile_policies
         and not non_pcap_spyware_profiles
@@ -153,6 +156,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -165,6 +169,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -185,6 +190,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
       fail_message: |
         {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
@@ -200,6 +206,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -212,6 +219,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
       fail_message: |
         {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
@@ -234,6 +242,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not security_policies_with_virus_no_email_names
       fail_message: AV policies that do not have email logging - {% for pol in security_policies_with_virus_no_email_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -246,6 +255,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -258,6 +268,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -277,6 +288,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: icmp_deny_policy
       fail_message: An explicit deny policy could not be found, click link for requirements.
       pass_message: Identified policy - {% for pol in icmp_deny_policy %}{{ pol.entry["@name"] }} {% endfor %}
@@ -298,6 +310,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_db_vulnerability_policies_names
       fail_message: DB policies with invalid vulnerability profiles - {% for pol in invalid_db_vulnerability_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -317,6 +330,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_vulnerability_app_policies_names
       fail_message: App policies with invalid vulnerability profile - {% for pol in invalid_vulnerability_app_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -337,6 +351,7 @@ snippets:
       meta:
         stig: idps
         severity: low
+        not_applicable: false
       test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
       fail_message: |
         {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
@@ -352,6 +367,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -364,6 +380,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -383,6 +400,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not interfaces_missing_netflow
       fail_message: Interfaces missing netflow - {% for int in interfaces_missing_netflow %}{{ int }} {% endfor %}
       pass_message: Validation successful
@@ -402,6 +420,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not unauthorized_not_explicitly_denied_applications and unauthorized_applications
       fail_message: |
         {% if not unauthorized_applications %}A list of unauthorized applications must be supplied
@@ -416,6 +435,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not unauthorized_not_explicitly_denied_applications
       fail_message: Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}
       pass_message: Validation successful
@@ -435,6 +455,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not unauthorized_policies_no_logging 
       fail_message: Policies denying unauthorized traffic without logging - {% for pol in unauthorized_policies_no_logging %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -448,6 +469,7 @@ snippets:
         stig: idps
         severity: medium
         action_required: true
+        not_applicable: false
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -461,6 +483,7 @@ snippets:
         stig: idps
         severity: medium
         action_required: true
+        not_applicable: false
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -473,6 +496,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -485,6 +509,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -505,6 +530,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_alert_mechanisms_policies_names
       fail_message: Policies without valid alerting - {% for pol in invalid_alert_mechanisms_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -524,6 +550,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: valid_alert_dos_policies and not invalid_alert_dos_policies
       fail_message: |
         {% if not valid_alert_dos_policies %}No valid Dos Protection policies setup for alerts {% endif %}
@@ -545,6 +572,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_intersubnet_alert_policies_names
       fail_message: Intersubnet policies with invalid alerting - {% for pol in invalid_intersubnet_alert_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -557,6 +585,7 @@ snippets:
       meta:
         stig: idps
         severity: low
+        not_applicable: false
       test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
       fail_message: |
         {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
