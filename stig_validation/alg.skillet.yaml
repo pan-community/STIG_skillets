@@ -118,14 +118,12 @@ variables:
   - name: dos_zone_protection_profiles
     description: Dos zone profile for internal zones if zone protection is used
     type_hint: list
-    default:
-      - trusted_zone_protection
+    default: trusted_zone_protection
 
   - name: dos_policies
     description: Zone policies for internal zones if dos policies are used
     type_hint: list
-    default:
-      - dos_policy
+    default: dos_policy
 
 snippets:
 
@@ -868,24 +866,24 @@ snippets:
         -   name: zones_with_intended_dos_zone_protection_profile
             capture_list: |
               /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry[
-                {% for prof in dos_zone_protection_profiles %} network/zone-protection-profile/text()='{{ prof }}' {% if not loop.last %} or {% endif %}{% endfor %}
+                {% for prof in dos_zone_protection_profiles | listify %} network/zone-protection-profile/text()='{{ prof }}' {% if not loop.last %} or {% endif %}{% endfor %}
               ]/@name
         -   name: zones_without_required_zone_protection
-            capture_expression: trusted_zones | difference(zones_with_intended_dos_zone_protection_profile)
+            capture_expression: trusted_zones | listify | difference(zones_with_intended_dos_zone_protection_profile)
         -   name: dos_policies_without_profile
             capture_list: |
               /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
                 not(protection/classified/profile)
-                and {% for pol in dos_policies %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %}
+                and {% for pol in dos_policies | listify %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %}
               ]/@name
         -   name: dos_policies_with_profile
             capture_list: |
               /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
                 protection/classified/profile
-                and ({% for pol in dos_policies %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %})
+                and ({% for pol in dos_policies | listify %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %})
               ]
         -   name: zones_without_policy_protection
-            capture_expression: trusted_zones | difference(dos_policies_with_profile | json_query("[].entry.to.zone.member[]"))
+            capture_expression: trusted_zones | listify | difference(dos_policies_with_profile | json_query("[].entry.to.zone.member[]"))
       tags:
         - PANW-AG-000102
 
