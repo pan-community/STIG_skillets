@@ -28,6 +28,11 @@ variables:
     type_hint: list
     default: web-browsing
 
+  - name: apps_with_vulnerability_protection
+    description: Applications that should have vulnerability protection applied
+    type_hint: list
+    default: web-browsing
+
   - name: alert_mechanism
     description: How the ISSO and ISSM receive alerts
     type_hint: dropdown
