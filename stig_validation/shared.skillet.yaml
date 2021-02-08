@@ -408,3 +408,28 @@ snippets:
         - PANW-IP-000046
         - PANW-IP-000047
         - PANW-IP-000048
+
+    - name: capture_vulnerability_profile_rules
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_vulnerability_interzone_security_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [
+              action="allow" and not(disabled="yes")
+              and (
+                not(to/member/text()=from/member/text())
+                or to/member='any' or from/member='any'
+                or count(to/member) > 1
+                or count(from/member) > 1
+                )
+            ]
+          filter_items: |-
+            not( item | json_query('entry."profile-setting".group.member | [@][]') | item_present(valid_vulnerability_profile_groups))
+            and not( item | json_query('entry."profile-setting".profiles.vulnerability.member | [@][]') | item_present(valid_vulnerability_profiles))
+        - name: invalid_vulnerability_interzone_security_policies_names
+          capture_expression: invalid_vulnerability_interzone_security_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000105
+        - PANW-IP-000043
