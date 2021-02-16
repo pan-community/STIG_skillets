@@ -408,6 +408,7 @@ snippets:
         - PANW-IP-000046
         - PANW-IP-000047
         - PANW-IP-000048
+        - PANW-IP-000051
 
     - name: capture_vulnerability_profile_rules
       cmd: parse
