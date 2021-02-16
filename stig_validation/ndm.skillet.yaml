@@ -189,13 +189,9 @@ snippets:
         - PANW-NM-000024
 
     - name: capture_system_management_settings
-      cmd: parse
-      variable: config
-      outputs:
-        - name: system_hostname
-          capture_value: /config/devices/entry/deviceconfig/system/hostname/text()
-        - name: system_syslog_hostname
-          capture_value: /config/devices/entry/deviceconfig/setting/management/hostname-type-in-syslog/text()
+      include: shared_snippets
+      include_snippets:
+        - name: capture_system_management_settings
       tags:
         - PANW-NM-000029
 

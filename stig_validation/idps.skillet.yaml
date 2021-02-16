@@ -99,14 +99,23 @@ snippets:
       tags:
         - PANW-IP-000001
 
+    - name: capture_system_management_settings
+      include: shared_snippets
+      include_snippets:
+        - name: capture_system_management_settings
+      tags:
+        - PANW-IP-000007
+
     - name: PANW-IP-000007
       label: The Palo Alto Networks security platform must produce audit records containing information to establish the source of the event, including, at a minimum, originating source address.
       meta:
         stig: idps
         severity: medium
         not_applicable: false
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: system_hostname and system_syslog_hostname in ["ipv4-address", "ipv6-address"]
+      fail_message: |
+        {% if not system_hostname %}A unique hostname must be configured{% endif %}
+        {% if not system_syslog_hostname in ["ipv4-address", "ipv6-address"] %}Vaild selection required for syslog hostname format.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207689
       tags:
