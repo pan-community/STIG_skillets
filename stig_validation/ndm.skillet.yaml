@@ -189,9 +189,13 @@ snippets:
         - PANW-NM-000024
 
     - name: capture_system_management_settings
-      include: shared_snippets
-      include_snippets:
-        - name: capture_system_management_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: system_hostname
+          capture_value: /config/devices/entry/deviceconfig/system/hostname/text()
+        - name: system_syslog_hostname
+          capture_value: /config/devices/entry/deviceconfig/setting/management/hostname-type-in-syslog/text()
       tags:
         - PANW-NM-000029
 
@@ -496,7 +500,7 @@ snippets:
         action_required: true
         not_applicable: false
       test: false
-      fail_message: Not implemented
+      fail_message: Manually validate that no single person has multiple Adminstrator roles (i.e. [Security or Cryptographic] and Audit)
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62745
       tags:
@@ -783,19 +787,155 @@ snippets:
       tags:
         - PANW-NM-000128
 
-    - name: PANW-NM-000131
-      label: The Palo Alto Networks security platform must use automated mechanisms to alert security personnel to threats identified by authoritative sources (e.g., CTOs) and IAW CJCSM 6510.01B.
+    - name: capture_alert_mechanisms
+      include: shared_snippets
+      include_snippets:
+        - name: capture_alert_mechanisms
+      tags:
+        - PANW-NM-000131
+
+    - name: capture_snmp_system_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: capture_snmp_profiles
+          capture_list: /config/shared/log-settings/snmptrap
+        - name: valid_threat_snmp_profile
+          capture_list: |
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/log-settings
+            /profiles/entry[match-list/entry/log-type="threat" and match-list/entry/send-snmptrap/member]
+          filter_items: |
+            "All Logs" in item | json_query('entry."match-list".entry[? "send-snmptrap"].filter | join(` , `, @)')
+            or (
+              "critical" in item | json_query('entry."match-list".entry[? "send-snmptrap"].filter | join(` , `, @)')
+              and "high" in item | json_query('entry."match-list".entry[? "send-snmptrap"].filter | join(` , `, @)')
+              and "medium" in item | json_query('entry."match-list".entry[? "send-snmptrap"].filter | join(` , `, @)')
+              and "low" in item | json_query('entry."match-list".entry[? "send-snmptrap"].filter | join(` , `, @)')
+              and "informational" in item | json_query('entry."match-list".entry[? "send-snmptrap"].filter | join(` , `, @)')
+            )
+        - name: valid_threat_snmp_profile_names
+          capture_expression: valid_threat_snmp_profile | json_query('[].entry."@name"')
+      tags:
+        - PANW-NM-000131
+      when: alert_mechanism == "send-snmptrap"
+
+    - name: capture_syslog_system_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: capture_syslog_profiles
+          capture_list: /config/shared/log-settings/syslog
+        - name: valid_threat_syslog_profile
+          capture_list: |
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/log-settings
+            /profiles/entry[match-list/entry/log-type="threat"]
+          filter_items: |
+            "All Logs" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+            or (
+              "critical" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "high" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "medium" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "low" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "informational" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+            )
+        - name: valid_threat_syslog_profile_names
+          capture_expression: valid_threat_syslog_profile | json_query('[].entry."@name"')
+      tags:
+        - PANW-NM-000131
+      when: alert_mechanism == "send-syslog"
+
+    - name: capture_email_system_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: capture_email_profiles
+          capture_list: /config/shared/log-settings/email
+        - name: valid_threat_email_profile
+          capture_list: |
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/log-settings
+            /profiles/entry[match-list/entry/log-type="threat" and match-list/entry/send-email/member]
+          filter_items: |
+            "All Logs" in item | json_query('entry."match-list".entry[? "send-email"].filter | join(` , `, @)')
+            or (
+              "critical" in item | json_query('entry."match-list".entry[? "send-email"].filter | join(` , `, @)')
+              and "high" in item | json_query('entry."match-list".entry[? "send-email"].filter | join(` , `, @)')
+              and "medium" in item | json_query('entry."match-list".entry[? "send-email"].filter | join(` , `, @)')
+              and "low" in item | json_query('entry."match-list".entry[? "send-email"].filter | join(` , `, @)')
+              and "informational" in item | json_query('entry."match-list".entry[? "send-email"].filter | join(` , `, @)')
+            )
+        - name: valid_threat_email_profile_names
+          capture_expression: valid_threat_email_profile | json_query('[].entry."@name"')
+      tags:
+        - PANW-NM-000131
+      when: alert_mechanism == "send-email"
+
+    - name: PANW-NM-000131-snmp
+      label: The Palo Alto Networks security platform must use automated mechanisms to alert security personnel to threats identified by authoritative sources (e.g., CTOs) and IAW CJCSM 6510.01B.      
       meta:
         stig: ndm
         severity: medium
-        action_required: true
-        not_applicable: false
-      test: false
-      fail_message: Not implemented
-      pass_message: Validation successful
+      test: |
+        valid_alert_server_profiles
+        and capture_snmp_profiles
+        and valid_threat_snmp_profile_names
+
+      fail_message: 
+        "{% if not capture_snmp_profiles or not valid_alert_server_profiles or not valid_threat_snmp_profile_names %}
+          {% if not capture_snmp_profiles %}Missing SNMP profiles\n{% endif %}
+          {% if not valid_alert_server_profiles %}Missing log forwarding profiles\n{% endif %}
+          {% if not valid_threat_snmp_profile_names %}Missing snmp profiles for threat logs{% endif %}
+        {% else %}All required traffic types not accounted for in system syslog settings, click link to review.{% endif %}"
+      pass_message: Validation successful - Using SNMP
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62771
       tags:
         - PANW-NM-000131
+      when: alert_mechanism == "send-snmptrap"
+
+    - name: PANW-NM-000131-syslog
+      label: The Palo Alto Networks security platform must use automated mechanisms to alert security personnel to threats identified by authoritative sources (e.g., CTOs) and IAW CJCSM 6510.01B.      
+      meta:
+        stig: ndm
+        severity: medium
+      test: |
+        valid_alert_server_profiles
+        and capture_syslog_profiles
+        and capture_log_forwarding_profiles
+        and valid_threat_syslog_profile_names
+
+      fail_message: 
+        "{% if not capture_syslog_profiles or not valid_alert_server_profiles or not valid_threat_syslog_profile_names %}
+          {% if not capture_syslog_profiles %}Missing Syslog profiles{% endif %}
+          {% if not valid_alert_server_profiles %}Missing log forwarding profiles{% endif %}
+          {% if not valid_threat_syslog_profile_names %}Missing Syslog profiles for threat logs{% endif %}
+        {% else %}All required traffic types not accounted for in system syslog settings, click link to review.{% endif %}"
+      pass_message: Validation successful - Using Syslog
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62771
+      tags:
+        - PANW-NM-000131
+      when: alert_mechanism == "send-syslog"
+
+    - name: PANW-NM-000131-email
+      label: The Palo Alto Networks security platform must use automated mechanisms to alert security personnel to threats identified by authoritative sources (e.g., CTOs) and IAW CJCSM 6510.01B.      
+      meta:
+        stig: ndm
+        severity: medium
+      test: |
+        valid_alert_server_profiles
+        and capture_email_profiles
+        and capture_log_forwarding_profiles
+        and valid_threat_email_profile_names
+
+      fail_message: 
+        "{% if not capture_email_profiles or not valid_alert_server_profiles or not valid_threat_email_profile_names %}
+          {% if not capture_email_profiles %}Missing Email profiles.\n{% endif %}
+          {% if not valid_alert_server_profiles %}Missing log forwarding profiles.\n{% endif %}
+          {% if not valid_threat_email_profile_names %}Missing email profiles with threat log-type or all severity levels.{% endif %}
+        {% else %}All required traffic types not accounted for in system email settings, click link to review.{% endif %}"
+      pass_message: Validation successful - Using Email
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62771
+      tags:
+        - PANW-NM-000131
+      when: alert_mechanism == "send-email"
 
     - name: capture_centralized_admin_accounts
       cmd: parse
@@ -899,7 +1039,7 @@ snippets:
         action_required: '{{ default_admin is mapping }}'
         not_applicable: false
       test: not default_admin
-      fail_message: Default user of admin configured, manually perform login test to determin pass fail
+      fail_message: Default user of admin configured, manually perform login test to determine pass or fail.
       pass_message: Default admin user not found
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62781
       tags:
