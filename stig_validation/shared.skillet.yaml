@@ -408,3 +408,41 @@ snippets:
         - PANW-IP-000046
         - PANW-IP-000047
         - PANW-IP-000048
+        - PANW-IP-000051
+
+    - name: capture_vulnerability_profile_rules
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_vulnerability_interzone_security_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [
+              action="allow" and not(disabled="yes")
+              and (
+                not(to/member/text()=from/member/text())
+                or to/member='any' or from/member='any'
+                or count(to/member) > 1
+                or count(from/member) > 1
+                )
+            ]
+          filter_items: |-
+            not( item | json_query('entry."profile-setting".group.member | [@][]') | item_present(valid_vulnerability_profile_groups))
+            and not( item | json_query('entry."profile-setting".profiles.vulnerability.member | [@][]') | item_present(valid_vulnerability_profiles))
+        - name: invalid_vulnerability_interzone_security_policies_names
+          capture_expression: invalid_vulnerability_interzone_security_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000105
+        - PANW-IP-000043
+
+    - name: capture_system_management_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: system_hostname
+          capture_value: /config/devices/entry/deviceconfig/system/hostname/text()
+        - name: system_syslog_hostname
+          capture_value: /config/devices/entry/deviceconfig/setting/management/hostname-type-in-syslog/text()
+      tags:
+        - PANW-NM-000029
+        - PANW-IP-000007

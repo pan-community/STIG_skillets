@@ -100,6 +100,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: vaild_authentication_profiles and not invalid_admin_users
       fail_message: |
         {% if not vaild_authentication_profiles %}No vaild authentication profiles found{% endif %}
@@ -115,8 +116,9 @@ snippets:
         stig: ndm
         severity: low
         action_required: true
+        not_applicable: false
       test: false
-      fail_message: "Verify that displayed login banner is concistent with STIG"
+      fail_message: "Verify that displayed login banner is consistent with STIG"
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62707
       tags:
@@ -128,6 +130,7 @@ snippets:
         stig: ndm
         severity: medium
         action_required: true
+        not_applicable: false
       test: false
       fail_message: Verify appropriate administrator accounts as per the STIG
       pass_message: Validation successful
@@ -174,6 +177,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: |
         'All Logs' in system_syslog_filters
         or ( 'critical' in system_syslog_filters and 'high' in system_syslog_filters
@@ -185,13 +189,9 @@ snippets:
         - PANW-NM-000024
 
     - name: capture_system_management_settings
-      cmd: parse
-      variable: config
-      outputs:
-        - name: system_hostname
-          capture_value: /config/devices/entry/deviceconfig/system/hostname/text()
-        - name: system_syslog_hostname
-          capture_value: /config/devices/entry/deviceconfig/setting/management/hostname-type-in-syslog/text()
+      include: shared_snippets
+      include_snippets:
+        - name: capture_system_management_settings
       tags:
         - PANW-NM-000029
 
@@ -200,6 +200,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
+        not_applicable: false
       test: system_hostname and system_syslog_hostname in ["FQDN", "hostname", "ipv4-address", "ipv6-address"]
       fail_message: |
         {% if not system_hostname %}A unique hostname must be configured{% endif %}
@@ -214,6 +215,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
+        not_applicable: false
       test: |
         system_syslog and valid_traffic_syslog_profile_names and valid_threat_syslog_profile_names and valid_config_syslog_profile_names
         and (
@@ -250,6 +252,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: |
         (
           system_services.service['disable-telnet'] == 'yes'
@@ -281,6 +284,7 @@ snippets:
         stig: ndm
         severity: medium
         action_required: true
+        not_applicable: false
       test: not admin_no_auth_profile
       fail_message: Admin accounts without auth profile - {% for admin in admin_no_auth_profile %}{{ admin }} {% endfor %}
       pass_message: Verify configured administrator accounts uniquely identify an individual as per the STIG
@@ -300,6 +304,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: operational_mode == 'fips-cc' and (not centralized_authentication == 'ldap')
       fail_message: "{% if not operational_mode == 'fips-cc' %}NGFW must be running in FIPS mode{% else %}Radius requires SSL{% endif %}"
       pass_message: Validation successful
@@ -336,6 +341,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_min_length == "15"
       fail_message: Minimum password length must be set to 15
       pass_message: Validation successful
@@ -348,6 +354,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_history_count == "5"
       fail_message: Prevent password reuse limit must be 5.
       pass_message: Validation successful
@@ -360,6 +367,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_min_uppercase == "1"
       fail_message: Minimum uppercase letters must be 1.
       pass_message: Validation successful
@@ -372,6 +380,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_min_lowercase == "1"
       fail_message: Minimum lowercase letters must be 1.
       pass_message: Validation successful
@@ -384,6 +393,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_min_numeric == "1"
       fail_message: Minimum numeric letters must be 1.
       pass_message: Validation successful
@@ -396,6 +406,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_min_special == "1"
       fail_message: Minimum special characters must be 1.
       pass_message: Validation successful
@@ -408,6 +419,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_differs_by_char == "8"
       fail_message: ew Password Differs By Characters" must be set to 8
       pass_message: Validation successful
@@ -420,6 +432,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: mgmt_disable_http != 'no' and mgmt_disable_telnet != 'no'
       fail_message: HTTP and telnet must be disabled for system management.
       pass_message: Validation successful
@@ -441,6 +454,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_change_period_block == "1"
       fail_message: Block Password Change Period (days) must be set to 1
       pass_message: Validation successful
@@ -453,6 +467,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: password_min_change_period == "60"
       fail_message: Required Password Change Period (days) must be set to 60
       pass_message: Validation successful
@@ -465,6 +480,7 @@ snippets:
       meta:
         stig: ndm
         severity: high
+        not_applicable: false
       test: authorized_no_idle_timeout or admin_idle_timeout | int <= 10
       fail_message: Admin idle timeout must be 10 minutes or less if no documentation is provided authorizing otherwise
       pass_message: Validation successful
@@ -478,6 +494,7 @@ snippets:
         stig: ndm
         severity: medium
         action_required: true
+        not_applicable: false
       test: false
       fail_message: Not implemented
       pass_message: Validation successful
@@ -502,6 +519,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: not invalid_lockout_time_admin_users
       fail_message: Users with invalid lockout-time settings - {% for user in invalid_lockout_time_admin_users %}{{ user.entry["@name"] }}{% endfor %}
       pass_message: Validation successful
@@ -526,6 +544,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
+        not_applicable: false
       test: |
         system_alarm_settings["common-criteria-alarm-generation"]["enable-alarm-generation"] == "yes"
         and system_alarm_thresholds.traffic == "75"
@@ -545,6 +564,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
+        not_applicable: false
       test: system_alarm_settings["common-criteria-alarm-generation"]["enable-alarm-generation"] == "yes"
       fail_message: Device -> Log Settings -> Alarms -> Enable Alarms must be checked
       pass_message: Validation successful
@@ -567,6 +587,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
+        not_applicable: false
       test: ntp_servers | tag_present('primary-ntp-server.ntp-server-address') and ntp_servers | tag_present('secondary-ntp-server.ntp-server-address')
       fail_message: NGFW must have a primary and a secondary NTP server configured.
       pass_message: Validation successful
@@ -579,6 +600,7 @@ snippets:
       meta:
         stig: ndm
         severity: low
+        not_applicable: false
       test: ntp_servers | tag_present('primary-ntp-server.ntp-server-address') and ntp_servers | tag_present('secondary-ntp-server.ntp-server-address')
       fail_message: NGFW must have a primary and a secondary NTP server configured.
       pass_message: Validation successful
@@ -591,6 +613,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: |
         ntp_servers | tag_present('primary-ntp-server.ntp-server-address')
         and ntp_servers | tag_present('secondary-ntp-server.ntp-server-address')
@@ -615,6 +638,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: system_time_zone == "UTC" or system_time_zone == "GMT"
       fail_message: Configured system time zone must be either UTC or GMT
       pass_message: Validation successful
@@ -658,7 +682,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
-      when: TLS_gw
+        not_applicable: false
       test: |
         ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
         and (not non_dod_issuers and dod_issuers)
@@ -678,6 +702,7 @@ snippets:
         stig: ndm
         severity: medium
         action_required: true
+        not_applicable: false
       test: not non_dod_issuers and dod_issuers
       fail_message: Certificates must be manually verified as per the STIG
       pass_message: Validation successful
@@ -699,6 +724,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: change_passwrod_at_first_login == "yes"
       fail_message: The "Require Password Change on First Login" box must be checked
       pass_message: Validation successful
@@ -711,6 +737,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: mgmt_disable_http != 'no' and mgmt_disable_telnet != 'no'
       fail_message: HTTP and telnet must be disabled for system management.
       pass_message: Validation successful
@@ -723,6 +750,7 @@ snippets:
       meta:
         stig: ndm
         severity: high
+        not_applicable: false
       test: system_snmp_v3 and not snmp_profiles_not_v3_names
       fail_message: |
         {% if snmp_profiles_not_v3_names %}SNMP Profiles not using v3 - {% for prof in snmp_profiles_not_v3_names %}{{ prof }}{% endfor %}
@@ -737,6 +765,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: |
         system_syslog and valid_traffic_syslog_profile_names and valid_threat_syslog_profile_names and valid_config_syslog_profile_names
         and (
@@ -760,6 +789,7 @@ snippets:
         stig: ndm
         severity: medium
         action_required: true
+        not_applicable: false
       test: false
       fail_message: Not implemented
       pass_message: Validation successful
@@ -806,6 +836,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: |
         ( centralized_authentication == "kerberos" and kerberos_accounts and not non_kerberos_accounts )
         or ( centralized_authentication == "ldap" and ldap_accounts and not non_ldap_accounts )
@@ -843,6 +874,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: not password_profiles
       fail_message: Password profiles may not be configured, remove all password profiles.
       pass_message: Validation successful
@@ -865,6 +897,7 @@ snippets:
         stig: ndm
         severity: high
         action_required: '{{ default_admin is mapping }}'
+        not_applicable: false
       test: not default_admin
       fail_message: Default user of admin configured, manually perform login test to determin pass fail
       pass_message: Default admin user not found
@@ -886,6 +919,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: log_on_high_dp_load == "yes"
       fail_message: Enable Log on High DP Load must be checked.
       pass_message: Validation successful
@@ -898,6 +932,7 @@ snippets:
       meta:
         stig: ndm
         severity: medium
+        not_applicable: false
       test: |
         (
           ntp_servers["ntp-servers"]["primary-ntp-server"]["authentication-type"] | tag_present("autokey")

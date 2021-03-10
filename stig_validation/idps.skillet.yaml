@@ -28,6 +28,11 @@ variables:
     type_hint: list
     default: web-browsing
 
+  - name: apps_with_vulnerability_protection
+    description: Applications that should have vulnerability protection applied
+    type_hint: list
+    default: web-browsing
+
   - name: alert_mechanism
     description: How the ISSO and ISSM receive alerts
     type_hint: dropdown
@@ -86,6 +91,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_interzone_non_default_profile_policies
       fail_message: Policies that do not have non-default profiles - {% for pol in invalid_interzone_non_default_profile_policies %}{{ pol.entry["@name"] }} {% endfor %} 
       pass_message: Validation successful
@@ -93,13 +99,23 @@ snippets:
       tags:
         - PANW-IP-000001
 
+    - name: capture_system_management_settings
+      include: shared_snippets
+      include_snippets:
+        - name: capture_system_management_settings
+      tags:
+        - PANW-IP-000007
+
     - name: PANW-IP-000007
       label: The Palo Alto Networks security platform must produce audit records containing information to establish the source of the event, including, at a minimum, originating source address.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+        not_applicable: false
+      test: system_hostname and system_syslog_hostname in ["ipv4-address", "ipv6-address"]
+      fail_message: |
+        {% if not system_hostname %}A unique hostname must be configured{% endif %}
+        {% if not system_syslog_hostname in ["ipv4-address", "ipv6-address"] %}Vaild selection required for syslog hostname format.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207689
       tags:
@@ -133,6 +149,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: |
         not invalid_interzone_non_default_profile_policies
         and not non_pcap_spyware_profiles
@@ -153,6 +170,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -165,6 +183,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -185,6 +204,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
       fail_message: |
         {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
@@ -200,6 +220,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -212,6 +233,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
       fail_message: |
         {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
@@ -234,6 +256,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not security_policies_with_virus_no_email_names
       fail_message: AV policies that do not have email logging - {% for pol in security_policies_with_virus_no_email_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -246,6 +269,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -258,6 +282,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -277,6 +302,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: icmp_deny_policy
       fail_message: An explicit deny policy could not be found, click link for requirements.
       pass_message: Identified policy - {% for pol in icmp_deny_policy %}{{ pol.entry["@name"] }} {% endfor %}
@@ -292,12 +318,14 @@ snippets:
         - name: capture_invalid_db_vulnerability_policies
       tags:
         - PANW-IP-000032
+        - PANW-IP-000043
 
     - name: PANW-IP-000032
       label: To protect against unauthorized data mining, the Palo Alto Networks security platform must detect and prevent SQL and other code injection attacks launched against data storage objects, including, at a minimum, databases, database records, queries, and fields.
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_db_vulnerability_policies_names
       fail_message: DB policies with invalid vulnerability profiles - {% for pol in invalid_db_vulnerability_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -317,6 +345,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_vulnerability_app_policies_names
       fail_message: App policies with invalid vulnerability profile - {% for pol in invalid_vulnerability_app_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -337,6 +366,7 @@ snippets:
       meta:
         stig: idps
         severity: low
+        not_applicable: false
       test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
       fail_message: |
         {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
@@ -352,6 +382,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -359,13 +390,21 @@ snippets:
       tags:
         - PANW-IP-000041
 
+    - name: capture_vulnerability_profile_rules
+      include: shared_snippets
+      include_snippets:
+        - name: capture_vulnerability_profile_rules
+      tags:
+        - PANW-IP-000043
+
     - name: PANW-IP-000043
       label: The Palo Alto Networks security platform must use a Vulnerability Protection Profile that blocks any critical, high, or medium threats.
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+        not_applicable: false
+      test: not invalid_vulnerability_interzone_security_policies_names
+      fail_message: Policies with bad vulnerability profiles - {% for pol in invalid_vulnerability_interzone_security_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207704
       tags:
@@ -383,6 +422,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not interfaces_missing_netflow
       fail_message: Interfaces missing netflow - {% for int in interfaces_missing_netflow %}{{ int }} {% endfor %}
       pass_message: Validation successful
@@ -396,12 +436,15 @@ snippets:
         - name: capture_unauthorized_policies
       tags:
         - PANW-IP-000046
+        - PANW-IP-000048
+        - PANW-IP-000051
 
     - name: PANW-IP-000046
       label: The Palo Alto Networks security platform must detect use of network services that have not been authorized or approved by the ISSM and ISSO, at a minimum.
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not unauthorized_not_explicitly_denied_applications and unauthorized_applications
       fail_message: |
         {% if not unauthorized_applications %}A list of unauthorized applications must be supplied
@@ -416,6 +459,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not unauthorized_not_explicitly_denied_applications
       fail_message: Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}
       pass_message: Validation successful
@@ -429,12 +473,16 @@ snippets:
       outputs:
         - name: unauthorized_policies_no_logging 
           capture_expression: unauthorized_policies | json_query('[?!(entry."log-setting")].entry."@name"')
+      tags:
+        - PANW-IP-000048
+        - PANW-IP-000051
 
     - name: PANW-IP-000048
       label: The Palo Alto Networks security platform must generate an alert to the ISSO and ISSM, at a minimum, when unauthorized network services are detected.
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not unauthorized_policies_no_logging 
       fail_message: Policies denying unauthorized traffic without logging - {% for pol in unauthorized_policies_no_logging %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -448,6 +496,7 @@ snippets:
         stig: idps
         severity: medium
         action_required: true
+        not_applicable: false
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -461,6 +510,7 @@ snippets:
         stig: idps
         severity: medium
         action_required: true
+        not_applicable: false
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -473,8 +523,9 @@ snippets:
       meta:
         stig: idps
         severity: medium
-      test: false
-      fail_message: Click link for remediation instruction.
+        not_applicable: false
+      test: not unauthorized_policies_no_logging 
+      fail_message: Policies denying unauthorized traffic without logging - {% for pol in unauthorized_policies_no_logging %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207711
       tags:
@@ -485,6 +536,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -505,6 +557,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_alert_mechanisms_policies_names
       fail_message: Policies without valid alerting - {% for pol in invalid_alert_mechanisms_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -524,6 +577,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: valid_alert_dos_policies and not invalid_alert_dos_policies
       fail_message: |
         {% if not valid_alert_dos_policies %}No valid Dos Protection policies setup for alerts {% endif %}
@@ -545,6 +599,7 @@ snippets:
       meta:
         stig: idps
         severity: medium
+        not_applicable: false
       test: not invalid_intersubnet_alert_policies_names
       fail_message: Intersubnet policies with invalid alerting - {% for pol in invalid_intersubnet_alert_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -557,6 +612,7 @@ snippets:
       meta:
         stig: idps
         severity: low
+        not_applicable: false
       test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
       fail_message: |
         {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}

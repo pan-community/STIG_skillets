@@ -118,14 +118,12 @@ variables:
   - name: dos_zone_protection_profiles
     description: Dos zone profile for internal zones if zone protection is used
     type_hint: list
-    default:
-      - trusted_zone_protection
+    default: trusted_zone_protection
 
   - name: dos_policies
     description: Zone policies for internal zones if dos policies are used
     type_hint: list
-    default:
-      - dos_policy
+    default: dos_policy
 
 snippets:
 
@@ -176,12 +174,12 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: "{{ not traffic_intermediary }}"
       test: |
         (
         ( decryption | length > 0 )
         and ( decryption | difference(security)
         )
-      when: traffic_intermediary
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228832
@@ -212,8 +210,8 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: "{{ not traffic_intermediary }}"
       test: operational_mode == 'fips-cc'
-      when: traffic_intermediary | default('no')
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228833
@@ -228,6 +226,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: operational_mode == 'fips-cc'
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
@@ -243,7 +242,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      when: TLS_gw or VPN_concentrator
+        not_applicable: "{{ not VPN_concentrator and not TLS_gw }}"
       test: operational_mode == 'fips-cc'
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
@@ -271,6 +270,7 @@ snippets:
       meta:
         stig: alg
         severity: low
+        not_applicable: false
       test: not deny_no_log_policies_names
       fail_message: Deny policies without logging - {% for pol in deny_no_log_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -291,6 +291,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       when: not use_WMI
@@ -318,6 +319,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not capture_dns_proxy_names
       fail_message: DNS proxy must not be configured
       pass_message: Validation successful
@@ -378,6 +380,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not non_approved_ppsm_policies_names
       fail_message: Non PPSM approved policies - {%for pol in non_approved_ppsm_policies_names%}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -403,7 +406,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      when: TLS_gw
+        not_applicable: "{{ not TLS_gw }}"
       test: not decryption_policies or ocsp_responders
       fail_message: OCSP responders must be configured if decryption is used
       pass_message: Validation successful
@@ -417,6 +420,7 @@ snippets:
         stig: alg
         severity: medium
         action_required: true
+        not_applicable: false
       test: false
       fail_message: Has to be tested and merged in.
       pass_message: Validation successful
@@ -459,6 +463,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not invalid_spyware_security_policies_names
       fail_message: Policies with invalid spyware profile - {% for pol in invalid_spyware_security_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -489,6 +494,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not zones_permitting_spoofing
       fail_message: Zones that permit IP Spoofing - {% for zone in zones_permitting_spoofing %}{{ zone }} {% endfor %}
       pass_message: Validation successful
@@ -512,6 +518,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not default_any_any_policies
       fail_message: Policies that permit by default - {% for pol in default_any_any_policies %}{{ pol }}{% endfor %}
       pass_message: Validation successful
@@ -539,6 +546,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       # TCP default is higher than 900 so there must be a configuration element to be valid
       test: (
          device_session_timeout_tcp | int < 901
@@ -560,6 +568,7 @@ snippets:
         stig: alg
         severity: medium
         action_required: true
+        not_applicable: false
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -582,6 +591,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
       fail_message: |
         {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
@@ -597,6 +607,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
       fail_message: |
         {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
@@ -619,6 +630,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not security_policies_with_virus_no_email_names
       fail_message: AV policies that do not have email logging - {% for pol in security_policies_with_virus_no_email_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -632,6 +644,7 @@ snippets:
         stig: alg
         severity: medium
         action_required: true
+        not_applicable: false
       test: false
       fail_message: As this may be a manual process it should be verified manually.
       pass_message: Validation successful
@@ -644,6 +657,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
       fail_message: |
         {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
@@ -659,6 +673,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
       fail_message: |
         {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
@@ -675,12 +690,12 @@ snippets:
         stig: alg
         severity: medium
         action_required: true
+        not_applicable: "{{ not traffic_intermediary }}"
       test: |
         (
         ( decryption | length > 0 )
         and ( decryption | difference(security)
         )
-      when: traffic_intermediary
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228854
@@ -692,13 +707,12 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
+        not_applicable: "{{ not traffic_intermediary }}"
       test: |
         (
         ( decryption | length > 0 )
         and ( decryption | difference(security)
         )
-      when: traffic_intermediary
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228855
@@ -735,6 +749,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not invalid_db_vulnerability_policies_names
       fail_message: DB policies with invalid vulnerability profiles - {% for pol in invalid_db_vulnerability_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -754,6 +769,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not invalid_vulnerability_app_policies_names
       fail_message: App policies with invalid vulnerability profile - {% for pol in invalid_vulnerability_app_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -774,6 +790,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
       fail_message: |
         {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
@@ -819,7 +836,7 @@ snippets:
         - PANW-AG-000101
 
     # Capture "Block session if certificate status is unknown" state.
-    - name: PANW-AG-000101
+    - name: PANW-AG-000101-capture-unknown-block
       cmd: parse
       variable: config
       outputs:
@@ -830,7 +847,7 @@ snippets:
         - PANW-AG-000101
 
     # Capture "Block session if certificate status cannot be retrieved within timeout" state
-    - name: PANW-AG-000101
+    - name: PANW-AG-000101-capture-timeout-block
       cmd: parse
       variable: config
       outputs:
@@ -845,7 +862,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      when: TLS_gw
+        not_applicable: "{{ not TLS_gw }}"
       test: |
         ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
         and (not non_dod_issuers and dod_issuers)
@@ -868,24 +885,24 @@ snippets:
         -   name: zones_with_intended_dos_zone_protection_profile
             capture_list: |
               /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry[
-                {% for prof in dos_zone_protection_profiles %} network/zone-protection-profile/text()='{{ prof }}' {% if not loop.last %} or {% endif %}{% endfor %}
+                {% for prof in dos_zone_protection_profiles | listify %} network/zone-protection-profile/text()='{{ prof }}' {% if not loop.last %} or {% endif %}{% endfor %}
               ]/@name
         -   name: zones_without_required_zone_protection
-            capture_expression: trusted_zones | difference(zones_with_intended_dos_zone_protection_profile)
+            capture_expression: trusted_zones | listify | difference(zones_with_intended_dos_zone_protection_profile)
         -   name: dos_policies_without_profile
             capture_list: |
               /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
                 not(protection/classified/profile)
-                and {% for pol in dos_policies %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %}
+                and {% for pol in dos_policies | listify %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %}
               ]/@name
         -   name: dos_policies_with_profile
             capture_list: |
               /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
                 protection/classified/profile
-                and ({% for pol in dos_policies %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %})
+                and ({% for pol in dos_policies | listify %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %})
               ]
         -   name: zones_without_policy_protection
-            capture_expression: trusted_zones | difference(dos_policies_with_profile | json_query("[].entry.to.zone.member[]"))
+            capture_expression: trusted_zones | listify | difference(dos_policies_with_profile | json_query("[].entry.to.zone.member[]"))
       tags:
         - PANW-AG-000102
 
@@ -894,6 +911,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: |-
           (protection_strategy == "zone" and ( zone_protection_profiles | length and not zones_without_required_zone_protection | length ))
           or (protection_strategy == "dos" and ( not dos_policies_without_profile and not zones_without_policy_protection ))
@@ -909,26 +927,9 @@ snippets:
         - PANW-AG-000102
 
     - name: capture_vulnerability_profile_rules
-      cmd: parse
-      variable: config
-      outputs:
-        - name: invalid_vulnerability_interzone_security_policies
-          capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
-            [
-              action="allow" and not(disabled="yes")
-              and (
-                not(to/member/text()=from/member/text())
-                or to/member='any' or from/member='any'
-                or count(to/member) > 1
-                or count(from/member) > 1
-                )
-            ]
-          filter_items: |-
-            item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
-            and item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
-        - name: invalid_vulnerability_interzone_security_policies_names
-          capture_expression: invalid_vulnerability_interzone_security_policies | map(attribute="entry.@name") | list
+      include: shared_snippets
+      include_snippets:
+        - name: capture_vulnerability_profile_rules
       tags:
         - PANW-AG-000105
 
@@ -937,6 +938,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not invalid_vulnerability_interzone_security_policies_names
       fail_message: Policies with bad vulnerability profiles - {% for pol in invalid_vulnerability_interzone_security_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -949,6 +951,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not non_approved_ppsm_policies_names
       fail_message: Non approved policies - {%for pol in non_approved_ppsm_policies_names%}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -972,6 +975,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: captured_user_id_mapping
       fail_message: No user ID mapping ouitput found.
       pass_message: Validation successful
@@ -992,6 +996,7 @@ snippets:
       meta:
         stig: alg
         severity: low
+        not_applicable: false
       test: not interfaces_missing_netflow
       fail_message: Interfaces missing netflow - {% for int in interfaces_missing_netflow %}{{ int }} {% endfor %}
       pass_message: Validation successful
@@ -1011,6 +1016,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not unauthorized_not_explicitly_denied_applications
       fail_message: Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}
       pass_message: Validation successful
@@ -1023,6 +1029,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not deny_no_log_policies_names
       fail_message: Deny policies without logging - {% for pol in deny_no_log_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -1046,6 +1053,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not deny_no_log_pols
       fail_message: Deny policies without forwarding profiles - {%for pol in deny_no_log_pols %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -1059,6 +1067,7 @@ snippets:
         stig: alg
         severity: medium
         action_required: true
+        not_applicable: false
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -1072,6 +1081,7 @@ snippets:
         stig: alg
         severity: medium
         action_required: true
+        not_applicable: false
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -1084,6 +1094,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: true
       fail_message: Click link for remediation instruction.
       pass_message: Validation requires manual review of architecture documentation
@@ -1106,6 +1117,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not invalid_alert_mechanisms_policies_names
       fail_message: Policies without valid alerting - {% for pol in invalid_alert_mechanisms_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -1118,6 +1130,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not invalid_alert_mechanisms_policies_names
       fail_message: Policies without valid alerting - {% for pol in invalid_alert_mechanisms_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -1137,6 +1150,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: valid_alert_dos_policies and not invalid_alert_dos_policies
       fail_message: |
         {% if not valid_alert_dos_policies %}No valid Dos Protection policies setup for alerts {% endif %}
@@ -1158,6 +1172,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not invalid_intersubnet_alert_policies_names
       fail_message: Intersubnet policies with invalid alerting - {% for pol in invalid_intersubnet_alert_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -1177,6 +1192,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: icmp_deny_policy
       fail_message: An explicit deny policy could not be found, click link for requirements.
       pass_message: Identified policy - {% for pol in icmp_deny_policy %}{{ pol.entry["@name"] }} {% endfor %}
@@ -1189,7 +1205,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      when: traffic_intermediary
+        not_applicable: "{{ not traffic_intermediary }}"
       test: operational_mode == 'fips-cc'
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
@@ -1203,7 +1219,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
-      when: TLS_gw
+        not_applicable: "{{ not TLS_gw }}"
       test: operational_mode == 'fips-cc'
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
@@ -1217,6 +1233,7 @@ snippets:
       meta:
         stig: alg
         severity: low
+        not_applicable: false
       test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
       fail_message: |
         {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
@@ -1256,6 +1273,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not smtp_policies_no_av
       fail_message: SMTP policies without av - {% for pol in smtp_policies_no_av %}{{ pol }} {% endfor %}
       pass_message: Validation successful
@@ -1289,6 +1307,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not decryption_policies and not invalid_ftp_policies
       fail_message: |
         {% if not decryption_policies %}This validation requiers decryption to be configured. {% endif %}
@@ -1324,6 +1343,7 @@ snippets:
       meta:
         stig: alg
         severity: medium
+        not_applicable: false
       test: not invalid_http_policies_names
       fail_message: Policies without proper profiles - {% for pol in invalid_http_policies_names %}{{ pol }} {% endfor %}
       pass_message: Validation successful
