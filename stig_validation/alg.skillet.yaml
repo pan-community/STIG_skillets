@@ -180,6 +180,7 @@ snippets:
         ( decryption | length > 0 )
         and ( decryption | difference(security)
         )
+      when: traffic_intermediary
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228832
@@ -212,6 +213,7 @@ snippets:
         severity: medium
         not_applicable: "{{ not traffic_intermediary }}"
       test: operational_mode == 'fips-cc'
+      when: traffic_intermediary | default('no')
       fail_message: The NGFW must be running in FIPS mode
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228833
@@ -927,9 +929,26 @@ snippets:
         - PANW-AG-000102
 
     - name: capture_vulnerability_profile_rules
-      include: shared_snippets
-      include_snippets:
-        - name: capture_vulnerability_profile_rules
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_vulnerability_interzone_security_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [
+              action="allow" and not(disabled="yes")
+              and (
+                not(to/member/text()=from/member/text())
+                or to/member='any' or from/member='any'
+                or count(to/member) > 1
+                or count(from/member) > 1
+                )
+            ]
+          filter_items: |-
+            item | element_value('profile-setting.profiles.vulnerability.member') not in valid_vulnerability_profiles
+            and item | element_value('profile-setting.group.member') not in valid_vulnerability_profile_groups
+        - name: invalid_vulnerability_interzone_security_policies_names
+          capture_expression: invalid_vulnerability_interzone_security_policies | map(attribute="entry.@name") | list
       tags:
         - PANW-AG-000105
 
@@ -1089,15 +1108,34 @@ snippets:
       tags:
         - PANW-AG-000116
 
+    - name: capture_enabled_alert_mechanisms
+      include: shared_snippets
+      include_snippets:
+        - name: capture_enabled_alert_mechanisms
+        - name: capture_alert_mechanisms_policies
+        - name: capture_alert_mechanisms_noauth
+        - name: capture_alert_mechanisms_names
+      tags:
+        - PANW-AG-000118
+
     - name: PANW-AG-000118
       label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when threats identified by authoritative sources (e.g., IAVMs or CTOs) are detected.
       meta:
         stig: alg
         severity: medium
         not_applicable: false
-      test: true
-      fail_message: Click link for remediation instruction.
-      pass_message: Validation requires manual review of architecture documentation
+      test: |-
+            (
+            enabled_alert_server_profiles
+            and valid_alert_policies_names | length
+            and not invalid_alert_policies_names | length
+            )
+      fail_message:
+        "{% if not enabled_alert_server_profiles %}Missing valid server profiles{% endif %}
+        {% if not valid_alert_policies_names %}Missing valid rules with log-setting profiles{% endif %}
+        {% if invalid_alert_policies_names %}Policies without valid alerting - {% for pol in invalid_alert_policies_names %}{{ pol }} {% endfor %}
+        {% else %}All required findings not True, click link to review.{% endif %}"
+      pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228870
       tags:
         - PANW-AG-000118
