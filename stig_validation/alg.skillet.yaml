@@ -178,7 +178,7 @@ snippets:
       test: |
         (
         ( decryption | length > 0 )
-        and ( decryption | difference(security)
+        and ( decryption | difference(security))
         )
       when: traffic_intermediary
       fail_message: Click link for remediation instruction.
@@ -696,7 +696,7 @@ snippets:
       test: |
         (
         ( decryption | length > 0 )
-        and ( decryption | difference(security)
+        and ( decryption | difference(security))
         )
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -713,7 +713,7 @@ snippets:
       test: |
         (
         ( decryption | length > 0 )
-        and ( decryption | difference(security)
+        and ( decryption | difference(security))
         )
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -866,11 +866,11 @@ snippets:
         severity: medium
         not_applicable: "{{ not TLS_gw }}"
       test: |
-        ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
+        ( dod_cert_names_present_in_profile | sort == dod_cert_names | sort )
         and (not non_dod_issuers and dod_issuers)
         and (not 'no' in unknown_cert_session_block)
         and (not 'no' in timeout_session_block)
-        and ({{ server_profiles_cert_profile | sort }} == {{ cert_profile_names | sort }} )
+        and ( server_profiles_cert_profile | sort == cert_profile_names | sort )
         and (ocsp_required == 'yes')
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
