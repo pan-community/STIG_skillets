@@ -1,0 +1,538 @@
+---
+
+name: shared_snippets
+label : Shared snippets for gathering information
+
+description: These snippets are shared between STIGs
+
+type: pan_validation
+labels:
+    collection:
+        - stig
+        - Validation
+
+variables:
+
+snippets:
+
+    - name: get_system_info
+      cmd: cli
+      cmd_str: show system info
+      output_type: xml
+      outputs:
+        - name: operational_mode
+          capture_value: /system/operational-mode/text()
+      tags:
+        - PANW-NM-000051
+
+    - name: capture_av_profile_in_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_av_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
+            [
+              (decoder/entry[@name='smtp']/action='drop' or decoder/entry[@name='smtp']/action='reset-both')
+              and (decoder/entry[@name='smtp']/wildfire-action='drop' or decoder/entry[@name='smtp']/wildfire-action='reset-both')
+              and (decoder/entry[@name='pop3']/action='drop' or decoder/entry[@name='pop3']/action='reset-both')
+              and (decoder/entry[@name='pop3']/wildfire-action='drop' or decoder/entry[@name='pop3']/wildfire-action='reset-both')
+              and (decoder/entry[@name='imap']/action='drop' or decoder/entry[@name='imap']/action='reset-both')
+              and (decoder/entry[@name='imap']/wildfire-action='drop' or decoder/entry[@name='imap']/wildfire-action='reset-both')
+            ]/@name
+        - name: invalid_av_profiles
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry/@name
+          filter_items: item not in valid_av_profiles
+        - name: valid_av_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
+            entry[count(virus) > 0 and not(virus/member='default')]/@name
+        - name: invalid_av_profile_groups
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry/@name
+          filter_items: item not in valid_av_profile_groups
+        # At this point we can assume all profiles and profile-groups have vaild antivirus settings
+        - name: invalid_security_policies_av
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
+            [
+              action='allow'
+              and (
+                count(profile-setting/group/member) = 0
+                and (
+                  count(profile-setting/profiles/virus/member) = 0
+                  or profile-setting/profiles/virus/member='default'
+                )
+              )
+            ]/@name
+      tags:
+        - PANW-AG-000062
+        - PANW-AG-000063
+        - PANW-AG-000073
+        - PANW-AG-000074
+        - PANW-IP-000020
+        - PANW-IP-000026
+
+    - name: capture_virus_alerting
+      cmd: parse
+      variable: config
+      outputs:
+        - name: device_server_profile_email
+          capture_list: /config/shared/log-settings/email/entry/@name
+        - name: log_profiles_with_email
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
+            [count(match-list/entry/send-email/member) > 0]/@name
+        - name: security_policies_with_virus_no_email
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
+            [
+              action='allow'
+              and not(disabled="yes")
+              and (
+                count(profile-seting/profile/virus/member) > 0
+                or count(profile-setting/group/member) > 0
+              )
+            ]
+          filter_items: item | element_value('log-setting') not in log_profiles_with_email
+        - name: security_policies_with_virus_no_email_names
+          capture_expression: security_policies_with_virus_no_email | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000064
+        - PANW-IP-000028
+
+    - name: capture_icmp_deny_policy
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_deny_policy
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and not(disabled="yes") and source/member="any" and destination/member="any"
+            and application/member="icmp" and application/member="ipv6-icmp" and application/member="traceroute"]
+          filter_items: |
+             untrusted_zones | listify | items_present(item.entry.from.member) or "any" in item.entry.from.member
+             and trusted_zones | listify | items_present(item.entry.to.member) or "any" in item.entry.to.member
+      tags:
+        - PANW-AG-000127
+        - PANW-IP-000031
+
+    - name: capture_predefined_db_applications
+      cmd: op
+      cmd_str: <show><predefined><xpath>/predefined/application</xpath></predefined></show>
+      output_type: xml
+      outputs:
+        - name: predefined_db_applications
+          capture_list: /application/entry[subcategory="database"]/@name
+      tags:
+        - PANW-AG-000080
+        - PANW-IP-000032
+
+    - name: capture_vulnerability_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_vulnerability_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry/rules/entry
+            [count(action/reset-both)>0]/../../@name
+        - name: valid_vulnerability_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
+            entry[count(vulnerability)>0 and not(vulnerability/member='default')]/@name
+      tags:
+        - PANW-AG-000080
+        - PANW-AG-000081
+        - PANW-AG-000105
+        - PANW-AG-000148
+        - PANW-AG-000149
+
+    - name: capture_invalid_db_vulnerability_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: application_groups_with_db
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application-group/entry
+          filter_items: item | json_query('entry.members.member | [@][]') | item_present(predefined_db_applications)
+        - name: application_groups_with_db_names
+          capture_expression: application_groups_with_db | json_query('[].entry."@name"')
+        - name: invalid_db_vulnerability_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not (disabled="yes")]
+          filter_items: |
+            item | json_query('entry.application.member | [@][]') | item_present(predefined_db_applications + application_groups_with_db_names)
+            and (
+              (not item | json_query('entry."profile-setting".group.member') and not item | json_query('entry."profile-setting".profiles.vulnerability.member'))
+              or (
+                item | json_query('entry."profile-setting".group.member[0]') not in valid_vulnerability_profile_groups
+                and item | json_query('entry."profile-setting".profiles.vulnerability.member[0]') not in valid_vulnerability_profiles
+              )
+            )
+        - name: invalid_db_vulnerability_policies_names
+          capture_expression: invalid_db_vulnerability_policies | json_query('[].entry."@name"')
+      tags:
+        - PANW-AG-000080
+
+    - name: capture_vulnerability_protected_apps
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_vulnerability_app_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not(disabled="yes")]
+          filter_items: |
+            (
+              item | json_query('entry.application.member | [@][]') | item_present(apps_with_vulnerability_protection | listify)
+              or "any" in item.entry.application.member
+            )
+            and (
+              item | json_query('entry."profile-setting".group.member[0]') not in valid_vulnerability_profile_groups
+              and item | json_query('entry."profile-setting".profiles.vulnerability.member[0]') not in valid_vulnerability_profiles
+            )
+        - name: invalid_vulnerability_app_policies_names
+          capture_expression: invalid_vulnerability_app_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000081
+        - PANW-IP-000033
+
+    # Verify certs exist and are DoD-issued and that none are issued by non-DoD entities
+    - name: verify_dod_certs_exist
+      cmd: parse
+      variable: config
+      outputs:
+        - name: non_dod_issuers
+          capture_value: /config/shared/certificate/entry/issuer
+          filter_items: |-
+            "DoD" not in item
+        - name: dod_issuers
+          capture_value: /config/shared/certificate/entry/issuer
+          filter_items: |-
+            "DoD" in item
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+        - PANW-NM-000141
+
+      # Capture the name of all the DoD certs (if there are no non-DoD issuers)
+    - name: capture_dod_cert_names
+      cmd: parse
+      variable: config
+      outputs:
+        - name: dod_cert_names
+          capture_list: /config/shared/certificate/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+      # Capture the name(s) of all Certificate Profiles
+    - name: capture_names_of_cert_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: cert_profile_names
+          capture_list: /config/shared/certificate-profile/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture all certs that are listed under the Certificate Profile(s)
+    - name: capture_certs_listed_under_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: dod_cert_names_present_in_profile
+          capture_list: /config/shared/certificate-profile/entry/CA/entry/@name
+      when: not non_dod_issuers and dod_issuers
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture the Certification Profile is aligned with the Authentication Server
+    #   PART I
+    # NOTE: RADIUS servers have an option to set a Certification Profile
+    #       LDAP servers do not have this option (SEE following task)
+    - name: capture_cert_profile_aligned_to_auth_server_I
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profiles_cert_profile
+          capture_list: /config/shared/server-profile/radius/entry/protocol/PEAP-MSCHAPv2/radius-cert-profile/text()
+      filter_items:
+       item in cert_profile_names
+      when: |
+          not (non_dod_issuers and dod_issuers)
+          and ('radius' in server_profile_types)
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture the Certification Profile is aligned with the Authentication Server
+    #   PART II
+    # NOTE: RADIUS servers have an option to set a Certification Profile
+    #       LDAP servers do not have this option
+    #       This step simply sets server_profiles_cert_profile to match the
+    #       content in cert_profile_names so that the test will pass.
+
+    - name: capture_cert_profile_aligned_to_auth_server_II
+      cmd: parse
+      variable: config
+      outputs:
+        - name: server_profiles_cert_profile_DEBUG
+          capture_list: /config/shared/certificate-profile/entry/@name
+      when: |
+          not (non_dod_issuers and dod_issuers)
+          and ('ldap' in server_profile_types)
+          and ('radius' not in server_profile_types)
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    # Capture OCSP required setting (does the system use OCSP for cert revocation)
+    - name: capture_ocsp_setting
+      cmd: parse
+      variable: config
+      outputs:
+        - name: ocsp_required
+          capture_value: /config/shared/certificate-profile/entry/use-ocsp/text()
+
+      tags:
+        - PANW-AG-000101
+        - PANW-NM-000110
+
+    - name: capture_logging_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_syslog_profiles
+          capture_list: /config/shared/log-settings/syslog/entry[count(server)>0]/@name
+        - name: valid_syslog_log_forwarding_profile
+          capture_list: /config/shared/log-settings/config/match-list/entry[count(send-syslog/member)>0]/@name
+        - name: valid_system_syslog_settings
+          capture_list: /config/shared/log-settings/system/match-list/entry[count(send-syslog/member)>0]/@name
+      tags:
+        - PANW-AG-000094
+        - PANW-NM-000144
+
+    - name: capture_netflow_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: netflow_profiles
+          capture_list: /config/shared/server-profile/netflow/entry/@name
+        - name: interfaces_with_netflow
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/network/interface/*[//netflow-profile]//entry[layer3 or ip]/@name
+        - name: interfaces_missing_netflow
+          capture_expression: netflow_interfaces | listify | difference(interfaces_with_netflow)
+      tags:
+        - PANW-AG-000111
+
+    - name: capture_alert_mechanisms
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_alert_server_profiles
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
+            [match-list/entry/{{alert_mechanism}}]/@name
+        - name: invalid_alert_mechanisms_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(trusted_zones | listify + ["any"])
+            and (
+              not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
+              or (
+                not item | json_query('entry."profile-setting".group.member')
+                and (
+                  not item | json_query('entry."profile-setting".profiles.virus.member')
+                  or not item | json_query('entry."profile-setting".profiles.vulnerability.member')
+                  or not item | json_query('entry."profile-setting".profiles.spyware.member')
+                )
+              )
+            )
+        - name: invalid_alert_mechanisms_policies_names
+          capture_expression: invalid_alert_mechanisms_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000119
+        - PANW-AG-000120
+        - PANW-AG-000121
+        - PANW-AG-000122
+        - PANW-IP-000053
+        - PANW-IP-000055
+        - PANW-NM-000131
+
+    - name: capture_invalid_alert_dos_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_alert_dos_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes")]
+          filter_items: item | json_query('entry."log-setting"') in valid_alert_server_profiles
+        - name: invalid_alert_dos_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/dos/rules/entry[not(disabled="yes") and not(log-setting)]
+      tags:
+        - PANW-AG-000121
+        - PANW-IP-000055
+
+    - name: capture_interzone_intersubnet_alerts
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_intersubnet_alert_policies
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[action="allow" and not(disabled="yes")]
+          filter_items: |
+            not item | json_query('entry."log-setting"') | item_present(valid_alert_server_profiles)
+            or (
+              not item | json_query('entry."profile-setting".group.member')
+              and not item | json_query('entry."profile-setting".profiles.virus.member')
+            )
+        - name: invalid_intersubnet_alert_policies_names
+          capture_expression: invalid_intersubnet_alert_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-IP-000056
+        - PANW-AG-000122
+
+    - name: capture_unauthorized_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: unauthorized_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="deny" and not(log-end="no") and not(disabled="yes") and not(application/member="any")]
+        - name: denied_and_logged_applications
+          capture_expression: unauthorized_policies | json_query('[].entry.application.member | [@][][]')
+        - name: unauthorized_not_explicitly_denied_applications
+          capture_expression: unauthorized_applications | listify | difference(denied_and_logged_applications)
+      tags:
+        - PANW-AG-000112
+        - PANW-IP-000046
+        - PANW-IP-000047
+        - PANW-IP-000048
+        - PANW-IP-000051
+
+    - name: capture_vulnerability_profile_rules
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_vulnerability_interzone_security_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [
+              action="allow" and not(disabled="yes")
+              and (
+                not(to/member/text()=from/member/text())
+                or to/member='any' or from/member='any'
+                or count(to/member) > 1
+                or count(from/member) > 1
+                )
+            ]
+          filter_items: |-
+            not( item | json_query('entry."profile-setting".group.member | [@][]') | item_present(valid_vulnerability_profile_groups))
+            and not( item | json_query('entry."profile-setting".profiles.vulnerability.member | [@][]') | item_present(valid_vulnerability_profiles))
+        - name: invalid_vulnerability_interzone_security_policies_names
+          capture_expression: invalid_vulnerability_interzone_security_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000105
+        - PANW-IP-000043
+
+    - name: capture_system_management_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: system_hostname
+          capture_value: /config/devices/entry/deviceconfig/system/hostname/text()
+        - name: system_syslog_hostname
+          capture_value: /config/devices/entry/deviceconfig/setting/management/hostname-type-in-syslog/text()
+      tags:
+        - PANW-NM-000029
+        - PANW-IP-000007
+
+        
+###############################
+    - name: capture_enabled_alert_mechanisms
+      cmd: parse
+      variable: config
+      outputs:
+        - name: enabled_alert_server_profiles
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
+            [match-list/entry/{{alert_mechanism}}]/@name
+      tags:
+        - PANW-AG-000118
+        - PANW-IP-000052
+
+    - name: capture_alert_mechanisms_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_alert_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
+            and (
+            item | json_query('entry."@name" | [@][]') | item_present(authoritative_source | listify + ["any"])
+            and
+              not item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
+              or (
+                item | json_query('entry."log-setting".group.member')
+              )
+            )
+
+        - name: valid_alert_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
+            and (
+            item | json_query('entry."@name" | [@][]') | item_present(authoritative_source | listify + ["any"])
+            and
+              item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
+              or (
+                item | json_query('entry."log-setting".group.member')
+              )
+            )
+      when: authoritative_source | length
+      tags:
+        - PANW-AG-000118
+        - PANW-IP-000052
+
+    - name: capture_alert_mechanisms_noauth
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_alert_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
+            and (not item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
+              or (
+                item | json_query('entry."log-setting".group.member')
+              )
+            )
+
+        - name: valid_alert_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
+            and (item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
+              or (
+                item | json_query('entry."log-setting".group.member')
+              )
+            )
+      when: not authoritative_source | length
+      tags:
+        - PANW-AG-000118
+        - PANW-IP-000052
+
+    - name: capture_alert_mechanisms_names
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_alert_policies_names
+          capture_expression: invalid_alert_policies | map(attribute="entry.@name") | list
+
+        - name: valid_alert_policies_names
+          capture_expression: valid_alert_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000118
+        - PANW-IP-000052

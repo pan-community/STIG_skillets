@@ -1,0 +1,701 @@
+---
+
+name: IDPS_Validation
+label: skillet generated from IDPS STIG documents at stigviewer.com
+
+description: This skillet accounts for IDPS STIG versions
+
+type: pan_validation
+labels:
+    collection:
+        - stig
+        - Validation
+
+variables:
+
+  - name: netflow_interfaces
+    description: Interfaces collecting netflow information
+    type_hint: list
+    default: ethernet1/1
+
+  - name: trusted_zones
+    description: Security zones conntaining trusted hosts (Includes DMZ)
+    type_hint: list
+    default: trust
+
+  - name: unauthorized_applications
+    description: Applications that should be explicitly denied and logged
+    type_hint: list
+    default: web-browsing
+
+  - name: apps_with_vulnerability_protection
+    description: Applications that should have vulnerability protection applied
+    type_hint: list
+    default: web-browsing
+
+  - name: alert_mechanism
+    description: How the ISSO and ISSM receive alerts
+    type_hint: dropdown
+    default: snmptrap
+    dd_list:
+      - key: snmptrap
+        value: send-snmptrap
+      - key: syslog
+        value: send-syslog
+      - key: email
+        value: send-email
+
+snippets:
+
+    - name: capture_non_default_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: non_default_vulnerability_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry
+            [not(@name="strict") and not(@name="default")]/@name
+        - name: non_default_spyware_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/spyware/entry
+            [not(@name="strict") and not(@name="default")]/@name
+        - name: non_default_virus_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
+            [not(@name="default")]/@name
+        - name: valid_non_default_profile_groups
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry
+            [ count(virus) > 0 and not(virus/member='default')
+              and count(vulnerability) > 0 and not(vulnerability/member='default') and not(vulnerability/member='strict')
+              and count(spyware) > 0 and not(spyware/member='default') and not(spyware/member='strict')
+            ]/@name
+        - name: invalid_interzone_non_default_profile_policies
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
+            [action="allow" and not(disabled="yes") and (not(to/member/text()=from/member/text()) or to/member='any' or from/member='any')
+             or count(to/member) > 1 or count(from/member) > 1]
+          filter_items: |
+            ( not item | json_query('entry."profile-setting".profiles.virus.member') | item_present(non_default_virus_profiles)
+              or not item | json_query('entry."profile-setting".profiles.vulnerability.member') | item_present(non_default_vulnerability_profiles)
+              or not item | json_query('entry."profile-setting".profiles.spyware.member') | item_present(non_default_spyware_profiles)
+            ) and (
+              not item | json_query('entry."profile-setting".group.member') | item_present(valid_non_default_profile_groups)
+            )
+      tags:
+        - PANW-IP-000001
+        - PANW-IP-000008
+
+    - name: PANW-IP-000001
+      label: The Palo Alto Networks security platform must enable Antivirus, Anti-spyware, and Vulnerability Protection for all authorized traffic.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not invalid_interzone_non_default_profile_policies
+      fail_message: Policies that do not have non-default profiles - {% for pol in invalid_interzone_non_default_profile_policies %}{{ pol.entry["@name"] }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207688
+      tags:
+        - PANW-IP-000001
+
+    - name: capture_system_management_settings
+      include: shared_snippets
+      include_snippets:
+        - name: capture_system_management_settings
+      tags:
+        - PANW-IP-000007
+
+    - name: PANW-IP-000007
+      label: The Palo Alto Networks security platform must produce audit records containing information to establish the source of the event, including, at a minimum, originating source address.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: system_hostname and system_syslog_hostname in ["ipv4-address", "ipv6-address"]
+      fail_message: |
+        {% if not system_hostname %}A unique hostname must be configured{% endif %}
+        {% if not system_syslog_hostname in ["ipv4-address", "ipv6-address"] %}Vaild selection required for syslog hostname format.{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207689
+      tags:
+        - PANW-IP-000007
+
+    - name: capture_non_default_profiles
+      cmd: parse
+      variable: config
+      outputs:
+        - name: non_pcap_vulnerability_profiles
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry
+            [not(@name="strict") and not(@name="default")]
+          filter_items: |
+            "disable" in item | json_query('entry.rules.entry[]."packet-capture"')
+        - name: non_pcap_spyware_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/spyware/entry
+            [not(@name="strict") and not(@name="default")]
+          filter_items: |
+            "disable" in item | json_query('entry."botnet-domains".lists.entry[]."packet-capture"')
+        - name: non_pcap_virus_profiles
+          capture_list: |-
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/virus/entry
+            [not(@name="default") and not(packet-capture="yes")]/@name
+      tags:
+        - PANW-IP-000008
+
+    - name: PANW-IP-000008
+      label: The Palo Alto Networks security platform must capture traffic of detected/dropped malicious code.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: |
+        not invalid_interzone_non_default_profile_policies
+        and not non_pcap_spyware_profiles
+        and not non_pcap_virus_profiles
+        and not non_pcap_vulnerability_profiles
+      fail_message: |
+        {% if invalid_interzone_non_default_profile_policies %}Policies that do not have non-default profiles - {% for pol in invalid_interzone_non_default_profile_policies %}{{ pol.entry["@name"] }} {% endfor %}{% endif %}
+        {% if non_pcap_spyware_profiles %}Spyware profiles that do not have extended pcap enabled - {% for prof in non_pcap_spyware_profiles %}{{ prof.entry["@name"] }} {% endfor %}{% endif %}
+        {% if non_pcap_virus_profiles %}Anti-virus profiles that do not have pcap enabled - {% for prof in non_pcap_virus_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if non_pcap_vulnerability_profiles %}Vulnerability profiles that do not have extended pcap enabled - {% for prof in non_pcap_vulnerability_profiles %}{{ prof.entry["@name"] }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207690
+      tags:
+        - PANW-IP-000008
+
+    - name: PANW-IP-000010
+      label: In the event of a logging failure caused by the lack of audit record storage capacity, the Palo Alto Networks security platform must continue generating and storing audit records if possible, overwriting the oldest audit records in a first-in-first-out manner.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207691
+      tags:
+        - PANW-IP-000010
+
+    - name: PANW-IP-000018
+      label: The Palo Alto Networks security platform must have a DoS Protection Profile for outbound traffic applied to a policy for traffic originating from the internal zone going to the external zone.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207692
+      tags:
+        - PANW-IP-000018
+
+    - name: capture_av_profile_in_policies
+      include: shared_snippets
+      include_snippets:
+        - name: capture_av_profile_in_policies
+      tags:
+        - PANW-IP-000020
+        - PANW-IP-000026
+
+    - name: PANW-IP-000020
+      label: The Palo Alto Networks security platform must detect and deny any prohibited mobile or otherwise malicious code at the enclave boundary.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
+      fail_message: |
+        {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_av_profile_groups %}Invalid profile groups - {% for prof in invalid_av_profile_groups %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207693
+      tags:
+        - PANW-IP-000020
+
+    - name: PANW-IP-000024
+      label: The Palo Alto Networks security platform must install updates for application software files, signature definitions, detection heuristics, and vendor-provided rules when new releases are available in accordance with organizational configuration management policy and procedures.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207694
+      tags:
+        - PANW-IP-000024
+
+    - name: PANW-IP-000026
+      label: The Palo Alto Networks security platform must detect and drop any prohibited mobile or otherwise malicious code at internal boundaries.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not( invalid_av_profiles or invalid_av_profile_groups or invalid_security_policies_av )
+      fail_message: |
+        {% if invalid_av_profiles %}Invalid AV profiles - {% for prof in invalid_av_profiles %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_av_profile_groups %}Invalid profile groups - {% for prof in invalid_av_profile_groups %}{{ prof }} {% endfor %}{% endif %}
+        {% if invalid_security_policies_av %}Security policies with invalid AV - {% for pol in invalid_security_policies_av %}{{ pol }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207695
+      tags:
+        - PANW-IP-000026
+
+    - name: capture_virus_alerting
+      include: shared_snippets
+      include_snippets:
+        - name: capture_virus_alerting
+      tags:
+        - PANW-IP-000028
+
+    - name: PANW-IP-000028
+      label: The Palo Alto Networks security platform must send an immediate (within seconds) alert to, at a minimum, the SA when malicious code is detected.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not security_policies_with_virus_no_email_names
+      fail_message: AV policies that do not have email logging - {% for pol in security_policies_with_virus_no_email_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207696
+      tags:
+        - PANW-IP-000028
+
+    - name: PANW-IP-000029
+      label: The Palo Alto Networks security platform must automatically install updates to signature definitions, detection heuristics, and vendor-provided rules.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207697
+      tags:
+        - PANW-IP-000029
+
+    - name: capture_list_of_security_policy_names
+      cmd: parse
+      variable: config
+      outputs:
+        - name: list_of_security_policy_names
+          capture_list: "/config/devices/entry[@name='localhost.localdomain']
+                         /vsys/entry[@name='vsys1']/rulebase/security/rules/entry/@name"
+      when: true
+      tags:
+        - PANW-IP-000030
+
+    - name: capture_icmp_application_types
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_application_names
+          capture_list: "/config/devices/entry[@name='localhost.localdomain']
+                         /vsys/entry[@name='vsys1']/application/
+                         entry[default/ident-by-icmp-type/type='3'
+                               or default/ident-by-icmp-type/type='5'
+                               or default/ident-by-icmp-type/type='18']/@name"
+      when: true
+      tags:
+        - PANW-IP-000030
+
+    - name: capture_icmp_application_member_settings_deny
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_application_names_with_deny_rules
+          capture_list: "/config/devices/entry[@name='localhost.localdomain']
+                         /vsys/entry[@name='vsys1']/rulebase/security/rules/
+                         entry[rule-type='interzone'
+                               and action='deny'
+                               and not(disabled='yes')
+                               and contains(\"{{ icmp_application_names | join(' ') }}\", application/member)]/@name"
+      tags:
+        - PANW-IP-000030
+
+    - name: capture_icmp_application_member_settings_allow
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_application_names_with_allow_rules
+          capture_list: "/config/devices/entry[@name='localhost.localdomain']
+                         /vsys/entry[@name='vsys1']/rulebase/security/rules/
+                         entry[rule-type='interzone'
+                               and action='allow'
+                               and not(disabled='yes')
+                               and contains(\"{{ icmp_application_names | join(' ') }}\", application/member)]/@name"
+      when: true
+      tags:
+        - PANW-IP-000030
+
+    - name: PANW-IP-000030
+      label: The Palo Alto Networks security platform must block outbound ICMP Destination Unreachable, Redirect, and Address Mask reply messages.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: |
+        icmp_application_names_with_deny_rules | length > 0 and 
+        list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first )
+        < list_of_security_policy_names.index( icmp_application_names_with_allow_rules | first )
+
+      fail_message: Click link for remediation instruction...
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207698
+      tags:
+        - PANW-IP-000030
+
+    - name: capture_icmp_deny_policy
+      include: shared_snippets
+      include_snippets:
+        - name: capture_icmp_deny_policy
+      tags:
+        - PANW-IP-000031
+
+    - name: PANW-IP-000031
+      label: The Palo Alto Networks security platform must block malicious ICMP packets.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: icmp_deny_policy
+      fail_message: An explicit deny policy could not be found, click link for requirements.
+      pass_message: Identified policy - {% for pol in icmp_deny_policy %}{{ pol.entry["@name"] }} {% endfor %}
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207699
+      tags:
+        - PANW-IP-000031
+
+    - name: capture_predefined_db_applications
+      include: shared_snippets
+      include_snippets:
+        - name: capture_predefined_db_applications
+        - name: capture_vulnerability_profiles
+        - name: capture_invalid_db_vulnerability_policies
+      tags:
+        - PANW-IP-000032
+        - PANW-IP-000043
+
+    - name: PANW-IP-000032
+      label: To protect against unauthorized data mining, the Palo Alto Networks security platform must detect and prevent SQL and other code injection attacks launched against data storage objects, including, at a minimum, databases, database records, queries, and fields.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not invalid_db_vulnerability_policies_names
+      fail_message: DB policies with invalid vulnerability profiles - {% for pol in invalid_db_vulnerability_policies_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207700
+      tags:
+        - PANW-IP-000032
+
+    - name: capture_vulnerability_protected_apps
+      include: shared_snippets
+      include_snippets:
+        - name: capture_vulnerability_protected_apps
+      tags:
+        - PANW-IP-000033
+
+    - name: PANW-IP-000033
+      label: To protect against unauthorized data mining, the Palo Alto Networks security platform must detect and prevent code injection attacks launched against application objects including, at a minimum, application URLs and application code.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not invalid_vulnerability_app_policies_names
+      fail_message: App policies with invalid vulnerability profile - {% for pol in invalid_vulnerability_app_policies_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207701
+      tags:
+        - PANW-IP-000033
+
+    - name: capture_logging_settings
+      include: shared_snippets
+      include_snippets:
+        - name: capture_logging_settings
+      tags:
+        - PANW-IP-000039
+        - PANW-IP-000058
+
+    - name: PANW-IP-000039
+      label: The Palo Alto Networks security platform must off-load log records to a centralized log server.
+      meta:
+        stig: idps
+        severity: low
+        not_applicable: false
+      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
+      fail_message: |
+        {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
+        {% if not valid_syslog_log_forwarding_profile %}No valid syslog log forwarding profiles. {% endif %}
+        {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207702
+      tags:
+        - PANW-IP-000039
+
+    - name: PANW-IP-000041
+      label: The Palo Alto Networks security platform must protect against or limit the effects of known and unknown types of Denial of Service (DoS) attacks by employing rate-based attack prevention behavior analysis (traffic thresholds).
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: false
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207703
+      tags:
+        - PANW-IP-000041
+
+    - name: capture_vulnerability_profile_rules
+      include: shared_snippets
+      include_snippets:
+        - name: capture_vulnerability_profile_rules
+      tags:
+        - PANW-IP-000043
+
+    - name: PANW-IP-000043
+      label: The Palo Alto Networks security platform must use a Vulnerability Protection Profile that blocks any critical, high, or medium threats.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not invalid_vulnerability_interzone_security_policies_names
+      fail_message: Policies with bad vulnerability profiles - {% for pol in invalid_vulnerability_interzone_security_policies_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207704
+      tags:
+        - PANW-IP-000043
+
+    - name: capture_netflow_profiles
+      include: shared_snippets
+      include_snippets:
+        - name: capture_netflow_profiles
+      tags:
+        - PANW-IP-000045
+
+    - name: PANW-IP-000045
+      label: Palo Alto Networks security platform components, including sensors, event databases, and management consoles must integrate with a network-wide monitoring capability.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not interfaces_missing_netflow
+      fail_message: Interfaces missing netflow - {% for int in interfaces_missing_netflow %}{{ int }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207705
+      tags:
+        - PANW-IP-000045
+
+    - name: capture_unauthorized_policies
+      include: shared_snippets
+      include_snippets:
+        - name: capture_unauthorized_policies
+      tags:
+        - PANW-IP-000046
+        - PANW-IP-000048
+        - PANW-IP-000051
+
+    - name: PANW-IP-000046
+      label: The Palo Alto Networks security platform must detect use of network services that have not been authorized or approved by the ISSM and ISSO, at a minimum.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not unauthorized_not_explicitly_denied_applications and unauthorized_applications
+      fail_message: |
+        {% if not unauthorized_applications %}A list of unauthorized applications must be supplied
+        {% else %}Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207706
+      tags:
+        - PANW-IP-000046
+
+    - name: PANW-IP-000047
+      label: The Palo Alto Networks security platform must generate a log record when unauthorized network services are detected.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not unauthorized_not_explicitly_denied_applications
+      fail_message: Unauthorized applications not explicitly denied and logged - {% for app in unauthorized_not_explicitly_denied_applications %}{{ app }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207707
+      tags:
+        - PANW-IP-000047
+
+    - name: capture_unauthorized_policies_no_logging
+      cmd: parse
+      variable: config
+      outputs:
+        - name: unauthorized_policies_no_logging
+          capture_expression: unauthorized_policies | json_query('[?!(entry."log-setting")].entry."@name"')
+      tags:
+        - PANW-IP-000048
+        - PANW-IP-000051
+
+    - name: PANW-IP-000048
+      label: The Palo Alto Networks security platform must generate an alert to the ISSO and ISSM, at a minimum, when unauthorized network services are detected.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not unauthorized_policies_no_logging
+      fail_message: Policies denying unauthorized traffic without logging - {% for pol in unauthorized_policies_no_logging %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207708
+      tags:
+        - PANW-IP-000048
+
+    - name: PANW-IP-000049
+      label: The Palo Alto Networks security platform must continuously monitor inbound communications traffic for unusual/unauthorized activities or conditions.
+      meta:
+        stig: idps
+        severity: medium
+        action_required: true
+        not_applicable: false
+      test: true
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation requires manual review of architecture documentation
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207709
+      tags:
+        - PANW-IP-000049
+
+    - name: PANW-IP-000050
+      label: The Palo Alto Networks security platform must continuously monitor outbound communications traffic for unusual/unauthorized activities or conditions.
+      meta:
+        stig: idps
+        severity: medium
+        action_required: true
+        not_applicable: false
+      test: true
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation requires manual review of architecture documentation
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207710
+      tags:
+        - PANW-IP-000050
+
+    - name: PANW-IP-000051
+      label: The Palo Alto Networks security platform must send an alert to, at a minimum, the ISSO and ISSM when intrusion detection events are detected which indicate a compromise or potential for compromise.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not unauthorized_policies_no_logging 
+      fail_message: Policies denying unauthorized traffic without logging - {% for pol in unauthorized_policies_no_logging %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207711
+      tags:
+        - PANW-IP-000051
+
+    - name: capture_enabled_alert_mechanisms
+      include: shared_snippets
+      include_snippets:
+        - name: capture_enabled_alert_mechanisms
+        - name: capture_alert_mechanisms_policies
+        - name: capture_alert_mechanisms_noauth
+        - name: capture_alert_mechanisms_names
+      tags:
+        - PANW-IP-000052
+
+    - name: PANW-IP-000052
+      label: The Palo Alto Networks security platform must send an alert to, at a minimum, the ISSO and ISSM when threats identified by authoritative sources (e.g., IAVMs or CTOs) are detected.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: |-
+            (
+            enabled_alert_server_profiles
+            and valid_alert_policies_names | length
+            and not invalid_alert_policies_names | length
+            )
+      fail_message:
+        "{% if not enabled_alert_server_profiles %}Missing valid server profiles{% endif %}
+        {% if not valid_alert_policies_names %}Missing valid rules with log-setting profiles{% endif %}
+        {% if invalid_alert_policies_names %}Policies without valid alerting - {% for pol in invalid_alert_policies_names %}{{ pol }} {% endfor %}
+        {% else %}All required findings not True, click link to review.{% endif %}"
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207712
+      tags:
+        - PANW-IP-000052
+
+    - name: capture_alert_mechanisms
+      include: shared_snippets
+      include_snippets:
+        - name: capture_alert_mechanisms
+      tags:
+        - PANW-IP-000053
+        - PANW-IP-000055
+
+    - name: PANW-IP-000053
+      label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when rootkits or other malicious software which allows unauthorized privileged or non-privileged access is detected.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not invalid_alert_mechanisms_policies_names
+      fail_message: Policies without valid alerting - {% for pol in invalid_alert_mechanisms_policies_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207713
+      tags:
+        - PANW-IP-000053
+
+    - name: capture_invalid_alert_dos_policies
+      include: shared_snippets
+      include_snippets:
+        - name: capture_invalid_alert_dos_policies
+      tags:
+        - PANW-IP-000055
+
+    - name: PANW-IP-000055
+      label: The Palo Alto Networks security platform must send an alert to, at a minimum, the ISSO and ISSM when denial of service incidents are detected.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: valid_alert_dos_policies and not invalid_alert_dos_policies
+      fail_message: |
+        {% if not valid_alert_dos_policies %}No valid Dos Protection policies setup for alerts {% endif %}
+        {% if invalid_alert_dos_policies %}DoS Protection policies with invalid log forwarding - {% for pol in invalid_alert_dos_policies %}{{ pol.entry["@name"] }} {% endfor %}{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207714
+      tags:
+        - PANW-IP-000055
+
+    - name: capture_interzone_intersubnet_alerts
+      include: shared_snippets
+      include_snippets:
+        - name: capture_interzone_intersubnet_alerts
+      tags:
+        - PANW-IP-000056
+
+    - name: PANW-IP-000056
+      label: The Palo Alto Networks security platform must generate an alert to, at a minimum, the ISSO and ISSM when new active propagation of malware infecting DoD systems or malicious code adversely affecting the operations and/or security of DoD systems is detected.
+      meta:
+        stig: idps
+        severity: medium
+        not_applicable: false
+      test: not invalid_intersubnet_alert_policies_names
+      fail_message: Intersubnet policies with invalid alerting - {% for pol in invalid_intersubnet_alert_policies_names %}{{ pol }} {% endfor %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207715
+      tags:
+        - PANW-IP-000056
+
+    - name: PANW-IP-000058
+      label: The Palo Alto Networks security platform must off-load log records to a centralized log server in real-time.
+      meta:
+        stig: idps
+        severity: low
+        not_applicable: false
+      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
+      fail_message: |
+        {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
+        {% if not valid_syslog_log_forwarding_profile %}No valid syslog log forwarding profiles. {% endif %}
+        {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
+      pass_message: Validation successful
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207716
+      tags:
+        - PANW-IP-000058
