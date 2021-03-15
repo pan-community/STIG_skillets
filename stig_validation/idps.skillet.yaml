@@ -337,15 +337,11 @@ snippets:
         stig: idps
         severity: medium
         not_applicable: false
-      test: (
-        {% if (icmp_application_names_with_deny_rules | length == 0) %}
-          false
-        {% elif (icmp_application_names_with_allow_rules | length > 0) %}
-          {{ list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first ) }}
-          < {{ list_of_security_policy_names.index( ( icmp_application_names_with_allow_rules | first ) ) }}
-        {% else %}
-          icmp_application_names_with_deny_rules | length > 0
-        {% endif %} )
+      test: |
+        icmp_application_names_with_deny_rules | length > 0 and 
+        list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first )
+        < list_of_security_policy_names.index( icmp_application_names_with_allow_rules | first )
+
       fail_message: Click link for remediation instruction...
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207698
