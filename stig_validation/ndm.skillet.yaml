@@ -688,9 +688,9 @@ snippets:
         severity: medium
         not_applicable: false
       test: |
-        ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
+        (dod_cert_names_present_in_profile | sort == dod_cert_names | sort )
         and (not non_dod_issuers and dod_issuers)
-        and ({{ server_profiles_cert_profile | sort }} == {{ cert_profile_names | sort }} )
+        and ( server_profiles_cert_profile | sort == cert_profile_names | sort )
         and (ocsp_required == 'yes')
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
