@@ -62,7 +62,7 @@ snippets:
                   count(profile-setting/profiles/virus/member) = 0
                   or profile-setting/profiles/virus/member='default'
                 )
-              ) 
+              )
             ]/@name
       tags:
         - PANW-AG-000062
@@ -358,6 +358,7 @@ snippets:
         - PANW-AG-000122
         - PANW-IP-000053
         - PANW-IP-000055
+        - PANW-NM-000131
 
     - name: capture_invalid_alert_dos_policies
       cmd: parse
@@ -446,3 +447,92 @@ snippets:
       tags:
         - PANW-NM-000029
         - PANW-IP-000007
+
+        
+###############################
+    - name: capture_enabled_alert_mechanisms
+      cmd: parse
+      variable: config
+      outputs:
+        - name: enabled_alert_server_profiles
+          capture_list: |
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/log-settings/profiles/entry
+            [match-list/entry/{{alert_mechanism}}]/@name
+      tags:
+        - PANW-AG-000118
+        - PANW-IP-000052
+
+    - name: capture_alert_mechanisms_policies
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_alert_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
+            and (
+            item | json_query('entry."@name" | [@][]') | item_present(authoritative_source | listify + ["any"])
+            and
+              not item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
+              or (
+                item | json_query('entry."log-setting".group.member')
+              )
+            )
+
+        - name: valid_alert_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
+            and (
+            item | json_query('entry."@name" | [@][]') | item_present(authoritative_source | listify + ["any"])
+            and
+              item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
+              or (
+                item | json_query('entry."log-setting".group.member')
+              )
+            )
+      when: authoritative_source | length
+      tags:
+        - PANW-AG-000118
+        - PANW-IP-000052
+
+    - name: capture_alert_mechanisms_noauth
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_alert_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
+            and (not item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
+              or (
+                item | json_query('entry."log-setting".group.member')
+              )
+            )
+
+        - name: valid_alert_policies
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
+          filter_items: |
+            item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
+            and (item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
+              or (
+                item | json_query('entry."log-setting".group.member')
+              )
+            )
+      when: not authoritative_source | length
+      tags:
+        - PANW-AG-000118
+        - PANW-IP-000052
+
+    - name: capture_alert_mechanisms_names
+      cmd: parse
+      variable: config
+      outputs:
+        - name: invalid_alert_policies_names
+          capture_expression: invalid_alert_policies | map(attribute="entry.@name") | list
+
+        - name: valid_alert_policies_names
+          capture_expression: valid_alert_policies | map(attribute="entry.@name") | list
+      tags:
+        - PANW-AG-000118
+        - PANW-IP-000052

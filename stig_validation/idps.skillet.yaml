@@ -93,7 +93,7 @@ snippets:
         severity: medium
         not_applicable: false
       test: not invalid_interzone_non_default_profile_policies
-      fail_message: Policies that do not have non-default profiles - {% for pol in invalid_interzone_non_default_profile_policies %}{{ pol.entry["@name"] }} {% endfor %} 
+      fail_message: Policies that do not have non-default profiles - {% for pol in invalid_interzone_non_default_profile_policies %}{{ pol.entry["@name"] }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207688
       tags:
@@ -277,14 +277,76 @@ snippets:
       tags:
         - PANW-IP-000029
 
+    - name: capture_list_of_security_policy_names
+      cmd: parse
+      variable: config
+      outputs:
+        - name: list_of_security_policy_names
+          capture_list: "/config/devices/entry[@name='localhost.localdomain']
+                         /vsys/entry[@name='vsys1']/rulebase/security/rules/entry/@name"
+      when: true
+      tags:
+        - PANW-IP-000030
+
+    - name: capture_icmp_application_types
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_application_names
+          capture_list: "/config/devices/entry[@name='localhost.localdomain']
+                         /vsys/entry[@name='vsys1']/application/
+                         entry[default/ident-by-icmp-type/type='3'
+                               or default/ident-by-icmp-type/type='5'
+                               or default/ident-by-icmp-type/type='18']/@name"
+      when: true
+      tags:
+        - PANW-IP-000030
+
+    - name: capture_icmp_application_member_settings_deny
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_application_names_with_deny_rules
+          capture_list: "/config/devices/entry[@name='localhost.localdomain']
+                         /vsys/entry[@name='vsys1']/rulebase/security/rules/
+                         entry[rule-type='interzone'
+                               and action='deny'
+                               and not(disabled='yes')
+                               and contains(\"{{ icmp_application_names | join(' ') }}\", application/member)]/@name"
+      tags:
+        - PANW-IP-000030
+
+    - name: capture_icmp_application_member_settings_allow
+      cmd: parse
+      variable: config
+      outputs:
+        - name: icmp_application_names_with_allow_rules
+          capture_list: "/config/devices/entry[@name='localhost.localdomain']
+                         /vsys/entry[@name='vsys1']/rulebase/security/rules/
+                         entry[rule-type='interzone'
+                               and action='allow'
+                               and not(disabled='yes')
+                               and contains(\"{{ icmp_application_names | join(' ') }}\", application/member)]/@name"
+      when: true
+      tags:
+        - PANW-IP-000030
+
     - name: PANW-IP-000030
       label: The Palo Alto Networks security platform must block outbound ICMP Destination Unreachable, Redirect, and Address Mask reply messages.
       meta:
         stig: idps
         severity: medium
         not_applicable: false
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: (
+        {% if (icmp_application_names_with_deny_rules | length == 0) %}
+          false
+        {% elif (icmp_application_names_with_allow_rules | length > 0) %}
+          {{ list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first ) }}
+          < {{ list_of_security_policy_names.index( ( icmp_application_names_with_allow_rules | first ) ) }}
+        {% else %}
+          icmp_application_names_with_deny_rules | length > 0
+        {% endif %} )
+      fail_message: Click link for remediation instruction...
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207698
       tags:
@@ -471,7 +533,7 @@ snippets:
       cmd: parse
       variable: config
       outputs:
-        - name: unauthorized_policies_no_logging 
+        - name: unauthorized_policies_no_logging
           capture_expression: unauthorized_policies | json_query('[?!(entry."log-setting")].entry."@name"')
       tags:
         - PANW-IP-000048
@@ -483,7 +545,7 @@ snippets:
         stig: idps
         severity: medium
         not_applicable: false
-      test: not unauthorized_policies_no_logging 
+      test: not unauthorized_policies_no_logging
       fail_message: Policies denying unauthorized traffic without logging - {% for pol in unauthorized_policies_no_logging %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207708
@@ -531,14 +593,33 @@ snippets:
       tags:
         - PANW-IP-000051
 
+    - name: capture_enabled_alert_mechanisms
+      include: shared_snippets
+      include_snippets:
+        - name: capture_enabled_alert_mechanisms
+        - name: capture_alert_mechanisms_policies
+        - name: capture_alert_mechanisms_noauth
+        - name: capture_alert_mechanisms_names
+      tags:
+        - PANW-IP-000052
+
     - name: PANW-IP-000052
       label: The Palo Alto Networks security platform must send an alert to, at a minimum, the ISSO and ISSM when threats identified by authoritative sources (e.g., IAVMs or CTOs) are detected.
       meta:
         stig: idps
         severity: medium
         not_applicable: false
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |-
+            (
+            enabled_alert_server_profiles
+            and valid_alert_policies_names | length
+            and not invalid_alert_policies_names | length
+            )
+      fail_message:
+        "{% if not enabled_alert_server_profiles %}Missing valid server profiles{% endif %}
+        {% if not valid_alert_policies_names %}Missing valid rules with log-setting profiles{% endif %}
+        {% if invalid_alert_policies_names %}Policies without valid alerting - {% for pol in invalid_alert_policies_names %}{{ pol }} {% endfor %}
+        {% else %}All required findings not True, click link to review.{% endif %}"
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207712
       tags:
