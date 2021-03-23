@@ -1,0 +1,21 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: True
+  connection: local
+  tasks:
+    - name: PANW-NM-000053 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000053"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000053
+
+    - name: PANW-NM-000053 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000053

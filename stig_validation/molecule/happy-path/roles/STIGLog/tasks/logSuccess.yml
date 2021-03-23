@@ -1,0 +1,16 @@
+- name:                Success
+  block:
+       # Print Success Log Output to Terminal
+     - name:           Successful Output
+       debug:
+         msg:          '{{ ansible_date_time.date }}  {{ ansible_date_time.time }}  Passed! {{ finding_level }} | {{ finding_id }} | {{ stig }} | {{ finding_title }}'
+
+      # Write Success Output to Log File
+      # Creates the file if it doesn't exist
+      # Prepends to the file if it does exist
+     - name:           Success Output to Log File
+       lineinfile:
+         path:         '{{ working_dir }}/files/{{ inventory_hostname }}/{{ device_make }}-{{ stig_code }}-{{ inventory_hostname }}-success.log'
+         line: '{{ ansible_date_time.date }}    {{ ansible_date_time.time }}    PASSED: {{ finding_level }} | {{ finding_id }} | {{ stig }} | {{ finding_title }}    Details: {{ finding_detail }}'
+         create:       yes
+         insertbefore: BOF

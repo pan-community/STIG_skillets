@@ -1,0 +1,16 @@
+- name:         Log Checklist
+  block:
+  # Print Checklist Output to Terminal
+  - name:       Checklist Output
+    debug:
+      msg:      '{{ ansible_date_time.date }}  {{ ansible_date_time.time }}  {{ finding_status }} {{ finding_id }}'
+
+  # Write Checklist Output to Log File
+  # Creates the file if it doesn't exist
+  # Overwrites the file if it does
+  - name:       Checklist Output to Log File
+    lineinfile:
+      path:     '{{ working_dir }}/files/{{ inventory_hostname }}/{{device_make}}-{{ stig_code }}-{{ inventory_hostname }}-checklist.log'
+      regexp: 'ID: {{ finding_id }}  '
+      line: 'ID: {{ finding_id }}  Status: {{finding_status}}  Finding Details: {{ finding_detail }}'
+      create:   yes

@@ -1,0 +1,16 @@
+- name:                Failure
+  block:
+       # Print Failure Log Output to Terminal
+     - name:           Failure Output
+       debug:
+         msg: '{{ ansible_date_time.date }}  {{ ansible_date_time.time }}  FAILED: {{ finding_level }} | {{ finding_id }} | {{ stig }} | {{ finding_title }}'
+
+      # Write Failure Output to Log File
+      # Creates the file if it doesn't exist
+      # Prepends to the file if it does exist
+     - name:           Failure Output to Log File
+       lineinfile:
+         path:         '{{ working_dir }}/files/{{ inventory_hostname }}/{{ device_make }}-{{ stig_code }}-{{ inventory_hostname }}-fail.log'
+         line: '{{ ansible_date_time.date }}    {{ ansible_date_time.time }}    FAILED: {{ finding_level }} | {{ finding_id }} | {{ stig }} | {{ finding_title }}    Details: {{ finding_detail }}'
+         create:       yes
+         insertbefore: BOF

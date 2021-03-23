@@ -1,0 +1,68 @@
+{
+ "files": [
+  {
+   "name": ".",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "nembery-skillet-1.0.3.tar.gz",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "54ed8338d2d5a00b4f47d335ced932443bfb37a69d2e62f142d4620cb5021d78",
+   "format": 1
+  },
+  {
+   "name": "LICENSE",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "66d0f2ae2b799281e8f2e7365a564e4b8fc52fe7c4bc6a05c7a5978c70413e50",
+   "format": 1
+  },
+  {
+   "name": "plugins",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/modules",
+   "ftype": "dir",
+   "chksum_type": null,
+   "chksum_sha256": null,
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/panos_validate.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "701aa063536c80f5c9ccba95858bcfd4174ffb3fbf3cb6a1f7993d8aba002c1f",
+   "format": 1
+  },
+  {
+   "name": "plugins/modules/panos_skillet.py",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "06345cb895419114a296bc52748f95d773fb8f3463c1edfca437dfd5b691601f",
+   "format": 1
+  },
+  {
+   "name": "README.md",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "272152ac7690dd54dac2bdb2e99d74fa7cc1fe39f5b4d3d8a601c216e92da177",
+   "format": 1
+  },
+  {
+   "name": "nembery-skillet-1.0.2.tar.gz",
+   "ftype": "file",
+   "chksum_type": "sha256",
+   "chksum_sha256": "7a244733f624b3e81d057a8bf38ee11a4a333bceb09937bcc22ba3d08560e503",
+   "format": 1
+  }
+ ],
+ "format": 1
+}
