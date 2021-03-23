@@ -1,0 +1,28 @@
+---
+- name:         Create Checklist
+  import_tasks: createChecklist.yml
+  tags:
+    - create-checklist
+  when:         create_Checklist | bool
+
+- name:         Log Checklist Output
+  import_tasks: logChecklist.yml
+  tags:
+    - log-checklist
+  when:         log_Checklist | bool
+
+- name:         Log Failure Output
+  import_tasks: logFailure.yml
+  tags:
+    - log-failure
+  when:
+    - log_Failure | bool
+    - finding_status == "Open"
+
+- name:         Log Success Output
+  import_tasks: logSuccess.yml
+  tags:
+    - log-success
+  when:
+    - log_Success | bool
+    - finding_status == "NotAFinding"

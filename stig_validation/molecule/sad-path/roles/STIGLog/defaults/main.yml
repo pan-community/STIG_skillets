@@ -1,0 +1,6 @@
+---
+#The below variables control which logs are written
+create_Checklist: yes
+log_Checklist: yes
+log_Failure: yes
+log_Success: yes

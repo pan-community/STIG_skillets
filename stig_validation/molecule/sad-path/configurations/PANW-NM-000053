@@ -1,0 +1,3 @@
+    <password-complexity>
+           <minimum-length>10</minimum-length>
+    </password-complexity>

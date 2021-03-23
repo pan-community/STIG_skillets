@@ -1,0 +1,30 @@
+- name:      Create Checklist
+  block:
+  # Print Checklist Output to Terminal
+  - name:    Checklist Output
+    debug:
+      msg:   '{{ ansible_date_time.date }}  {{ ansible_date_time.time }}  {{ finding_status }} {{ finding_id }}'
+
+    # Create target directory if it doesn't exist
+  - name:    Create Checklist Directory
+    file:
+      path:  '{{ working_dir }}/files/{{ inventory_hostname }}'
+      state: directory
+
+    # Create Checklist from STIG template if it doesn't exist
+  - name:    Create Checklist File
+    copy:
+      src:   '{{ working_dir }}/files/{{ device_make }}-{{ stig_code }}-template.ckl'
+      dest:  '{{ working_dir }}/files/{{ inventory_hostname }}/{{ device_make }}-{{ inventory_hostname }}.ckl'
+      force: no
+
+    # Write Output to Checklist File
+    # Overwrites the given findings in the file
+  - name:    Write Output to Checklist
+    xml:
+      path:  '{{ working_dir }}/files/{{ inventory_hostname }}/{{ device_make }}-{{ inventory_hostname }}.ckl'
+      xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "{{ finding_id }}"]/{{item.node}}'
+      value: '{{ item.value }}'
+    loop:
+      - {node: 'STATUS', value: '{{ finding_status }}'}
+      - {node: 'FINDING_DETAILS', value: '{{ finding_detail }}'}

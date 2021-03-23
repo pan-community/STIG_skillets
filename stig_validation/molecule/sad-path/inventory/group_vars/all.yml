@@ -1,0 +1,4 @@
+#ansible_python_interpreter: /root/anaconda3/lib/python3.7
+success_output: {}
+failure_output: {}
+
