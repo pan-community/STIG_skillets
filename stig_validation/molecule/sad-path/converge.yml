@@ -1,0 +1,61 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: True
+  connection: local
+  tasks:
+    - name: "Create Full Configuration"
+      template:
+        src: "{{ playbook_dir }}/configurations/main.j2"
+        dest: "{{ playbook_dir }}/configurations/main.conf"
+      delegate_to: localhost
+      tags:
+      - always
+
+    - name: "Import Config"
+      panos_import:
+        ip_address: "{{ PA_login.ip_address }}"
+        username: "{{ PA_login.username }}"
+        password: "{{ PA_login.password }}"
+        file: "{{ playbook_dir }}/configurations/main.conf"
+        category: "configuration"
+        validate_certs: false
+      register: result 
+      tags:
+      - always
+     
+    - name: "Load Config"
+      panos_loadcfg:
+        ip_address: "{{ PA_login.ip_address }}"
+        username: "{{ PA_login.username }}"
+        password: "{{ PA_login.password }}"
+        file: "{{ result.filename }}"
+      tags:
+      - always
+
+    - name: Call PaloAltoALGSTIG Role
+      include_role:
+        name: ../../../PaloAltoALGSTIG
+      when:
+        - device_make == "paloalto"
+        - '"ALG" in device_role'
+      tags:
+      - always
+
+    - name: Call PaloAltoIDPSSTIG Role
+      include_role:
+        name: ../../../PaloAltoIDPSSTIG
+      when:
+        - device_make == "paloalto"
+        - '"IDPS" in device_role'
+      tags:
+      - always
+
+    - name: Call PaloAltoNDMSTIG Role
+      include_role:
+        name: ../../../PaloAltoNDMSTIG
+      when:
+        - device_make == "paloalto"
+        - '"NDM" in device_role'
+      tags:
+      - always
