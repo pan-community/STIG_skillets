@@ -4,6 +4,1502 @@
   gather_facts: True
   connection: local
   tasks:
+    - name: PANW-AG-000015 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000015"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000015
+
+    - name: PANW-AG-000015 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000015
+
+
+    - name: PANW-AG-000016 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000016"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000016
+
+    - name: PANW-AG-000016 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000016
+
+
+    - name: PANW-AG-000017 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000017"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000017
+
+    - name: PANW-AG-000017 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000017
+
+
+    - name: PANW-AG-000020 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000020"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000020
+
+    - name: PANW-AG-000020 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000020
+
+
+    - name: PANW-AG-000024 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000024"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000024
+
+    - name: PANW-AG-000024 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000024
+
+
+    - name: PANW-AG-000035 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000035"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000035
+
+    - name: PANW-AG-000035 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000035
+
+
+    - name: PANW-AG-000036 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000036"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000036
+
+    - name: PANW-AG-000036 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000036
+
+
+    - name: PANW-AG-000037 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000037"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000037
+
+    - name: PANW-AG-000037 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000037
+
+
+    - name: PANW-AG-000038 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000038"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000038
+
+    - name: PANW-AG-000038 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000038
+
+
+    - name: PANW-AG-000044 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000044"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000044
+
+    - name: PANW-AG-000044 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000044
+
+
+    - name: PANW-AG-000047 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000047"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000047
+
+    - name: PANW-AG-000047 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000047
+
+
+    - name: PANW-AG-000049 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000049"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000049
+
+    - name: PANW-AG-000049 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000049
+
+
+    - name: PANW-AG-000050 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000050"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000050
+
+    - name: PANW-AG-000050 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000050
+
+
+    - name: PANW-AG-000051 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000051"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000051
+
+    - name: PANW-AG-000051 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000051
+
+
+    - name: PANW-AG-000052 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000052"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000052
+
+    - name: PANW-AG-000052 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000052
+
+
+    - name: PANW-AG-000060 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000060"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000060
+
+    - name: PANW-AG-000060 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000060
+
+
+    - name: PANW-AG-000062 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000062"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000062
+
+    - name: PANW-AG-000062 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000062
+
+
+    - name: PANW-AG-000063 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000063"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000063
+
+    - name: PANW-AG-000063 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000063
+
+
+    - name: PANW-AG-000064 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000064"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000064
+
+    - name: PANW-AG-000064 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000064
+
+
+    - name: PANW-AG-000065 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000065"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000065
+
+    - name: PANW-AG-000065 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000065
+
+
+    - name: PANW-AG-000073 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000073"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000073
+
+    - name: PANW-AG-000073 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000073
+
+
+    - name: PANW-AG-000074 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000074"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000074
+
+    - name: PANW-AG-000074 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000074
+
+
+    - name: PANW-AG-000078 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000078"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000078
+
+    - name: PANW-AG-000078 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000078
+
+
+    - name: PANW-AG-000079 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000079"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000079
+
+    - name: PANW-AG-000079 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000079
+
+
+    - name: PANW-AG-000080 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000080"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000080
+
+    - name: PANW-AG-000080 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000080
+
+
+    - name: PANW-AG-000081 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000081"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000081
+
+    - name: PANW-AG-000081 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000081
+
+
+    - name: PANW-AG-000094 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000094"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000094
+
+    - name: PANW-AG-000094 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000094
+
+
+    - name: PANW-AG-000101 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000101"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000101
+
+    - name: PANW-AG-000101 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000101
+
+
+    - name: PANW-AG-000102 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000102"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000102
+
+    - name: PANW-AG-000102 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000102
+
+
+    - name: PANW-AG-000105 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000105"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000105
+
+    - name: PANW-AG-000105 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000105
+
+
+    - name: PANW-AG-000107 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000107"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000107
+
+    - name: PANW-AG-000107 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000107
+
+
+    - name: PANW-AG-000109 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000109"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000109
+
+    - name: PANW-AG-000109 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000109
+
+
+    - name: PANW-AG-000111 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000111"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000111
+
+    - name: PANW-AG-000111 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000111
+
+
+    - name: PANW-AG-000112 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000112"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000112
+
+    - name: PANW-AG-000112 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000112
+
+
+    - name: PANW-AG-000113 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000113"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000113
+
+    - name: PANW-AG-000113 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000113
+
+
+    - name: PANW-AG-000114 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000114"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000114
+
+    - name: PANW-AG-000114 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000114
+
+
+    - name: PANW-AG-000115 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000115"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000115
+
+    - name: PANW-AG-000115 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000115
+
+
+    - name: PANW-AG-000116 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000116"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000116
+
+    - name: PANW-AG-000116 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000116
+
+
+    - name: PANW-AG-000118 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000118"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000118
+
+    - name: PANW-AG-000118 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000118
+
+
+    - name: PANW-AG-000119 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000119"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000119
+
+    - name: PANW-AG-000119 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000119
+
+
+    - name: PANW-AG-000120 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000120"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000120
+
+    - name: PANW-AG-000120 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000120
+
+
+    - name: PANW-AG-000121 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000121"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000121
+
+    - name: PANW-AG-000121 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000121
+
+
+    - name: PANW-AG-000122 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000122"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000122
+
+    - name: PANW-AG-000122 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000122
+
+
+    - name: PANW-AG-000127 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000127"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000127
+
+    - name: PANW-AG-000127 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000127
+
+
+    - name: PANW-AG-000141 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000141"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000141
+
+    - name: PANW-AG-000141 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000141
+
+
+    - name: PANW-AG-000143 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000143"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000143
+
+    - name: PANW-AG-000143 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000143
+
+
+    - name: PANW-AG-000144 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000144"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000144
+
+    - name: PANW-AG-000144 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000144
+
+
+    - name: PANW-AG-000147 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000147"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000147
+
+    - name: PANW-AG-000147 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000147
+
+
+    - name: PANW-AG-000148 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000148"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000148
+
+    - name: PANW-AG-000148 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000148
+
+
+    - name: PANW-AG-000149 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-AG-000149"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-AG-000149
+
+    - name: PANW-AG-000149 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-AG-000149
+
+
+    - name: PANW-IP-000001 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000001"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000001
+
+    - name: PANW-IP-000001 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000001
+
+
+    - name: PANW-IP-000007 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000007"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000007
+
+    - name: PANW-IP-000007 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000007
+
+
+    - name: PANW-IP-000008 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000008"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000008
+
+    - name: PANW-IP-000008 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000008
+
+
+    - name: PANW-IP-000010 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000010"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000010
+
+    - name: PANW-IP-000010 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000010
+
+
+    - name: PANW-IP-000018 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000018"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000018
+
+    - name: PANW-IP-000018 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000018
+
+
+    - name: PANW-IP-000020 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000020"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000020
+
+    - name: PANW-IP-000020 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000020
+
+
+    - name: PANW-IP-000024 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000024"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000024
+
+    - name: PANW-IP-000024 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000024
+
+
+    - name: PANW-IP-000026 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000026"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000026
+
+    - name: PANW-IP-000026 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000026
+
+
+    - name: PANW-IP-000028 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000028"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000028
+
+    - name: PANW-IP-000028 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000028
+
+
+    - name: PANW-IP-000029 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000029"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000029
+
+    - name: PANW-IP-000029 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000029
+
+
+    - name: PANW-IP-000030 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000030"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000030
+
+    - name: PANW-IP-000030 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000030
+
+
+    - name: PANW-IP-000031 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000031"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000031
+
+    - name: PANW-IP-000031 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000031
+
+
+    - name: PANW-IP-000032 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000032"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000032
+
+    - name: PANW-IP-000032 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000032
+
+
+    - name: PANW-IP-000033 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000033"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000033
+
+    - name: PANW-IP-000033 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000033
+
+
+    - name: PANW-IP-000039 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000039"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000039
+
+    - name: PANW-IP-000039 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000039
+
+
+    - name: PANW-IP-000041 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000041"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000041
+
+    - name: PANW-IP-000041 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000041
+
+
+    - name: PANW-IP-000043 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000043"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000043
+
+    - name: PANW-IP-000043 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000043
+
+
+    - name: PANW-IP-000045 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000045"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000045
+
+    - name: PANW-IP-000045 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000045
+
+
+    - name: PANW-IP-000046 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000046"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000046
+
+    - name: PANW-IP-000046 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000046
+
+
+    - name: PANW-IP-000047 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000047"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000047
+
+    - name: PANW-IP-000047 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000047
+
+
+    - name: PANW-IP-000048 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000048"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000048
+
+    - name: PANW-IP-000048 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000048
+
+
+    - name: PANW-IP-000049 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000049"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000049
+
+    - name: PANW-IP-000049 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000049
+
+
+    - name: PANW-IP-000050 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000050"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000050
+
+    - name: PANW-IP-000050 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000050
+
+
+    - name: PANW-IP-000051 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000051"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000051
+
+    - name: PANW-IP-000051 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000051
+
+
+    - name: PANW-IP-000052 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000052"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000052
+
+    - name: PANW-IP-000052 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000052
+
+
+    - name: PANW-IP-000053 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000053"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000053
+
+    - name: PANW-IP-000053 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000053
+
+
+    - name: PANW-IP-000055 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000055"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000055
+
+    - name: PANW-IP-000055 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000055
+
+
+    - name: PANW-IP-000056 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000056"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000056
+
+    - name: PANW-IP-000056 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000056
+
+
+    - name: PANW-IP-000058 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-IP-000058"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-IP-000058
+
+    - name: PANW-IP-000058 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-IP-000058
+
+
+    - name: PANW-NM-000015 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000015"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000015
+
+    - name: PANW-NM-000015 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000015
+
+
+    - name: PANW-NM-000016 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000016"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000016
+
+    - name: PANW-NM-000016 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000016
+
+
+    - name: PANW-NM-000023 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000023"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000023
+
+    - name: PANW-NM-000023 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000023
+
+
+    - name: PANW-NM-000024 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000024"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000024
+
+    - name: PANW-NM-000024 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000024
+
+
+    - name: PANW-NM-000029 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000029"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000029
+
+    - name: PANW-NM-000029 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000029
+
+
+    - name: PANW-NM-000042 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000042"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000042
+
+    - name: PANW-NM-000042 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000042
+
+
+    - name: PANW-NM-000046 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000046"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000046
+
+    - name: PANW-NM-000046 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000046
+
+
+    - name: PANW-NM-000047 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000047"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000047
+
+    - name: PANW-NM-000047 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000047
+
+
+    - name: PANW-NM-000051 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000051"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000051
+
+    - name: PANW-NM-000051 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000051
+
+
     - name: PANW-NM-000053 Capture
       xml:
         path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
@@ -19,3 +1515,513 @@
           - xmlresp.matches[0].STATUS == 'NotAFinding'
       tags:
       - PANW-NM-000053
+
+
+    - name: PANW-NM-000054 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000054"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000054
+
+    - name: PANW-NM-000054 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000054
+
+
+    - name: PANW-NM-000055 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000055"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000055
+
+    - name: PANW-NM-000055 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000055
+
+
+    - name: PANW-NM-000056 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000056"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000056
+
+    - name: PANW-NM-000056 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000056
+
+
+    - name: PANW-NM-000057 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000057"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000057
+
+    - name: PANW-NM-000057 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000057
+
+
+    - name: PANW-NM-000058 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000058"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000058
+
+    - name: PANW-NM-000058 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000058
+
+
+    - name: PANW-NM-000059 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000059"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000059
+
+    - name: PANW-NM-000059 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000059
+
+
+    - name: PANW-NM-000061 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000061"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000061
+
+    - name: PANW-NM-000061 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000061
+
+
+    - name: PANW-NM-000062 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000062"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000062
+
+    - name: PANW-NM-000062 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000062
+
+
+    - name: PANW-NM-000063 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000063"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000063
+
+    - name: PANW-NM-000063 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000063
+
+
+    - name: PANW-NM-000069 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000069"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000069
+
+    - name: PANW-NM-000069 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000069
+
+
+    - name: PANW-NM-000075 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000075"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000075
+
+    - name: PANW-NM-000075 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000075
+
+
+    - name: PANW-NM-000092 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000092"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000092
+
+    - name: PANW-NM-000092 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000092
+
+
+    - name: PANW-NM-000096 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000096"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000096
+
+    - name: PANW-NM-000096 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000096
+
+
+    - name: PANW-NM-000097 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000097"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000097
+
+    - name: PANW-NM-000097 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000097
+
+
+    - name: PANW-NM-000098 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000098"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000098
+
+    - name: PANW-NM-000098 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000098
+
+
+    - name: PANW-NM-000099 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000099"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000099
+
+    - name: PANW-NM-000099 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000099
+
+
+    - name: PANW-NM-000100 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000100"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000100
+
+    - name: PANW-NM-000100 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000100
+
+
+    - name: PANW-NM-000101 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000101"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000101
+
+    - name: PANW-NM-000101 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000101
+
+
+    - name: PANW-NM-000110 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000110"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000110
+
+    - name: PANW-NM-000110 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000110
+
+
+    - name: PANW-NM-000114 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000114"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000114
+
+    - name: PANW-NM-000114 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000114
+
+
+    - name: PANW-NM-000117 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000117"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000117
+
+    - name: PANW-NM-000117 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000117
+
+
+    - name: PANW-NM-000118 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000118"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000118
+
+    - name: PANW-NM-000118 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000118
+
+
+    - name: PANW-NM-000128 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000128"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000128
+
+    - name: PANW-NM-000128 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000128
+
+
+    - name: PANW-NM-000131 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000131"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000131
+
+    - name: PANW-NM-000131 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000131
+
+
+    - name: PANW-NM-000136 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000136"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000136
+
+    - name: PANW-NM-000136 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000136
+
+
+    - name: PANW-NM-000141 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000141"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000141
+
+    - name: PANW-NM-000141 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000141
+
+
+    - name: PANW-NM-000142 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000142"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000142
+
+    - name: PANW-NM-000142 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000142
+
+
+    - name: PANW-NM-000143 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000143"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000143
+
+    - name: PANW-NM-000143 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000143
+
+
+    - name: PANW-NM-000144 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000144"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000144
+
+    - name: PANW-NM-000144 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000144
+
+
+    - name: PANW-NM-000145 Capture
+      xml:
+        path:  '../../../PaloAltoNDMSTIG/files/{{ inventory_hostname }}/paloalto-{{ inventory_hostname }}.ckl'
+        xpath: '//CHECKLIST/STIGS/iSTIG/VULN[STIG_DATA/ATTRIBUTE_DATA = "PANW-NM-000145"]/STATUS'
+        content: text
+      register: xmlresp
+      tags:
+      - PANW-NM-000145
+
+    - name: PANW-NM-000145 Assert
+      assert:
+        that:
+          - xmlresp.matches[0].STATUS == 'NotAFinding'
+      tags:
+      - PANW-NM-000145
