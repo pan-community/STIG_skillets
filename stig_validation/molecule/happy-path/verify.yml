@@ -1,6 +1,6 @@
 ---
 - name: Verify
-  hosts: 10.128.167.76
+  hosts: all
   gather_facts: True
   connection: local
   tasks:
