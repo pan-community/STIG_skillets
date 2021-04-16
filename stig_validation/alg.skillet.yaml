@@ -125,6 +125,10 @@ variables:
     type_hint: list
     default: dos_policy
 
+  - name: authoritative_source
+    description: List of Security Rules Enforcing Policies from Authoritative Sources.  Leaving this blank scans all policies
+    default: []
+
 snippets:
 
     - name: PANW-AG-000015-capture
@@ -281,6 +285,10 @@ snippets:
         - PANW-AG-000024
 
     - name: PANW-AG-000035
+      meta:
+        stig: alg
+        severity: medium
+        not_applicable: false
       include: CIS_NGFW_benchmark_v90
       include_snippets:
         - name: capture_userid_enabled_zones
@@ -564,17 +572,51 @@ snippets:
       tags:
         - PANW-AG-000052
 
+    - name: update_schedule_checks
+      include: shared_snippets
+      include_snippets:
+        - name: upgrade_info
+        - name: newest_installed_info
+        - name: upgrade_check
+        - name: newest_release_check
+      tags:
+        - PANW-AG-000060
+        - PANW-AG-000065
+
+    - name: update_schedule_actions
+      cmd: parse
+      variable: config
+      outputs:
+        - name: update_schedule
+          capture_object: devices/entry[@name="localhost.localdomain"]/deviceconfig/system/update-schedule
+      severity: medium
+      tags:
+        - PANW-AG-000060
+        - PANW-AG-000065
+
     - name: PANW-AG-000060
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228847
+      # default(False) will fail the test if a communication error is detected.
+      fail_message:
+        "{% if (installed_check | default(False)) or ((info_list | default(False)) and (upgrade_list | default(False)) and (latest_update | default(False))) or (update_schedule | default(False)) %}
+          {% if (installed_check | length) == 0 %}Dynamic updates are available but are not downloaded AND installed.{% endif %}
+          {% if (info_list != (upgrade_list | default('upgrade_list was empty'))) or ((latest_installed | default('latest_installed was empty')) != latest_update) %}Please download AND install new updates.{% endif %}
+          {% if not 'download-and-install' in update_schedule | string %}The download and install option is not selected.{% endif %}
+         {% else %}The configuration failed one OR more checks. Please see the link to review.{% endif %}"
       label: The Palo Alto Networks security platform must update malicious code protection mechanisms and signature definitions whenever new releases are available in accordance with organizational configuration management policy and procedures.
       meta:
         stig: alg
         severity: medium
-        action_required: true
-        not_applicable: false
-      test: false
-      fail_message: As this may be a manual process it should be verified manually.
-      pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228847
+      output_type: validation
+      pass_message: Validation Successful - Updates are downloaded and installed.
+      severity: medium
+      test: |-
+        (
+        'download-and-install' in update_schedule | string
+        and installed_check | length
+        and info_list == (upgrade_list | default('upgrade_list was empty'))
+        and (latest_installed | default('latest_installed was empty')) == latest_update
+        )
       tags:
         - PANW-AG-000060
 
@@ -587,6 +629,7 @@ snippets:
         - PANW-AG-000063
         - PANW-AG-000073
         - PANW-AG-000074
+        - PANW-AG-000147
 
     - name: PANW-AG-000062
       label: The Palo Alto Networks security platform must drop malicious code upon detection.
@@ -641,18 +684,30 @@ snippets:
         - PANW-AG-000064
 
     - name: PANW-AG-000065
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228851
+      # default(False) will fail the test if a communication error is detected.
+      fail_message:
+        "{% if (installed_check | default(False)) or ((info_list | default(False)) and (upgrade_list | default(False)) and (latest_update | default(False))) or (update_schedule | default(False)) %}
+          {% if (installed_check | length) == 0 %}Dynamic updates are available but are not downloaded AND installed.{% endif %}
+          {% if (info_list != (upgrade_list | default('upgrade_list was empty'))) or ((latest_installed | default('latest_installed was empty')) != latest_update) %}Please download AND install new updates.{% endif %}
+          {% if not 'download-and-install' in update_schedule | string %}The download and install option is not selected.{% endif %}
+         {% else %}The configuration failed one OR more checks. Please see the link to review.{% endif %}"
       label: The Palo Alto Networks security platform must automatically update malicious code protection mechanisms.
       meta:
         stig: alg
         severity: medium
-        action_required: true
-        not_applicable: false
-      test: false
-      fail_message: As this may be a manual process it should be verified manually.
-      pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228851
+      output_type: validation
+      pass_message: Validation Successful - Updates are downloaded and installed.
+      severity: medium
+      test: |-
+        (
+        'download-and-install' in update_schedule | string
+        and installed_check | length
+        and info_list == (upgrade_list | default('upgrade_list was empty'))
+        and (latest_installed | default('latest_installed was empty')) == latest_update
+        )
       tags:
-        PANW-AG-000065
+        - PANW-AG-000065
 
     - name: PANW-AG-000073
       label: The Palo Alto Networks security platform must deny or restrict detected prohibited mobile code.
@@ -826,14 +881,13 @@ snippets:
     - name: confirm_settings_and_profile_alignment_with_auth_server
       include: shared_snippets
       include_snippets:
-        #- name: verify_dod_certs_exist
+        - name: verify_dod_certs_exist
         - name: capture_dod_cert_names
         - name: capture_names_of_cert_profiles
         - name: capture_certs_listed_under_profiles
         - name: capture_cert_profile_aligned_to_auth_server_I
         - name: capture_cert_profile_aligned_to_auth_server_II
         - name: capture_ocsp_setting
-
       tags:
         - PANW-AG-000101
 
@@ -866,11 +920,11 @@ snippets:
         severity: medium
         not_applicable: "{{ not TLS_gw }}"
       test: |
-        ( dod_cert_names_present_in_profile | sort == dod_cert_names | sort )
+        ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
         and (not non_dod_issuers and dod_issuers)
         and (not 'no' in unknown_cert_session_block)
         and (not 'no' in timeout_session_block)
-        and ( server_profiles_cert_profile | sort == cert_profile_names | sort )
+        and ({{ server_profiles_cert_profile | sort }} == {{ cert_profile_names | sort }} )
         and (ocsp_required == 'yes')
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -1060,7 +1114,7 @@ snippets:
       cmd: parse
       variable: config
       outputs:
-        - name: deny_no_log_pols
+        - name: deny_no_log_forwarding
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
             [action="deny" and not(log-setting) and not(disabled="yes")]/@name
@@ -1073,8 +1127,8 @@ snippets:
         stig: alg
         severity: medium
         not_applicable: false
-      test: not deny_no_log_pols
-      fail_message: Deny policies without forwarding profiles - {%for pol in deny_no_log_pols %}{{ pol }} {% endfor %}
+      test: not deny_no_log_forwarding
+      fail_message: Deny policies without forwarding profiles - {%for pol in deny_no_log_forwarding %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228867
       tags:
@@ -1134,7 +1188,7 @@ snippets:
         "{% if not enabled_alert_server_profiles %}Missing valid server profiles{% endif %}
         {% if not valid_alert_policies_names %}Missing valid rules with log-setting profiles{% endif %}
         {% if invalid_alert_policies_names %}Policies without valid alerting - {% for pol in invalid_alert_policies_names %}{{ pol }} {% endfor %}
-        {% else %}All required findings not True, click link to review.{% endif %}"
+        {% else %}One or more tests failed. Click link to review.{% endif %}"
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228870
       tags:
@@ -1346,9 +1400,9 @@ snippets:
         stig: alg
         severity: medium
         not_applicable: false
-      test: not decryption_policies and not invalid_ftp_policies
+      test: decryption_policies and not invalid_ftp_policies_names
       fail_message: |
-        {% if not decryption_policies %}This validation requiers decryption to be configured. {% endif %}
+        {% if not decryption_policies %}This validation requires decryption to be configured. {% endif %}
         {% if invalid_ftp_policies_names %}Policies without proper profiles - {% for pol in invalid_ftp_policies_names %}{{ pol }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228880

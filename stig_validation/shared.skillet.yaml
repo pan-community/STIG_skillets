@@ -3,7 +3,7 @@
 name: shared_snippets
 label : Shared snippets for gathering information
 
-description: These snippets are shared between STIGs
+description: These snippets are shared between STIGs, to minimize duplicate code
 
 type: pan_validation
 labels:
@@ -50,7 +50,7 @@ snippets:
         - name: invalid_av_profile_groups
           capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/entry/@name
           filter_items: item not in valid_av_profile_groups
-        # At this point we can assume all profiles and profile-groups have vaild antivirus settings
+        # At this point we can assume all profiles and profile-groups have valid antivirus settings
         - name: invalid_security_policies_av
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/rulebase/security/rules/entry
@@ -71,6 +71,7 @@ snippets:
         - PANW-AG-000074
         - PANW-IP-000020
         - PANW-IP-000026
+        - PANW-AG-000147
 
     - name: capture_virus_alerting
       cmd: parse
@@ -294,7 +295,6 @@ snippets:
       outputs:
         - name: ocsp_required
           capture_value: /config/shared/certificate-profile/entry/use-ocsp/text()
-
       tags:
         - PANW-AG-000101
         - PANW-NM-000110
@@ -448,7 +448,6 @@ snippets:
         - PANW-NM-000029
         - PANW-IP-000007
 
-        
 ###############################
     - name: capture_enabled_alert_mechanisms
       cmd: parse
@@ -471,13 +470,13 @@ snippets:
           filter_items: |
             item | json_query('entry.to.member | [@][]') | item_present(alert_mechanism | listify + ["any"])
             and (
-            item | json_query('entry."@name" | [@][]') | item_present(authoritative_source | listify + ["any"])
+              item | json_query('entry."@name" | [@][]') | item_present(authoritative_source | listify + ["any"])
             and
               not item | json_query('entry."log-setting"') | item_present(enabled_alert_server_profiles)
               or (
                 item | json_query('entry."log-setting".group.member')
-              )
-            )
+                 )
+               )
 
         - name: valid_alert_policies
           capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry[not(disabled="yes")]
@@ -491,7 +490,7 @@ snippets:
                 item | json_query('entry."log-setting".group.member')
               )
             )
-      when: authoritative_source | length
+      when: authoritative_source | listify | length
       tags:
         - PANW-AG-000118
         - PANW-IP-000052
@@ -519,7 +518,7 @@ snippets:
                 item | json_query('entry."log-setting".group.member')
               )
             )
-      when: not authoritative_source | length
+      when: not authoritative_source | listify | length
       tags:
         - PANW-AG-000118
         - PANW-IP-000052
@@ -536,3 +535,64 @@ snippets:
       tags:
         - PANW-AG-000118
         - PANW-IP-000052
+
+################################
+
+# upgrade_info: checks for what updates are installed and downloaded
+# info_list: captures entries with update details
+# installed_check: captures version numbers of updates that are downloaded and installed
+    - name: upgrade_info
+      cmd: cli
+      cmd_str: request content upgrade info
+      output_type: xml
+      outputs:
+          - name: info_list
+            capture_list: /content-updates/entry
+          - name: installed_check
+            capture_list: /content-updates/entry[installing = "yes" and downloaded = "yes"]/released-on/text()
+      tags:
+          - PANW-AG-000060
+          - PANW-AG-000065
+          - PANW-IP-000024
+          - PANW-IP-000029
+    - name: newest_installed_info
+      cmd: parse
+      variable: config
+      outputs:
+          - name: latest_installed
+            capture_expression: (installed_check | sort(reverse = True))[0]
+      tags:
+          - PANW-AG-000060
+          - PANW-AG-000065
+          - PANW-IP-000024
+          - PANW-IP-000029
+
+# upgrade_check: checks for available updates that can be installed and downloaded
+# upgrade_list: captures a list of available updates by entry
+    - name: upgrade_check
+      cmd: cli
+      cmd_str: request content upgrade check
+      output_type: xml
+      outputs:
+          - name: upgrade_list
+            capture_list: /content-updates/entry
+          - name: release_check
+            capture_list: /content-updates/entry/released-on
+      tags:
+          - PANW-AG-000060
+          - PANW-AG-000065
+          - PANW-IP-000024
+          - PANW-IP-000029
+    - name: newest_release_check
+      cmd: parse
+      variable: config
+      outputs:
+          - name: latest_update
+            capture_expression: (release_check | json_query('[*]."released-on"') | sort(reverse = True))[0]
+      tags:
+          - PANW-AG-000060
+          - PANW-AG-000065
+          - PANW-IP-000024
+          - PANW-IP-000029
+
+################################
