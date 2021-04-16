@@ -45,6 +45,10 @@ variables:
       - key: email
         value: send-email
 
+  - name: authoritative_source
+    description: List of Security Rules Enforcing Policies from Authoritative Sources.  Leaving this blank scans all policies
+    default: []
+
 snippets:
 
     - name: capture_non_default_profiles
@@ -166,12 +170,21 @@ snippets:
         - PANW-IP-000008
 
     - name: PANW-IP-000010
+      cmd: parse
+      variable: config
+      outputs:
+        - name: stop_traffic
+          capture_value: /config/devices/entry[@name="localhost.localdomain"]/deviceconfig/setting/management/traffic-stop-on-logdb-full
+      tags:
+        - PANW-IP-000010
+
+    - name: PANW-IP-000010
       label: In the event of a logging failure caused by the lack of audit record storage capacity, the Palo Alto Networks security platform must continue generating and storing audit records if possible, overwriting the oldest audit records in a first-in-first-out manner.
       meta:
         stig: idps
         severity: medium
         not_applicable: false
-      test: false
+      test: stop_traffic == 'no'
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207691
@@ -215,16 +228,52 @@ snippets:
       tags:
         - PANW-IP-000020
 
+    - name: update_schedule_checks
+      include: shared_snippets
+      include_snippets:
+        - name: upgrade_info
+        - name: newest_installed_info
+        - name: upgrade_check
+        - name: newest_release_check
+      tags:
+        - PANW-IP-000024
+        - PANW-IP-000029
+
+    - name: update_schedule_actions
+      cmd: parse
+      variable: config
+      outputs:
+        - name: update_schedule
+          capture_object: devices/entry[@name="localhost.localdomain"]/deviceconfig/system/update-schedule
+      severity: medium
+      tags:
+        - PANW-IP-000024
+        - PANW-IP-000029
+
     - name: PANW-IP-000024
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207694
+      # default(False) will fail the test if a communication error is detected.
+      fail_message:
+        "{% if (installed_check | default(False)) or (info_list | default(False)) and (upgrade_list | default(False)) or (update_schedule | default(False)) %}
+          {% if (installed_check | length) == 0 %}Dynamic updates are available but are not downloaded AND installed.{% endif %}
+          {% if (info_list != (upgrade_list | default('upgrade_list was empty'))) or ((latest_installed | default('latest_installed was empty')) != latest_update) %}Please download AND install new updates.{% endif %}
+          {% if not 'download-and-install' in update_schedule | string %}The download and install option is not selected.{% endif %}
+         {% else %}The configuration failed one OR more checks. Please see the link to review.{% endif %}"
       label: The Palo Alto Networks security platform must install updates for application software files, signature definitions, detection heuristics, and vendor-provided rules when new releases are available in accordance with organizational configuration management policy and procedures.
       meta:
         stig: idps
         severity: medium
         not_applicable: false
-      test: false
-      fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207694
+      output_type: validation
+      pass_message: Validation Successful - Updates are downloaded and installed.
+      severity: medium
+      test: |-
+        (
+        'download-and-install' in update_schedule | string
+        and installed_check | length
+        and info_list == (upgrade_list | default('upgrade_list was empty'))
+        and (latest_installed | default('latest_installed was empty')) == latest_update
+        )
       tags:
         - PANW-IP-000024
 
@@ -265,15 +314,29 @@ snippets:
         - PANW-IP-000028
 
     - name: PANW-IP-000029
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207697
+      # default(False) will fail the test if a communication error is detected.
+      fail_message:
+        "{% if (installed_check | default(False)) or (info_list | default(False)) and (upgrade_list | default(False)) or (update_schedule | default(False)) %}
+          {% if (installed_check | length) == 0 %}Dynamic updates are available but are not downloaded AND installed.{% endif %}
+          {% if (info_list != (upgrade_list | default('upgrade_list was empty'))) or ((latest_installed | default('latest_installed was empty')) != latest_update) %}Please download AND install new updates.{% endif %}
+          {% if not 'download-and-install' in update_schedule | string %}The download and install option is not selected.{% endif %}
+         {% else %}The configuration failed one OR more checks. Please see the link to review.{% endif %}"
       label: The Palo Alto Networks security platform must automatically install updates to signature definitions, detection heuristics, and vendor-provided rules.
       meta:
         stig: idps
         severity: medium
         not_applicable: false
-      test: false
-      fail_message: Click link for remediation instruction.
-      pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207697
+      output_type: validation
+      pass_message: Validation Successful - Updates are downloaded and installed.
+      severity: medium
+      test: |-
+        (
+        'download-and-install' in update_schedule | string
+        and installed_check | length
+        and info_list == (upgrade_list | default('upgrade_list was empty'))
+        and (latest_installed | default('latest_installed was empty')) == latest_update
+        )
       tags:
         - PANW-IP-000029
 
@@ -337,10 +400,15 @@ snippets:
         stig: idps
         severity: medium
         not_applicable: false
-      test: |
-        icmp_application_names_with_deny_rules | length > 0 and 
-        list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first )
-        < list_of_security_policy_names.index( icmp_application_names_with_allow_rules | first )
+      test: (
+        {% if (icmp_application_names_with_deny_rules | length == 0) %}
+          false
+        {% elif (icmp_application_names_with_allow_rules | length > 0) %}
+          {{ list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first ) }}
+          < {{ list_of_security_policy_names.index( ( icmp_application_names_with_allow_rules | first ) ) }}
+        {% else %}
+          icmp_application_names_with_deny_rules | length > 0
+        {% endif %} )
 
       fail_message: Click link for remediation instruction...
       pass_message: Validation successful
@@ -582,7 +650,7 @@ snippets:
         stig: idps
         severity: medium
         not_applicable: false
-      test: not unauthorized_policies_no_logging 
+      test: not unauthorized_policies_no_logging
       fail_message: Policies denying unauthorized traffic without logging - {% for pol in unauthorized_policies_no_logging %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207711
