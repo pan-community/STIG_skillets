@@ -390,6 +390,16 @@ snippets:
                                and action='allow'
                                and not(disabled='yes')
                                and contains(\"{{ icmp_application_names | join(' ') }}\", application/member)]/@name"
+        - name: PANW-IP-000030-test
+          capture_variable: (
+            {% if (icmp_application_names_with_deny_rules | length == 0) %}
+            false
+            {% elif (icmp_application_names_with_allow_rules | length > 0) %}
+            {{ list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first ) }}
+            < {{ list_of_security_policy_names.index( ( icmp_application_names_with_allow_rules | first ) ) }}
+            {% else %}
+            icmp_application_names_with_deny_rules | length > 0
+            {% endif %} )
       when: true
       tags:
         - PANW-IP-000030
@@ -400,15 +410,7 @@ snippets:
         stig: idps
         severity: medium
         not_applicable: false
-      test: (
-        {% if (icmp_application_names_with_deny_rules | length == 0) %}
-          false
-        {% elif (icmp_application_names_with_allow_rules | length > 0) %}
-          {{ list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first ) }}
-          < {{ list_of_security_policy_names.index( ( icmp_application_names_with_allow_rules | first ) ) }}
-        {% else %}
-          icmp_application_names_with_deny_rules | length > 0
-        {% endif %} )
+      test: PANW-IP-000030-test
 
       fail_message: Click link for remediation instruction...
       pass_message: Validation successful
