@@ -1,0 +1,17 @@
+name: sad_PANW_NM_000053
+label: STIG PANW-NM-000053
+description: Password complexity of less than 15
+type: panos
+labels:
+    collection:
+      - stig
+      - Validation
+variables: []
+
+snippets:
+  - name: fail-password-complexity-length
+    xpath: /config/mgt-config
+    element: |-
+        <password-complexity>
+              <minimum-length>10</minimum-length>
+        </password-complexity>

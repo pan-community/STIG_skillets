@@ -3,35 +3,28 @@
   hosts: all
   gather_facts: True
   connection: local
-  tasks:
-    - name: "Create Full Configuration"
-      template:
-        src: "{{ playbook_dir }}/configurations/main.j2"
-        dest: "{{ playbook_dir }}/configurations/main.conf"
-      delegate_to: localhost
-      tags:
-      - always
 
-    - name: "Import Config"
-      panos_import:
-        ip_address: "{{ PA_login.ip_address }}"
-        username: "{{ PA_login.username }}"
-        password: "{{ PA_login.password }}"
-        file: "{{ playbook_dir }}/configurations/main.conf"
-        category: "configuration"
-        validate_certs: false
-      register: result 
-      tags:
-      - always
-     
-    - name: "Load Config"
-      panos_loadcfg:
-        ip_address: "{{ PA_login.ip_address }}"
-        username: "{{ PA_login.username }}"
-        password: "{{ PA_login.password }}"
-        file: "{{ result.filename }}"
-      tags:
-      - always
+  vars:
+    provider:
+      ip_address: "{{ PA_login.ip_address }}"
+      username: "{{ PA_login.username }}"
+      password: "{{ PA_login.password }}"
+
+  tasks:
+    - name: Baseline the FW
+      panos_baseline:
+        provider: '{{ provider }}'
+
+    - name: Create address object
+      panos_skillet:
+        skillet_path: "{{ playbook_dir }}/configurations"
+        skillet: "sad_PANW_NM_000053"
+        provider: '{{ provider }}'
+      register: skillet_output
+
+    - name: Debug skillet output
+      debug:
+        var: skillet_output
 
     - name: Call PaloAltoALGSTIG Role
       include_role:
