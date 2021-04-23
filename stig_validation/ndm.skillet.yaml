@@ -125,7 +125,6 @@ snippets:
       meta:
         stig: ndm
         severity: low
-        action_required: true
         not_applicable: false
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62707
       fail_message: Verify that the Palo Alto Networks security platform displays the Standard Mandatory DoD Notice and Consent Banner before granting access to the device. In the case of a failed test, if your platform appears to have the correct DoD notice, check for minor typos as the system check is looking for an exact match in the actual text versus the test text.
@@ -167,8 +166,8 @@ snippets:
         action_required: true
         not_applicable: false
       test: false
-      fail_message: Verify only ISSM or ISSM appointed users have audit log access.
-      pass_message: Validation successful
+      fail_message: Manually Validate only ISSM or ISSM appointed users have audit log access.
+      pass_message: Validation requires manual review of who has audit log access.
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_ndm/2019-12-20/finding/V-62709
       tags:
         - PANW-NM-000023
@@ -723,9 +722,9 @@ snippets:
         severity: medium
         not_applicable: false
       test: |
-        (dod_cert_names_present_in_profile | sort  ==  dod_cert_names | sort)
+        ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
         and (not non_dod_issuers and dod_issuers)
-        and (server_profiles_cert_profile | sort  ==  cert_profile_names | sort)
+        and ({{ server_profiles_cert_profile | sort }} == {{ cert_profile_names | sort }} )
         and (ocsp_required == 'yes')
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
@@ -935,7 +934,7 @@ snippets:
         and capture_syslog_profiles
         and capture_log_forwarding_profiles
         and valid_threat_syslog_profile_names
-      fail_message: 
+      fail_message:
         "{% if not capture_syslog_profiles or not valid_alert_server_profiles or not valid_threat_syslog_profile_names %}
           {% if not capture_syslog_profiles %}Missing Syslog profiles{% endif %}
           {% if not valid_alert_server_profiles %}Missing log forwarding profiles{% endif %}
@@ -958,7 +957,7 @@ snippets:
         and capture_email_profiles
         and capture_log_forwarding_profiles
         and valid_threat_email_profile_names
-      fail_message: 
+      fail_message:
         "{% if not capture_email_profiles or not valid_alert_server_profiles or not valid_threat_email_profile_names %}
           {% if not capture_email_profiles %}Missing Email profiles.\n{% endif %}
           {% if not valid_alert_server_profiles %}Missing log forwarding profiles.\n{% endif %}

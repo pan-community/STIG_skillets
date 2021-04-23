@@ -73,6 +73,57 @@ snippets:
         - PANW-IP-000026
         - PANW-AG-000147
 
+    - name: get_protection_profiles
+      cmd: parse
+      variable: config
+      outputs:
+      - name: dos_protection_policies
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry/@name
+      - name: dmz_to_internal_DOSprotection
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[to/zone/member/text()
+              = "{{ internal_zone }}" and from/zone/member/text() = "{{ dmz_zone }}"]
+
+      - name: dmz_to_internal_DOSprofiles
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[to/zone/member/text()
+              = "{{ internal_zone }}" and from/zone/member/text() = "{{ dmz_zone }}"]/protection/classified/profile/text()
+      - name: bad_dmz_to_internal_protection
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/dos-protection/entry
+        filter_items: |-
+          item | element_value('@name') in dmz_to_internal_DOSprofiles
+          and "no" in (item | string)
+
+      - name: external_to_internal_DOSprotection
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[to/zone/member/text()
+              = "{{ internal_zone }}" and from/zone/member/text() = "{{ external_zone }}"]
+
+      - name: external_to_internal_DOSprofiles
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[to/zone/member/text()
+              = "{{ internal_zone }}" and from/zone/member/text() = "{{ external_zone }}"]/protection/classified/profile/text()
+      - name: bad_external_to_internal_protection
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/dos-protection/entry
+        filter_items: |-
+          item | element_value('@name') in external_to_internal_DOSprofiles
+          and "no" in (item | string)
+
+      - name: internal_to_external_DOSprotection
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[to/zone/member/text()
+              = "{{ external_zone }}" and from/zone/member/text() = "{{ internal_zone }}"]
+
+      - name: internal_to_external_DOSprofiles
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[to/zone/member/text()
+              = "{{ external_zone }}" and from/zone/member/text() = "{{ internal_zone }}"]/protection/classified/profile/text()
+      - name: bad_internal_to_external_DOSprofiles
+        capture_list: /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/profiles/dos-protection/entry
+        filter_items: |-
+          item | element_value('@name') in internal_to_external_DOSprofiles
+          and ("no" in (item | json_query('entry.flood') | string)
+          or "yes" in (item | json_query('entry.resource') | string))
+
+      tags:
+      - PANW-IP-000018
+      - PANW-IP-000041
+      - PANW-AG-000047
+
     - name: capture_virus_alerting
       cmd: parse
       variable: config
@@ -134,8 +185,12 @@ snippets:
       outputs:
         - name: valid_vulnerability_profiles
           capture_list: |-
-            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry/rules/entry
-            [count(action/reset-both)>0]/../../@name
+            /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profiles/vulnerability/entry
+            [rules/entry[severity/member[text()='critical'] and action/reset-both]
+             and rules/entry[severity/member[text()='high'] and action/reset-both]
+             and rules/entry[severity/member[text()='medium'] and action/reset-both]
+             and rules/entry[severity/member[text()='low'] and action/alert]
+             and rules/entry[severity/member[text()='informational'] and action/alert]]/@name
         - name: valid_vulnerability_profile_groups
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/profile-group/
@@ -146,6 +201,8 @@ snippets:
         - PANW-AG-000105
         - PANW-AG-000148
         - PANW-AG-000149
+        - PANW-IP-000033
+        - PANW-IP-000043
 
     - name: capture_invalid_db_vulnerability_policies
       cmd: parse
