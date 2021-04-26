@@ -78,6 +78,21 @@ variables:
     type_hint: list
     default: untrust
 
+  - name: internal_zone
+    description: Internal zones
+    type_hint: list
+    default: trust
+
+  - name: DMZ_zone
+    description: DMZ zones
+    type_hint: list
+    default: trust
+
+  - name: external_zone
+    description: External Zones
+    type_hint: list
+    default: untrust
+
   - name: netflow_interfaces
     description: Interfaces collecting netflow information
     type_hint: list
@@ -115,13 +130,18 @@ variables:
       - key: Dos
         value: dos
 
-  - name: dos_zone_protection_profiles
-    description: Dos zone profile for internal zones if zone protection is used
+  - name: internal_zone_protection_profiles
+    description: Zone protection profiles for internal zones if zone protection is used
     type_hint: list
-    default: trusted_zone_protection
+    default: internal_zone_protection
+
+  - name: external_zone_protection_profiles
+    description: Zone protection profiles for external zones if zone protection is used
+    type_hint: list
+    default: external_zone_protection
 
   - name: dos_policies
-    description: Zone policies for internal zones if dos policies are used
+    description: DOS policies for internal zones if dos policies are used
     type_hint: list
     default: dos_policy
 
@@ -296,7 +316,24 @@ snippets:
       tags:
         - PANW-AG-000035
 
-    - name: PANW-AG-000036
+    - name: PANW-AG-000036-WMI
+      label: The Palo Alto Networks security platform must disable WMI probing if it is not used.
+      meta:
+        stig: alg
+        severity: medium
+        not_applicable: false
+      test: true
+      fail_message: Click link for remediation instruction.
+      pass_message: Validation successful
+      when: use_WMI
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228838
+      tags:
+        - PANW-AG-000036
+
+      # The include_snippets segment here allows the test segment defined in
+      # the CIS_NGFW_benchmark_v90 skillet file to be executed and return the
+      # test result as though it was directly defined in this file
+    - name: PANW-AG-000036-not-WMI
       label: The Palo Alto Networks security platform must disable WMI probing if it is not used.
       meta:
         stig: alg
@@ -407,6 +444,8 @@ snippets:
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/decryption/rules/entry
         - name: ocsp_responders
           capture_list:  /config/shared/ocsp-responder/entry
+        - name: http_ocsp_status
+          capture_object: devices/entry[@name="localhost.localdomain"]/deviceconfig/system/service/disable-http-ocsp
       tags:
         - PANW-AG-000044
         - PANW-AG-000148
@@ -417,23 +456,73 @@ snippets:
         stig: alg
         severity: medium
         not_applicable: "{{ not TLS_gw }}"
-      test: not decryption_policies or ocsp_responders
-      fail_message: OCSP responders must be configured if decryption is used
+      test: ocsp_responders and ('no' in http_ocsp_status | string)
+      fail_message: OCSP responders and HTTP OCSP must be configured and enabled for certificate validation.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228841
       tags:
         - PANW-AG-000044
+
+    - name: capture_dos_protection
+      cmd: parse
+      variable: config
+      outputs:
+        -   name: zone_protection_profiles
+            capture_list: /config/devices/entry[@name="localhost.localdomain"]/network/profiles/zone-protection-profile/entry/@name
+        -   name: internal_zones_with_intended_dos_zone_protection_profile
+            capture_list: |
+              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry[
+                {% for prof in internal_zone_protection_profiles | listify %} network/zone-protection-profile/text()='{{ prof }}' {% if not loop.last %} or {% endif %}{% endfor %}
+              ]/@name
+        -   name: internal_zones_without_required_zone_protection
+            capture_expression: internal_zone | listify | difference(internal_zones_with_intended_dos_zone_protection_profile)
+        -   name: external_zones_with_intended_dos_zone_protection_profile
+            capture_list: |
+              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry[
+                {% for prof in internal_zone_protection_profiles | listify %} network/zone-protection-profile/text()='{{ prof }}' {% if not loop.last %} or {% endif %}{% endfor %}
+              ]/@name
+        -   name: external_zones_without_required_zone_protection
+            capture_expression: external_zone | listify | difference(external_zones_with_intended_dos_zone_protection_profile)
+        -   name: dos_policies_without_profile
+            capture_list: |
+              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
+                not(protection/classified/profile)
+                and {% for pol in dos_policies | listify %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %}
+              ]/@name
+        -   name: dos_policies_with_profile
+            capture_list: |
+              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
+                protection/classified/profile
+                and ({% for pol in dos_policies | listify %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %})
+              ]
+        -   name: zones_without_policy_protection
+            capture_expression: internal_zone | listify | difference(dos_policies_with_profile | json_query("[].entry.to.zone.member[]"))
+      tags:
+        - PANW-AG-000047
+        - PANW-AG-000102
+
+    - name: capture_DOS_profiles
+      include: shared_snippets
+      include_snippets:
+        - name: get_protection_profiles
+      tags:
+        -PANW-AG-000047
 
     - name: PANW-AG-000047
       label: The Palo Alto Networks security platform must protect against the use of internal systems from launching Denial of Service (DoS) attacks against other networks or endpoints.
       meta:
         stig: alg
         severity: medium
-        action_required: true
         not_applicable: false
-      test: false
-      fail_message: Has to be tested and merged in.
-      pass_message: Validation successful
+      test: |-
+          (protection_strategy == "zone" and ( zone_protection_profiles | length and not external_zones_without_required_zone_protection | length ))
+          or (protection_strategy == "dos" and ( dos_protection_policies | length and external_to_internal_DOSprotection | length ))
+      fail_message: |
+        {% if protection_strategy == "zone" %}
+          {% if not zone_protection_profiles %}No zone protection profiles found{% else %}Zones without required zone protection profile - {% for zone in external_zones_without_required_zone_protection %}{{ zone }} {% endfor %}{% endif %}
+        {% else %}
+          {% if dos_policies_without_profile %}DoS policies missing DoS profile - {% for pol in dos_policies_without_profile %}{{ pol }} {% endfor %}{% else %}Zones not covered by policy protection - {% for zone in zones_without_policy_protection %}{{ zone }} {% endfor %}{% endif %}
+        {% endif %}      pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228842
       tags:
         - PANW-AG-000047
@@ -519,7 +608,12 @@ snippets:
         - name: default_any_any_policies
           capture_list: |-
             /config/devices/entry[@name='localhost.localdomain']/vsys/entry/rulebase/security/rules/entry
-            [application/member="any" and source/member="any" and destination/member="any" and action="allow" and not (disabled="yes")]/@name
+            [(
+             (application/member="any" and source/member="any" and destination/member="any" and action="allow")
+             or (source/member="any" and from/member="any" and action="allow")
+             or (destination/member="any" and to/member="any" and action="allow")
+             )
+             and not (disabled="yes")]/@name
       tags:
         - PANW-AG-000051
 
@@ -530,7 +624,7 @@ snippets:
         severity: medium
         not_applicable: false
       test: not default_any_any_policies
-      fail_message: Policies that permit by default - {% for pol in default_any_any_policies %}{{ pol }}{% endfor %}
+      fail_message: Policies that permit by default - {% for pol in default_any_any_policies %}{{ pol }} {% endfor %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228845
       tags:
@@ -545,9 +639,9 @@ snippets:
         - name: device_session_timeout_udp
           capture_value: /config/devices/entry[@name='localhost.localdomain']/deviceconfig/setting/session/timeout-udp
         - name: override_app_timeout
-          capture_list: /config/shared/override/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
+          capture_list: /config/shared/override/application/entry[(tcp-timeout > 900 or udp-timeout > 900) and not(disabled="yes")]/@name
         - name: custom_app_timeout
-          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application/entry[tcp-timeout > 900 or udp-timeout > 900]/@name
+          capture_list: /config/devices/entry[@name='localhost.localdomain']/vsys/entry[@name='vsys1']/application/entry[(tcp-timeout > 900 or udp-timeout > 900) and not(disabled="yes")]/@name 
       tags:
         - PANW-AG-000052
 
@@ -560,12 +654,11 @@ snippets:
       # TCP default is higher than 900 so there must be a configuration element to be valid
       test: (
          device_session_timeout_tcp | int < 901
-         and ( not device_session_timeout_udp or device_session_timeout_udp | int < 901 )
          and not override_app_timeout
          and not custom_app_timeout
          )
       fail_message: |
-        {% if device_session_timeout_tcp | int > 900 or device_session_timeout_udp | int > 900 %}Default session timeout for TCP or UDP too high. {% endif %}
+        {% if device_session_timeout_tcp | int > 900 %}Default session timeout for TCP or UDP too high. {% endif %}
         {% if override_app_timeout or custom_app_timeout %}Applications with timeout above 900: {% for app in custom_app_timeout %}{{ app }} {% endfor %} {% for app in override_app_timeout %}{{ app }} {% endfor %}{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228846
@@ -746,7 +839,6 @@ snippets:
       meta:
         stig: alg
         severity: medium
-        action_required: true
         not_applicable: "{{ not traffic_intermediary }}"
       test: |
         (
@@ -842,17 +934,45 @@ snippets:
         - PANW-AG-000094
         - PANW-AG-000144
 
+    - name: capture_syslog_log_settings
+      cmd: parse
+      variable: config
+      outputs:
+        - name: valid_traffic_syslog_profile
+          capture_list: |
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/log-settings
+            /profiles/entry[match-list/entry/log-type="traffic" and match-list/entry/send-syslog/member]/@name
+        - name: valid_threat_syslog_profile
+          capture_list: |
+            /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/log-settings
+            /profiles/entry[match-list/entry/log-type="threat" and match-list/entry/send-syslog/member]
+          filter_items: |
+            "All Logs" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+            or (
+              "critical" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "high" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "medium" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "low" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+              and "informational" in item | json_query('entry."match-list".entry[? "send-syslog"].filter | join(` , `, @)')
+            )
+        - name: valid_threat_syslog_profile_names
+          capture_expression: valid_threat_syslog_profile | json_query('[].entry."@name"')
+      tags:
+        - PANW-AG-000094
+
     - name: PANW-AG-000094
       label: The Palo Alto Networks security platform must off-load audit records onto a different system or media than the system being audited.
       meta:
         stig: alg
         severity: medium
         not_applicable: false
-      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings
+      test: valid_syslog_profiles and valid_syslog_log_forwarding_profile and valid_system_syslog_settings and valid_threat_syslog_profile_names and valid_traffic_syslog_profile
       fail_message: |
         {% if not valid_syslog_profiles %}No valid syslog profiles. {% endif %}
         {% if not valid_syslog_log_forwarding_profile %}No valid syslog log forwarding profiles. {% endif %}
         {% if not valid_system_syslog_settings %}No valid system syslog forwarders.{% endif %}
+        {% if not valid_traffic_syslog_profile %}No valid traffic syslog server profiles.{% endif %}
+        {% if not valid_threat_syslog_profile_names %}No valid threat syslog server profiles.{% endif %}
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228858
       tags:
@@ -920,47 +1040,17 @@ snippets:
         severity: medium
         not_applicable: "{{ not TLS_gw }}"
       test: |
-        ( dod_cert_names_present_in_profile | sort  ==  dod_cert_names | sort )
+        ({{ dod_cert_names_present_in_profile | sort }} == {{ dod_cert_names | sort }})
         and (not non_dod_issuers and dod_issuers)
         and (not 'no' in unknown_cert_session_block)
         and (not 'no' in timeout_session_block)
-        and ( server_profiles_cert_profile | sort  ==  cert_profile_names | sort  )
+        and ({{ server_profiles_cert_profile | sort }} == {{ cert_profile_names | sort }} )
         and (ocsp_required == 'yes')
       fail_message: Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228859```
       tags:
         - PANW-AG-000101
-
-    - name: capture_dos_protection
-      cmd: parse
-      variable: config
-      outputs:
-        -   name: zone_protection_profiles
-            capture_list: /config/devices/entry[@name="localhost.localdomain"]/network/profiles/zone-protection-profile/entry/@name
-        -   name: zones_with_intended_dos_zone_protection_profile
-            capture_list: |
-              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/zone/entry[
-                {% for prof in dos_zone_protection_profiles | listify %} network/zone-protection-profile/text()='{{ prof }}' {% if not loop.last %} or {% endif %}{% endfor %}
-              ]/@name
-        -   name: zones_without_required_zone_protection
-            capture_expression: trusted_zones | listify | difference(zones_with_intended_dos_zone_protection_profile)
-        -   name: dos_policies_without_profile
-            capture_list: |
-              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
-                not(protection/classified/profile)
-                and {% for pol in dos_policies | listify %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %}
-              ]/@name
-        -   name: dos_policies_with_profile
-            capture_list: |
-              /config/devices/entry[@name="localhost.localdomain"]/vsys/entry[@name="vsys1"]/rulebase/dos/rules/entry[
-                protection/classified/profile
-                and ({% for pol in dos_policies | listify %}@name='{{ pol }}' {% if not loop.last %} or {% endif %}{% endfor %})
-              ]
-        -   name: zones_without_policy_protection
-            capture_expression: trusted_zones | listify | difference(dos_policies_with_profile | json_query("[].entry.to.zone.member[]"))
-      tags:
-        - PANW-AG-000102
 
     - name: PANW-AG-000102
       label: The Palo Alto Networks security platform must protect against Denial of Service (DoS) attacks by employing rate-based attack prevention behavior analysis (traffic thresholds).
@@ -969,11 +1059,11 @@ snippets:
         severity: medium
         not_applicable: false
       test: |-
-          (protection_strategy == "zone" and ( zone_protection_profiles | length and not zones_without_required_zone_protection | length ))
+          (protection_strategy == "zone" and ( zone_protection_profiles | length and not internal_zones_without_required_zone_protection | length ))
           or (protection_strategy == "dos" and ( not dos_policies_without_profile and not zones_without_policy_protection ))
       fail_message: |
         {% if protection_strategy == "zone" %}
-          {% if not zone_protection_profiles %}No zone protection profiles found{% else %}Zones without required zone protection profile - {% for zone in zones_without_required_zone_protection %}{{ zone }} {% endfor %}{% endif %}
+          {% if not zone_protection_profiles %}No zone protection profiles found{% else %}Zones without required zone protection profile - {% for zone in internal_zones_without_required_zone_protection %}{{ zone }} {% endfor %}{% endif %}
         {% else %}
           {% if dos_policies_without_profile %}DoS policies missing DoS profile - {% for pol in dos_policies_without_profile %}{{ pol }} {% endfor %}{% else %}Zones not covered by policy protection - {% for zone in zones_without_policy_protection %}{{ zone }} {% endfor %}{% endif %}
         {% endif %}
@@ -1050,7 +1140,7 @@ snippets:
         severity: medium
         not_applicable: false
       test: captured_user_id_mapping
-      fail_message: No user ID mapping ouitput found.
+      fail_message: No user ID mapping output found.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_alg/2020-09-28/finding/V-228863
       tags:

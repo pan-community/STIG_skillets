@@ -23,6 +23,21 @@ variables:
     type_hint: list
     default: trust
 
+  - name: internal_zone
+    description: Internal zones
+    type_hint: list
+    default: trust
+
+  - name: DMZ_zone
+    description: DMZ zones
+    type_hint: list
+    default: trust
+
+  - name: external_zone
+    description: External Zones
+    type_hint: list
+    default: untrust
+
   - name: unauthorized_applications
     description: Applications that should be explicitly denied and logged
     type_hint: list
@@ -191,14 +206,30 @@ snippets:
       tags:
         - PANW-IP-000010
 
+    - name: capture_DOS_profiles
+      include: shared_snippets
+      include_snippets:
+        - name: get_protection_profiles
+      tags:
+        - PANW-IP-000018
+        - PANW-IP-000041
+
     - name: PANW-IP-000018
       label: The Palo Alto Networks security platform must have a DoS Protection Profile for outbound traffic applied to a policy for traffic originating from the internal zone going to the external zone.
       meta:
         stig: idps
         severity: medium
-        not_applicable: false
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |-
+        (
+        dos_protection_policies
+        and internal_to_external_DOSprotection
+        and not bad_internal_to_external_DOSprofiles
+        )
+      fail_message: |
+        {% if not dos_protection_policies %}Missing DOS protection {% endif %}
+        {% if not internal_to_external_DOSprotection %}Missing DOS protection from Internal to External {% endif %}
+        {% if bad_internal_to_external_DOSprofiles %} Incorrectly configured DOS Profiles - {% for pol in bad_internal_to_external_DOSprofiles %}{{ pol }} {% endfor %} {% endif %}
+        Click link for remediation instruction.
       pass_message: Validation successful
       documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207692
       tags:
@@ -390,16 +421,6 @@ snippets:
                                and action='allow'
                                and not(disabled='yes')
                                and contains(\"{{ icmp_application_names | join(' ') }}\", application/member)]/@name"
-        - name: PANW-IP-000030-test
-          capture_variable: (
-            {% if (icmp_application_names_with_deny_rules | length == 0) %}
-            false
-            {% elif (icmp_application_names_with_allow_rules | length > 0) %}
-            {{ list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first ) }}
-            < {{ list_of_security_policy_names.index( ( icmp_application_names_with_allow_rules | first ) ) }}
-            {% else %}
-            icmp_application_names_with_deny_rules | length > 0
-            {% endif %} )
       when: true
       tags:
         - PANW-IP-000030
@@ -410,7 +431,15 @@ snippets:
         stig: idps
         severity: medium
         not_applicable: false
-      test: PANW-IP-000030-test
+      test: (
+        {% if (icmp_application_names_with_deny_rules | length == 0) %}
+          false
+        {% elif (icmp_application_names_with_allow_rules | length > 0) %}
+          {{ list_of_security_policy_names.index( icmp_application_names_with_deny_rules | first ) }}
+          < {{ list_of_security_policy_names.index( ( icmp_application_names_with_allow_rules | first ) ) }}
+        {% else %}
+          icmp_application_names_with_deny_rules | length > 0
+        {% endif %} )
 
       fail_message: Click link for remediation instruction...
       pass_message: Validation successful
@@ -511,10 +540,23 @@ snippets:
         stig: idps
         severity: medium
         not_applicable: false
-      test: false
-      fail_message: Click link for remediation instruction.
+      test: |-
+        (
+        dos_protection_policies
+        and external_to_internal_DOSprotection
+        and dmz_to_internal_DOSprotection
+        and not bad_dmz_to_internal_protection
+        and not bad_external_to_internal_protection
+        )
+      fail_message: |
+        {% if not dos_protection_policies %}Missing DOS protection {% endif %}
+        {% if not external_to_internal_DOSprotection %}Missing DOS protection from External to Internal {% endif %}
+        {% if not dmz_to_internal_DOSprotection %}Missing DOS protection from DMZ to Internal {% endif %}
+        {% if bad_dmz_to_internal_protection %} incorrectly configured DMZ to Internal DOS protection profiles - {% for pol in bad_dmz_to_internal_protection %}{{ pol }} {% endfor %} {% endif %}
+        {% if bad_external_to_internal_protection %} incorrectly configured External to Internal DOS protection profiles - {% for pol in bad_external_to_internal_protection %}{{ pol }} {% endfor %} {% endif %}
+        Click link for remediation instruction.
       pass_message: Validation successful
-      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207703
+      documentation_link: https://www.stigviewer.com/stig/palo_alto_networks_idps/2020-09-28/finding/V-207692
       tags:
         - PANW-IP-000041
 
@@ -564,6 +606,7 @@ snippets:
         - name: capture_unauthorized_policies
       tags:
         - PANW-IP-000046
+        - PANW-IP-000047
         - PANW-IP-000048
         - PANW-IP-000051
 
