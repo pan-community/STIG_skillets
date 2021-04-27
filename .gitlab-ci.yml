@@ -1,0 +1,21 @@
+image: python:latest
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  GIT_SUBMODULE_STRATEGY: recursive
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+before_script:
+  - python -V
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+
+test:
+  script:
+    - pip install sli
+    - sli load -le
