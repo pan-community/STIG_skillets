@@ -59,12 +59,12 @@ variables:
     default: 192.168.1.0/24
 
   - name: PPSM_applications
-    description: Endpoints permitted by PPSM in CIDR format
+    description: Applications permitted by PPSM in CIDR format
     type_hint: list
     default: web-browsing
 
   - name: PPSM_services
-    description: Endpoints permitted by PPSM in CIDR format
+    description: Services permitted by PPSM in CIDR format
     type_hint: list
     default: service-https
 
